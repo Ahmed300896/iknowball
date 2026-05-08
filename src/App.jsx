@@ -41,5 +41,5 @@ export default function App() {
     return <GroupStage nickname={nickname} onNext={handleGroupsNext} />
   }
 
-  return <NicknameScreen onSubmit={handleNicknameSubmit} />
+  return <NicknameScreen onSubmit={handleNicknameSubmit} onViewFeed={() => setScreen('feed')} />
 }

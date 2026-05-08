@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-export default function NicknameScreen({ onSubmit }) {
+export default function NicknameScreen({ onSubmit, onViewFeed }) {
   const [nickname, setNickname] = useState('')
   const [error, setError] = useState('')
 
@@ -46,6 +46,14 @@ export default function NicknameScreen({ onSubmit }) {
           className="w-full bg-white text-black font-bold text-lg rounded-xl py-3 mt-2 active:scale-95 transition-transform"
         >
           Let's go
+        </button>
+
+        <button
+          type="button"
+          onClick={onViewFeed}
+          className="w-full border border-white/30 text-white font-bold text-lg rounded-xl py-3 active:scale-95 transition-transform"
+        >
+          View all predictions
         </button>
       </form>
     </div>

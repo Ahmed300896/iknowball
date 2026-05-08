@@ -16,58 +16,7 @@ import {
   arrayMove,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { groups, groupNames } from '../data/teams'
-
-const FLAGS = {
-  'Mexico': '🇲🇽',
-  'South Korea': '🇰🇷',
-  'South Africa': '🇿🇦',
-  'Czechia': '🇨🇿',
-  'Canada': '🇨🇦',
-  'Switzerland': '🇨🇭',
-  'Qatar': '🇶🇦',
-  'Bosnia-Herzegovina': '🇧🇦',
-  'Brazil': '🇧🇷',
-  'Morocco': '🇲🇦',
-  'Scotland': '🏴󠁧󠁢󠁳󠁣󠁴󠁿',
-  'Haiti': '🇭🇹',
-  'USA': '🇺🇸',
-  'Paraguay': '🇵🇾',
-  'Australia': '🇦🇺',
-  'Türkiye': '🇹🇷',
-  'Germany': '🇩🇪',
-  'Ecuador': '🇪🇨',
-  'Ivory Coast': '🇨🇮',
-  'Curaçao': '🇨🇼',
-  'Netherlands': '🇳🇱',
-  'Japan': '🇯🇵',
-  'Tunisia': '🇹🇳',
-  'Sweden': '🇸🇪',
-  'Belgium': '🇧🇪',
-  'Iran': '🇮🇷',
-  'Egypt': '🇪🇬',
-  'New Zealand': '🇳🇿',
-  'Spain': '🇪🇸',
-  'Uruguay': '🇺🇾',
-  'Saudi Arabia': '🇸🇦',
-  'Cape Verde': '🇨🇻',
-  'France': '🇫🇷',
-  'Senegal': '🇸🇳',
-  'Norway': '🇳🇴',
-  'Iraq': '🇮🇶',
-  'Argentina': '🇦🇷',
-  'Austria': '🇦🇹',
-  'Algeria': '🇩🇿',
-  'Jordan': '🇯🇴',
-  'Portugal': '🇵🇹',
-  'Colombia': '🇨🇴',
-  'Uzbekistan': '🇺🇿',
-  'DR Congo': '🇨🇩',
-  'England': '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
-  'Croatia': '🇭🇷',
-  'Panama': '🇵🇦',
-  'Ghana': '🇬🇭',
-}
+import { groups, groupNames, FLAGS } from '../data/teams'
 
 const POSITION_STYLES = [
   'text-yellow-400',  // 1st
@@ -78,6 +27,7 @@ const POSITION_STYLES = [
 
 function SortableTeam({ id, position, team }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
+  const isEliminated = position === 4
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -93,14 +43,16 @@ function SortableTeam({ id, position, team }) {
       className={`flex items-center gap-3 px-4 py-3 rounded-xl border select-none cursor-grab active:cursor-grabbing ${
         isDragging
           ? 'bg-white/20 border-white/40 shadow-lg z-10'
+          : isEliminated
+          ? 'bg-red-950/20 border-red-900/20'
           : 'bg-white/5 border-white/10'
       }`}
     >
-      <span className={`w-5 text-center font-bold text-sm ${POSITION_STYLES[position - 1]}`}>
-        {position}
+      <span className={`w-5 text-center font-bold text-sm ${isEliminated ? 'text-red-600' : POSITION_STYLES[position - 1]}`}>
+        {isEliminated ? '❌' : position}
       </span>
-      <span className="text-xl leading-none">{FLAGS[team] ?? '🏳️'}</span>
-      <span className="flex-1 text-white text-sm font-medium">{team}</span>
+      <span className={`text-xl leading-none ${isEliminated ? 'opacity-30' : ''}`}>{FLAGS[team] ?? '🏳️'}</span>
+      <span className={`flex-1 text-sm font-medium ${isEliminated ? 'line-through text-white/25' : 'text-white'}`}>{team}</span>
       <span className="text-white/30 text-lg">⠿</span>
     </div>
   )

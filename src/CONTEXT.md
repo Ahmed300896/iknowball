@@ -41,6 +41,8 @@ An experienced React developer building iknowball — a World Cup 2026 predictio
 
 - NicknameScreen — full-screen entry point, collects nickname via form, calls onSubmit prop
 - GroupStage — shows all 12 groups with drag-to-rank (dnd-kit), sticky header, fixed Next button; calls onNext(picks) where picks = { A: [...], B: [...], ... }
+- KnockoutScreen — full R32→Final bracket; seeds R32 from groupPicks (W/R cross-pairs) + optional thirdPlacePicks (defaults to placeholders); winners cascade into next round; calls onSubmit({ r32, r16, qf, sf, final })
+- PredictionsFeed — fetches all predictions from Supabase on mount, shows each as a card with nickname, champion pill, and group top-2 picks; handles loading / error / empty states
 
 ## Rules
 

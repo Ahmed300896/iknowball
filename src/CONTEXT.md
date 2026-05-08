@@ -40,6 +40,7 @@ An experienced React developer building iknowball — a World Cup 2026 predictio
 (Update this list as components are created)
 
 - NicknameScreen — full-screen entry point, collects nickname via form, calls onSubmit prop
+- GroupStage — shows all 12 groups with drag-to-rank (dnd-kit), sticky header, fixed Next button; calls onNext(picks) where picks = { A: [...], B: [...], ... }
 
 ## Rules
 

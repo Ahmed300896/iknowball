@@ -39,7 +39,7 @@ An experienced React developer building iknowball — a World Cup 2026 predictio
 
 (Update this list as components are created)
 
-- None yet
+- NicknameScreen — full-screen entry point, collects nickname via form, calls onSubmit prop
 
 ## Rules
 

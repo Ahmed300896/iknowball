@@ -10,24 +10,30 @@ const ROUNDS = [
   { key: 'final', label: 'Final',          count: 1 },
 ]
 
-// Groups are paired A/B, C/D, E/F, G/H, I/J, K/L.
-// Each pair produces 2 cross-matches (W vs R, R vs W) = 12 matches for 24 teams.
-// The remaining 4 matches use the 3rd-place teams from groups A–H (8 teams).
+// Official FIFA 2026 R32 bracket.
+// For 3rd-place slots the qualifying group is unknown until the tournament ends,
+// so we use the 3rd-place team from the first group listed as a placeholder.
 function buildR32Slots(groupPicks) {
-  const w = g => groupPicks[g]?.[0] ?? '?'
-  const r = g => groupPicks[g]?.[1] ?? '?'
-  const t = g => groupPicks[g]?.[2] ?? '?'
+  const w = g => groupPicks[g]?.[0] ?? '?'  // group winner
+  const r = g => groupPicks[g]?.[1] ?? '?'  // runner-up
+  const t = g => groupPicks[g]?.[2] ?? '?'  // 3rd place (placeholder)
   return [
-    [w('A'), r('B')], [w('C'), r('D')],
-    [w('E'), r('F')], [w('G'), r('H')],
-    [w('I'), r('J')], [w('K'), r('L')],
-    [w('B'), r('A')], [w('D'), r('C')],
-    [w('F'), r('E')], [w('H'), r('G')],
-    [w('J'), r('I')], [w('L'), r('K')],
-    [t('A'), t('B')],
-    [t('C'), t('D')],
-    [t('E'), t('F')],
-    [t('G'), t('H')],
+    [r('A'), r('B')],        // M1:  2nd A vs 2nd B
+    [w('C'), r('F')],        // M2:  1st C vs 2nd F
+    [w('F'), r('C')],        // M3:  1st F vs 2nd C
+    [w('E'), t('A')],        // M4:  1st E vs best 3rd (A/B/C/D/F) → placeholder: 3rd A
+    [w('I'), t('C')],        // M5:  1st I vs best 3rd (C/D/F/G/H) → placeholder: 3rd C
+    [w('A'), t('C')],        // M6:  1st A vs best 3rd (C/E/F/H/I) → placeholder: 3rd C
+    [w('L'), t('E')],        // M7:  1st L vs best 3rd (E/H/I/J/K) → placeholder: 3rd E
+    [w('G'), t('A')],        // M8:  1st G vs best 3rd (A/E/H/I/J) → placeholder: 3rd A
+    [w('D'), t('B')],        // M9:  1st D vs best 3rd (B/E/F/I/J) → placeholder: 3rd B
+    [w('H'), r('J')],        // M10: 1st H vs 2nd J
+    [r('K'), r('L')],        // M11: 2nd K vs 2nd L
+    [w('B'), t('E')],        // M12: 1st B vs best 3rd (E/F/G/I/J) → placeholder: 3rd E
+    [r('D'), r('G')],        // M13: 2nd D vs 2nd G
+    [w('J'), r('H')],        // M14: 1st J vs 2nd H
+    [w('K'), t('D')],        // M15: 1st K vs best 3rd (D/E/I/J/L) → placeholder: 3rd D
+    [r('E'), r('I')],        // M16: 2nd E vs 2nd I
   ]
 }
 

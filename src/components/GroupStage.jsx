@@ -12,16 +12,16 @@ function TeamRow({ team, position, isFirst, isLast, onMoveUp, onMoveDown }) {
   const isEliminated = position === 4
 
   return (
-    <div className={`flex items-center gap-3 px-3 py-3 rounded-xl border ${
-      isEliminated ? 'bg-red-950/20 border-red-900/20' : 'bg-white/5 border-white/10'
+    <div className={`flex items-center gap-3 px-3 py-3 rounded-xl border bg-white/5 border-white/10 ${
+      isEliminated ? 'opacity-40' : ''
     }`}>
-      <span className={`w-5 text-center font-bold text-sm ${isEliminated ? 'text-red-600' : POSITION_STYLES[position - 1]}`}>
-        {isEliminated ? '❌' : position}
+      <span className={`w-5 text-center font-bold text-sm ${POSITION_STYLES[position - 1]}`}>
+        {position}
       </span>
-      <span className={`text-xl leading-none ${isEliminated ? 'opacity-30' : ''}`}>
+      <span className="text-xl leading-none">
         {FLAGS[team] ?? '🏳️'}
       </span>
-      <span className={`flex-1 text-sm font-medium ${isEliminated ? 'line-through text-white/25' : 'text-white'}`}>
+      <span className="flex-1 text-sm font-medium text-white">
         {team}
       </span>
       <div className="flex flex-col gap-0.5">

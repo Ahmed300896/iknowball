@@ -5,6 +5,7 @@ export default function SignUpScreen({ onSignUpSuccess, onSwitchToLogin }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [username, setUsername] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
@@ -100,17 +101,27 @@ export default function SignUpScreen({ onSignUpSuccess, onSwitchToLogin }) {
           disabled={loading}
         />
 
-        <input
-          type="password"
-          value={password}
-          onChange={(e) => {
-            setPassword(e.target.value)
-            if (error) setError('')
-          }}
-          placeholder="Password"
-          className="w-full bg-white/10 text-white placeholder-white/40 border border-white/20 rounded-xl px-4 py-3 text-lg focus:outline-none focus:border-white/60"
-          disabled={loading}
-        />
+        <div className="relative w-full">
+          <input
+            type={showPassword ? 'text' : 'password'}
+            value={password}
+            onChange={(e) => {
+              setPassword(e.target.value)
+              if (error) setError('')
+            }}
+            placeholder="Password"
+            className="w-full bg-white/10 text-white placeholder-white/40 border border-white/20 rounded-xl px-4 py-3 pr-12 text-lg focus:outline-none focus:border-white/60"
+            disabled={loading}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((current) => !current)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/70 text-sm font-semibold"
+            tabIndex={-1}
+          >
+            {showPassword ? 'Hide' : 'Show'}
+          </button>
+        </div>
 
         {error && (
           <p className="text-red-400 text-sm text-center">{error}</p>

@@ -56,3 +56,43 @@ R32 → R16 → QF → SF → Final
 - All Supabase logic in src/lib/ only.
 - File names: kebab-case. Components: PascalCase.
 - Always handle loading and error states.
+
+## New Direction — Full Platform (as of May 2026)
+
+### Vision
+
+iknowball is expanding from a one-time prediction app into a full sports platform.
+Goal: go viral during World Cup 2026. Multiple games, account system, leaderboards.
+
+### Phase 1 — Account System (building now)
+
+- Sign up / log in via Supabase Auth (email + password)
+- User profile page (username, favourite team, country, avatar)
+- All predictions and future game activity linked to user account
+- Global leaderboard + friend group leaderboards
+
+### Phase 2 — More Games (after accounts)
+
+- Man of the match picks per game
+- Score predictor
+- Daily challenges
+- More TBD
+
+### Viral Features (add as we grow)
+
+- Share prediction as image card (WhatsApp, Instagram)
+- Friend groups with invite code
+- Badges and achievements
+- Daily streaks
+
+### Supabase Plan
+
+- Auth: Supabase built-in email/password auth
+- New tables needed: profiles, groups, group_members, motm_picks
+- predictions table: add user_id column to link to auth.users
+
+### Rules
+
+- No TypeScript. Plain JavaScript only.
+- Mobile-first always.
+- Supabase handles all auth and database — no custom backend.

@@ -72,7 +72,7 @@ function MatchCard({ teamA, teamB, picked, onPick }) {
   )
 }
 
-export default function KnockoutScreen({ nickname, groupPicks, onSubmit }) {
+export default function KnockoutScreen({ username, groupPicks, onSubmit }) {
   const r32Slots = useMemo(() => buildR32Slots(groupPicks), [groupPicks])
 
   const [roundIndex, setRoundIndex] = useState(0)
@@ -117,7 +117,7 @@ export default function KnockoutScreen({ nickname, groupPicks, onSubmit }) {
 
     const champion = allPicks.final[0]
     const { error } = await supabase.from('predictions').insert({
-      nickname,
+      nickname: username,
       group_picks: groupPicks,
       knockout: {
         r32: allPicks.r32,
@@ -144,7 +144,7 @@ export default function KnockoutScreen({ nickname, groupPicks, onSubmit }) {
     <div className="min-h-screen bg-black text-white">
       <div className="sticky top-0 z-20 bg-black/90 backdrop-blur border-b border-white/10 px-4 py-3 flex items-center justify-between">
         <span className="font-bold text-lg">iknowball</span>
-        <span className="text-white/40 text-sm">{nickname}</span>
+        <span className="text-white/40 text-sm">{username}</span>
       </div>
 
       <div className="px-4 pt-6 pb-5">

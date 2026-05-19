@@ -42,7 +42,7 @@ function PredictionCard({ prediction }) {
   )
 }
 
-export default function PredictionsFeed({ nickname }) {
+export default function PredictionsFeed({ username }) {
   const [predictions, setPredictions] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -70,7 +70,7 @@ export default function PredictionsFeed({ nickname }) {
     <div className="min-h-screen bg-black text-white">
       <div className="sticky top-0 z-20 bg-black/90 backdrop-blur border-b border-white/10 px-4 py-3 flex items-center justify-between">
         <span className="font-bold text-lg">iknowball</span>
-        <span className="text-white/40 text-sm">{nickname}</span>
+        <span className="text-white/40 text-sm">{username}</span>
       </div>
 
       <div className="px-4 pt-6 pb-4">

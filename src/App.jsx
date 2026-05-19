@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { supabase } from './lib/supabase'
 import LoginScreen from './components/LoginScreen'
 import SignUpScreen from './components/SignUpScreen'
-import NicknameScreen from './components/NicknameScreen'
 import GroupStage from './components/GroupStage'
 import KnockoutScreen from './components/KnockoutScreen'
 import PredictionsFeed from './components/PredictionsFeed'
@@ -11,8 +10,7 @@ export default function App() {
   const [user, setUser] = useState(null)
   const [username, setUsername] = useState('')
   const [authScreen, setAuthScreen] = useState('login')
-  const [screen, setScreen] = useState('nickname')
-  const [nickname, setNickname] = useState('')
+  const [screen, setScreen] = useState('groups')
   const [groupPicks, setGroupPicks] = useState(null)
   const [loading, setLoading] = useState(true)
 
@@ -32,7 +30,6 @@ export default function App() {
         
         if (profile?.username) {
           setUsername(profile.username)
-          setNickname(profile.username)
         }
       }
       setLoading(false)
@@ -53,13 +50,12 @@ export default function App() {
             .then(({ data: profile }) => {
               if (profile?.username) {
                 setUsername(profile.username)
-                setNickname(profile.username)
               }
             })
         } else {
           setUser(null)
           setUsername('')
-          setScreen('nickname')
+          setScreen('groups')
         }
       }
     )
@@ -67,19 +63,32 @@ export default function App() {
     return () => subscription?.unsubscribe()
   }, [])
 
-  function handleLoginSuccess(authUser) {
-    setUser(authUser)
-    setAuthScreen('login')
+  async function loadUsername(userId) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('username')
+      .eq('id', userId)
+      .single()
+
+    if (profile?.username) {
+      setUsername(profile.username)
+    }
   }
 
-  function handleSignUpSuccess(authUser) {
+  async function handleLoginSuccess(authUser) {
     setUser(authUser)
     setAuthScreen('login')
+    if (authUser?.id) {
+      await loadUsername(authUser.id)
+    }
   }
 
-  function handleNicknameSubmit(name) {
-    setNickname(name)
-    setScreen('groups')
+  async function handleSignUpSuccess(authUser) {
+    setUser(authUser)
+    setAuthScreen('login')
+    if (authUser?.id) {
+      await loadUsername(authUser.id)
+    }
   }
 
   function handleGroupsNext(picks) {
@@ -95,8 +104,8 @@ export default function App() {
     await supabase.auth.signOut()
     setUser(null)
     setUsername('')
-    setNickname('')
-    setScreen('nickname')
+    setGroupPicks(null)
+    setScreen('groups')
     setAuthScreen('login')
   }
 
@@ -126,22 +135,18 @@ export default function App() {
   }
 
   if (screen === 'feed') {
-    return <PredictionsFeed nickname={nickname} onLogout={handleLogout} />
+    return <PredictionsFeed username={username} onLogout={handleLogout} />
   }
 
   if (screen === 'knockout') {
     return (
       <KnockoutScreen
-        nickname={nickname}
+        username={username}
         groupPicks={groupPicks}
         onSubmit={handleKnockoutSubmit}
       />
     )
   }
 
-  if (screen === 'groups') {
-    return <GroupStage nickname={nickname} onNext={handleGroupsNext} />
-  }
-
-  return <NicknameScreen onSubmit={handleNicknameSubmit} onViewFeed={() => setScreen('feed')} />
+  return <GroupStage username={username} onNext={handleGroupsNext} />
 }

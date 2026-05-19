@@ -144,9 +144,10 @@ export default function App() {
         username={username}
         groupPicks={groupPicks}
         onSubmit={handleKnockoutSubmit}
+        onLogout={handleLogout}
       />
     )
   }
 
-  return <GroupStage username={username} onNext={handleGroupsNext} />
+  return <GroupStage username={username} onNext={handleGroupsNext} onLogout={handleLogout} />
 }

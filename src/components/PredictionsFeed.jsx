@@ -42,7 +42,7 @@ function PredictionCard({ prediction }) {
   )
 }
 
-export default function PredictionsFeed({ username }) {
+export default function PredictionsFeed({ username, onLogout }) {
   const [predictions, setPredictions] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -70,7 +70,16 @@ export default function PredictionsFeed({ username }) {
     <div className="min-h-screen bg-black text-white">
       <div className="sticky top-0 z-20 bg-black/90 backdrop-blur border-b border-white/10 px-4 py-3 flex items-center justify-between">
         <span className="font-bold text-lg">iknowball</span>
-        <span className="text-white/40 text-sm">{username}</span>
+        <div className="flex items-center gap-3">
+          <span className="text-white/40 text-sm">{username}</span>
+          <button
+            type="button"
+            onClick={onLogout}
+            className="text-white/70 text-sm font-semibold px-3 py-2 rounded-xl border border-white/20 bg-white/5 hover:bg-white/10"
+          >
+            Logout
+          </button>
+        </div>
       </div>
 
       <div className="px-4 pt-6 pb-4">

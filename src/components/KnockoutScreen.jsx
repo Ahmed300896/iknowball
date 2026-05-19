@@ -72,7 +72,7 @@ function MatchCard({ teamA, teamB, picked, onPick }) {
   )
 }
 
-export default function KnockoutScreen({ username, groupPicks, onSubmit }) {
+export default function KnockoutScreen({ username, groupPicks, onSubmit, onLogout }) {
   const r32Slots = useMemo(() => buildR32Slots(groupPicks), [groupPicks])
 
   const [roundIndex, setRoundIndex] = useState(0)
@@ -144,7 +144,16 @@ export default function KnockoutScreen({ username, groupPicks, onSubmit }) {
     <div className="min-h-screen bg-black text-white">
       <div className="sticky top-0 z-20 bg-black/90 backdrop-blur border-b border-white/10 px-4 py-3 flex items-center justify-between">
         <span className="font-bold text-lg">iknowball</span>
-        <span className="text-white/40 text-sm">{username}</span>
+        <div className="flex items-center gap-3">
+          <span className="text-white/40 text-sm">{username}</span>
+          <button
+            type="button"
+            onClick={onLogout}
+            className="text-white/70 text-sm font-semibold px-3 py-2 rounded-xl border border-white/20 bg-white/5 hover:bg-white/10"
+          >
+            Logout
+          </button>
+        </div>
       </div>
 
       <div className="px-4 pt-6 pb-5">

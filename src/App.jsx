@@ -100,6 +100,10 @@ export default function App() {
     setScreen('groups')
   }
 
+  function handleBackHome() {
+    setScreen('home')
+  }
+
   function handleGroupsNext(picks) {
     setGroupPicks(picks)
     setScreen('knockout')
@@ -153,13 +157,13 @@ export default function App() {
         username={username}
         groupPicks={groupPicks}
         onSubmit={handleKnockoutSubmit}
-        onLogout={handleLogout}
+        onBack={handleBackHome}
       />
     )
   }
 
   if (screen === 'groups') {
-    return <GroupStage username={username} onNext={handleGroupsNext} />
+    return <GroupStage username={username} onNext={handleGroupsNext} onBack={handleBackHome} />
   }
 
   return <HomeScreen username={username} onPlay={handlePlay} onLogout={handleLogout} />

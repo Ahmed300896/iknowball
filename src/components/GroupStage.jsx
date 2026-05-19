@@ -76,7 +76,7 @@ function GroupCard({ groupLetter, teams, onReorder }) {
   )
 }
 
-export default function GroupStage({ username, onNext }) {
+export default function GroupStage({ username, onNext, onBack }) {
   const [picks, setPicks] = useState(() =>
     Object.fromEntries(groupNames.map(g => [g, [...groups[g]]]))
   )
@@ -90,6 +90,13 @@ export default function GroupStage({ username, onNext }) {
   return (
     <div className="min-h-screen bg-black text-white">
       <div className="sticky top-0 z-20 bg-black/90 backdrop-blur border-b border-white/10 px-4 py-3 flex items-center justify-between">
+        <button
+          type="button"
+          onClick={onBack}
+          className="text-white/70 text-sm font-semibold px-3 py-2 rounded-xl border border-white/20 bg-white/5 hover:bg-white/10"
+        >
+          Back
+        </button>
         <span className="text-white font-bold text-lg">iknowball</span>
         <span className="text-white/40 text-sm">{username}</span>
       </div>

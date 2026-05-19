@@ -104,6 +104,10 @@ export default function App() {
     setScreen('home')
   }
 
+  function handleViewPredictions() {
+    setScreen('feed')
+  }
+
   function handleGroupsNext(picks) {
     setGroupPicks(picks)
     setScreen('knockout')
@@ -158,6 +162,7 @@ export default function App() {
         groupPicks={groupPicks}
         onSubmit={handleKnockoutSubmit}
         onBack={handleBackHome}
+        onViewPredictions={handleViewPredictions}
       />
     )
   }
@@ -166,5 +171,5 @@ export default function App() {
     return <GroupStage username={username} onNext={handleGroupsNext} onBack={handleBackHome} />
   }
 
-  return <HomeScreen username={username} onPlay={handlePlay} onLogout={handleLogout} />
+  return <HomeScreen username={username} onPlay={handlePlay} onLogout={handleLogout} onViewPredictions={handleViewPredictions} />
 }

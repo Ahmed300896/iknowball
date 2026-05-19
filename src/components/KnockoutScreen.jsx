@@ -72,13 +72,15 @@ function MatchCard({ teamA, teamB, picked, onPick }) {
   )
 }
 
-export default function KnockoutScreen({ username, groupPicks, onSubmit, onBack }) {
+export default function KnockoutScreen({ username, groupPicks, onSubmit, onBack, onViewPredictions }) {
   const r32Slots = useMemo(() => buildR32Slots(groupPicks), [groupPicks])
 
   const [roundIndex, setRoundIndex] = useState(0)
   const [allPicks, setAllPicks] = useState(() =>
     Object.fromEntries(ROUNDS.map(({ key, count }) => [key, Array(count).fill(null)]))
   )
+  const [successChampion, setSuccessChampion] = useState(null)
+  const [showSuccess, setShowSuccess] = useState(false)
 
   const currentRound = ROUNDS[roundIndex]
   const currentPicks = allPicks[currentRound.key]
@@ -137,7 +139,53 @@ export default function KnockoutScreen({ username, groupPicks, onSubmit, onBack 
       return
     }
 
-    onSubmit()
+    setSuccessChampion(champion)
+    setShowSuccess(true)
+  }
+
+  if (showSuccess) {
+    return (
+      <div className="min-h-screen bg-black text-white">
+        <div className="sticky top-0 z-20 bg-black/90 backdrop-blur border-b border-white/10 px-4 py-3 flex items-center justify-between">
+          <button
+            type="button"
+            onClick={onBack}
+            className="text-white/70 text-sm font-semibold px-3 py-2 rounded-xl border border-white/20 bg-white/5 hover:bg-white/10"
+          >
+            Back
+          </button>
+          <span className="font-bold text-lg">iknowball</span>
+          <span className="text-white/40 text-sm">{username}</span>
+        </div>
+
+        <div className="px-4 pt-10 pb-8">
+          <div className="bg-white/5 border border-white/10 rounded-3xl p-6 text-center space-y-6">
+            <p className="text-white/40 text-sm uppercase tracking-widest">Success</p>
+            <h1 className="text-white text-3xl font-bold">Prediction saved!</h1>
+            <div className="mx-auto w-24 h-24 rounded-full bg-white/10 flex items-center justify-center text-5xl">
+              {FLAGS[successChampion] ?? '🏳️'}
+            </div>
+            <p className="text-white text-lg font-semibold">{successChampion}</p>
+            <div className="space-y-3">
+              <button
+                type="button"
+                onClick={onBack}
+                className="w-full bg-white text-black font-bold rounded-2xl py-3 active:scale-95 transition-transform"
+              >
+                Back to home
+              </button>
+              <button
+                type="button"
+                onClick={onViewPredictions}
+                className="w-full bg-white/10 text-white font-bold rounded-2xl py-3 border border-white/20 hover:bg-white/10 active:scale-95 transition-transform"
+              >
+                See all predictions
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (

@@ -1,4 +1,4 @@
-export default function HomeScreen({ username, onPlay, onLogout }) {
+export default function HomeScreen({ username, onPlay, onLogout, onViewPredictions }) {
   const initials = username
     .split(' ')
     .filter(Boolean)
@@ -51,6 +51,21 @@ export default function HomeScreen({ username, onPlay, onLogout }) {
               className="w-full bg-white text-black font-bold rounded-2xl py-3 active:scale-95 transition-transform"
             >
               Play
+            </button>
+          </div>
+          <div className="bg-white/5 border border-white/10 rounded-3xl p-5 space-y-4">
+            <div>
+              <p className="text-white text-lg font-bold">See all predictions</p>
+              <p className="text-white/50 text-sm mt-2">
+                Browse all saved predictions from the community.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onViewPredictions}
+              className="w-full bg-white/10 text-white font-bold rounded-2xl py-3 border border-white/20 hover:bg-white/10 active:scale-95 transition-transform"
+            >
+              See all predictions
             </button>
           </div>
         </div>

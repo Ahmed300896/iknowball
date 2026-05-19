@@ -72,7 +72,7 @@ function MatchCard({ teamA, teamB, picked, onPick }) {
   )
 }
 
-export default function KnockoutScreen({ username, groupPicks, onSubmit, onBack, onViewPredictions }) {
+export default function KnockoutScreen({ username, groupPicks, onSubmit, onBack, onViewPredictions, onHome }) {
   const r32Slots = useMemo(() => buildR32Slots(groupPicks), [groupPicks])
 
   const [roundIndex, setRoundIndex] = useState(0)
@@ -154,7 +154,13 @@ export default function KnockoutScreen({ username, groupPicks, onSubmit, onBack,
           >
             Back
           </button>
-          <span className="font-bold text-lg">iknowball</span>
+          <button
+            type="button"
+            onClick={onHome}
+            className="font-bold text-lg hover:text-white/70 transition-colors"
+          >
+            iknowball
+          </button>
           <span className="text-white/40 text-sm">{username}</span>
         </div>
 
@@ -198,7 +204,13 @@ export default function KnockoutScreen({ username, groupPicks, onSubmit, onBack,
         >
           Back
         </button>
-        <span className="font-bold text-lg">iknowball</span>
+        <button
+          type="button"
+          onClick={onHome}
+          className="font-bold text-lg hover:text-white/70 transition-colors"
+        >
+          iknowball
+        </button>
         <span className="text-white/40 text-sm">{username}</span>
       </div>
 

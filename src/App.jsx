@@ -152,7 +152,7 @@ export default function App() {
   }
 
   if (screen === 'feed') {
-    return <PredictionsFeed username={username} onLogout={handleLogout} />
+    return <PredictionsFeed username={username} onLogout={handleLogout} onHome={handleBackHome} />
   }
 
   if (screen === 'knockout') {
@@ -163,12 +163,13 @@ export default function App() {
         onSubmit={handleKnockoutSubmit}
         onBack={handleBackHome}
         onViewPredictions={handleViewPredictions}
+        onHome={handleBackHome}
       />
     )
   }
 
   if (screen === 'groups') {
-    return <GroupStage username={username} onNext={handleGroupsNext} onBack={handleBackHome} />
+    return <GroupStage username={username} onNext={handleGroupsNext} onBack={handleBackHome} onHome={handleBackHome} />
   }
 
   return <HomeScreen username={username} onPlay={handlePlay} onLogout={handleLogout} onViewPredictions={handleViewPredictions} />

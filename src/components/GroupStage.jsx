@@ -76,7 +76,7 @@ function GroupCard({ groupLetter, teams, onReorder }) {
   )
 }
 
-export default function GroupStage({ username, onNext, onBack }) {
+export default function GroupStage({ username, onNext, onBack, onHome }) {
   const [picks, setPicks] = useState(() =>
     Object.fromEntries(groupNames.map(g => [g, [...groups[g]]]))
   )
@@ -97,7 +97,13 @@ export default function GroupStage({ username, onNext, onBack }) {
         >
           Back
         </button>
-        <span className="text-white font-bold text-lg">iknowball</span>
+        <button
+          type="button"
+          onClick={onHome}
+          className="text-white font-bold text-lg hover:text-white/70 transition-colors"
+        >
+          iknowball
+        </button>
         <span className="text-white/40 text-sm">{username}</span>
       </div>
 

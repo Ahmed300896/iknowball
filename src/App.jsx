@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from './lib/supabase'
 import LoginScreen from './components/LoginScreen'
 import SignUpScreen from './components/SignUpScreen'
+import HomeScreen from './components/HomeScreen'
 import GroupStage from './components/GroupStage'
 import KnockoutScreen from './components/KnockoutScreen'
 import PredictionsFeed from './components/PredictionsFeed'
@@ -10,7 +11,7 @@ export default function App() {
   const [user, setUser] = useState(null)
   const [username, setUsername] = useState('')
   const [authScreen, setAuthScreen] = useState('login')
-  const [screen, setScreen] = useState('groups')
+  const [screen, setScreen] = useState('home')
   const [groupPicks, setGroupPicks] = useState(null)
   const [loading, setLoading] = useState(true)
 
@@ -21,6 +22,7 @@ export default function App() {
       
       if (session?.user) {
         setUser(session.user)
+        setScreen('home')
         // Fetch username from profiles table
         const { data: profile } = await supabase
           .from('profiles')
@@ -42,6 +44,7 @@ export default function App() {
       (event, session) => {
         if (session?.user) {
           setUser(session.user)
+          setScreen('home')
           supabase
             .from('profiles')
             .select('username')
@@ -55,7 +58,7 @@ export default function App() {
         } else {
           setUser(null)
           setUsername('')
-          setScreen('groups')
+          setScreen('home')
         }
       }
     )
@@ -78,6 +81,7 @@ export default function App() {
   async function handleLoginSuccess(authUser) {
     setUser(authUser)
     setAuthScreen('login')
+    setScreen('home')
     if (authUser?.id) {
       await loadUsername(authUser.id)
     }
@@ -86,9 +90,14 @@ export default function App() {
   async function handleSignUpSuccess(authUser) {
     setUser(authUser)
     setAuthScreen('login')
+    setScreen('home')
     if (authUser?.id) {
       await loadUsername(authUser.id)
     }
+  }
+
+  function handlePlay() {
+    setScreen('groups')
   }
 
   function handleGroupsNext(picks) {
@@ -105,7 +114,7 @@ export default function App() {
     setUser(null)
     setUsername('')
     setGroupPicks(null)
-    setScreen('groups')
+    setScreen('home')
     setAuthScreen('login')
   }
 
@@ -149,5 +158,9 @@ export default function App() {
     )
   }
 
-  return <GroupStage username={username} onNext={handleGroupsNext} onLogout={handleLogout} />
+  if (screen === 'groups') {
+    return <GroupStage username={username} onNext={handleGroupsNext} />
+  }
+
+  return <HomeScreen username={username} onPlay={handlePlay} onLogout={handleLogout} />
 }

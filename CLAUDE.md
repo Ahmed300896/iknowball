@@ -1,98 +1,36 @@
-# iknowball — Project Map (CLAUDE.md)
+### The 5 Team Selection System
 
-## What This Project Is
+Users pick 5 teams based on FIFA ranking tiers — locked before June 11:
 
-iknowball (iknowball.com) is a web-based football fan platform built around the 2026 FIFA World Cup. It is NOT a betting app, NOT a bracket-only app, and NOT a media companion. It is a social prediction and challenge platform that helps distributed friend groups recreate the experience of watching football together.
+- 2 teams from top 10 ranked nations
+- 1 team from ranked 11-25
+- 1 team from ranked 26-40
+- 1 team from the rest
 
-## Current Build Phase
+### Game 1 — World Cup Predictor (built)
 
-Phase 1 — Friday MVP (Prediction App)
+- Predict group stage standings + knockout winners + champion
+- Points weighted heavily to later rounds and champion pick
+- Group stage: 1 point per correct qualifier (1st or 2nd)
+- Knockout: 3pts R32, 6pts R16, 10pts QF, 15pts SF, 20pts Final
+- Champion bonus: 50 points
 
-- User enters a nickname (no account/password yet)
-- User predicts group stage standings for all 12 groups (rank teams 1st to 4th)
-- User picks 8 best third-place teams
-- User picks knockout round winners R32 → R16 → QF → SF → Final
-- Predictions saved to Supabase
-- Friends can see each other's predictions
+### Game 2 — Starting 11 (to build)
 
-## Tech Stack
+- Predict starting 11 before each match for your 5 teams
+- Must get 7 or more correct out of 11 to earn points
+- Get 6 or less = zero points, all or nothing
+- Points per correct player increase each round
 
-- Frontend: React (Vite)
-- Styling: Tailwind CSS v3
-- Database: Supabase (free tier)
-- Hosting: Vercel
-- No TypeScript — plain JavaScript only
+### Game 3 — Score Predictor (to build)
 
-## Workspace Routing
+- Predict exact scoreline for every World Cup match
+- Get it exactly right = full points
+- Get it wrong = zero points, all or nothing
+- Points value increases in later rounds
 
-Working on UI components → go to src/CONTEXT.md
-Working on planning next features → go to planning/CONTEXT.md
+### Game 4 — iknowball FPL (to build)
 
-## Tournament Data
-
-48 teams, 12 groups of 4. June 11 – July 19, 2026.
-
-Group A: Mexico, South Korea, South Africa, Czechia
-Group B: Canada, Switzerland, Qatar, Bosnia-Herzegovina
-Group C: Brazil, Morocco, Scotland, Haiti
-Group D: USA, Paraguay, Australia, Türkiye
-Group E: Germany, Ecuador, Ivory Coast, Curaçao
-Group F: Netherlands, Japan, Tunisia, Sweden
-Group G: Belgium, Iran, Egypt, New Zealand
-Group H: Spain, Uruguay, Saudi Arabia, Cape Verde
-Group I: France, Senegal, Norway, Iraq
-Group J: Argentina, Austria, Algeria, Jordan
-Group K: Portugal, Colombia, Uzbekistan, DR Congo
-Group L: England, Croatia, Panama, Ghana
-
-Knockout: Top 2 from each group + 8 best 3rd place = 32 teams
-R32 → R16 → QF → SF → Final
-
-## Key Rules for Claude
-
-- No TypeScript. Plain JavaScript only.
-- Mobile-first.
-- Small focused components — one job each.
-- All Supabase logic in src/lib/ only.
-- File names: kebab-case. Components: PascalCase.
-- Always handle loading and error states.
-
-## New Direction — Full Platform (as of May 2026)
-
-### Vision
-
-iknowball is expanding from a one-time prediction app into a full sports platform.
-Goal: go viral during World Cup 2026. Multiple games, account system, leaderboards.
-
-### Phase 1 — Account System (building now)
-
-- Sign up / log in via Supabase Auth (email + password)
-- User profile page (username, favourite team, country, avatar)
-- All predictions and future game activity linked to user account
-- Global leaderboard + friend group leaderboards
-
-### Phase 2 — More Games (after accounts)
-
-- Man of the match picks per game
-- Score predictor
-- Daily challenges
-- More TBD
-
-### Viral Features (add as we grow)
-
-- Share prediction as image card (WhatsApp, Instagram)
-- Friend groups with invite code
-- Badges and achievements
-- Daily streaks
-
-### Supabase Plan
-
-- Auth: Supabase built-in email/password auth
-- New tables needed: profiles, groups, group_members, motm_picks
-- predictions table: add user_id column to link to auth.users
-
-### Rules
-
-- No TypeScript. Plain JavaScript only.
-- Mobile-first always.
-- Supabase handles all auth and database — no custom backend.
+- Pick 15-player fantasy squad from your 5 chosen teams rosters only
+- Players earn points based on real match performances
+- Squad locked before June 11, runs whole tournament

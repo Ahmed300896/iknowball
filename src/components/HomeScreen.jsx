@@ -1,29 +1,20 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import TeamSelectionScreen from './TeamSelectionScreen'
 
 export default function HomeScreen({ user, username, onPlay, onLogout, onViewPredictions }) {
   const [showTeamSelection, setShowTeamSelection] = useState(false)
-  const [userTeams, setUserTeams] = useState(null)
 
-  // Load user's favorite teams on mount
-  useEffect(() => {
-    if (!user?.id) return
-
-    async function loadTeams() {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('favorite_teams')
-        .eq('id', user.id)
-        .single()
-      
-      setUserTeams(profile?.favorite_teams || null)
-    }
-
-    loadTeams()
-  }, [user?.id])
-
-  function handlePlayClick() {
+  async function handlePlayClick() {
+    // Only check for teams when user clicks Play
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('favorite_teams')
+      .eq('id', user.id)
+      .single()
+    
+    const userTeams = profile?.favorite_teams
+    
     // Check if user has selected teams
     if (userTeams && Array.isArray(userTeams) && userTeams.length > 0) {
       // User has teams - go straight to game
@@ -35,14 +26,12 @@ export default function HomeScreen({ user, username, onPlay, onLogout, onViewPre
   }
 
   function handleTeamsSelected(selectedTeams) {
-    // Update local state with selected teams
-    setUserTeams(selectedTeams)
+    // After selecting teams, proceed to game
     setShowTeamSelection(false)
-    // Proceed to game
     onPlay()
   }
 
-  // ONLY show TeamSelectionScreen if user clicked Play and needs to select teams
+  // ONLY show TeamSelectionScreen when user explicitly clicks Play and needs to select teams
   if (showTeamSelection === true) {
     return (
       <TeamSelectionScreen
@@ -53,7 +42,7 @@ export default function HomeScreen({ user, username, onPlay, onLogout, onViewPre
     )
   }
 
-  // Default: Always show HomeScreen dashboard first
+  // Default: Always show HomeScreen dashboard
 
   const initials = username
     .split(' ')

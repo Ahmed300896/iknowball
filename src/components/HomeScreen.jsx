@@ -4,42 +4,46 @@ import TeamSelectionScreen from './TeamSelectionScreen'
 
 export default function HomeScreen({ user, username, onPlay, onLogout, onViewPredictions }) {
   const [showTeamSelection, setShowTeamSelection] = useState(false)
-  const [favoriteTeams, setFavoriteTeams] = useState(null)
-  const [loadingTeams, setLoadingTeams] = useState(true)
+  const [userTeams, setUserTeams] = useState(null)
 
+  // Load user's favorite teams on mount
   useEffect(() => {
-    // Fetch user's favorite teams
-    async function fetchFavoriteTeams() {
-      if (!user?.id) return
-      
+    if (!user?.id) return
+
+    async function loadTeams() {
       const { data: profile } = await supabase
         .from('profiles')
         .select('favorite_teams')
         .eq('id', user.id)
         .single()
       
-      setFavoriteTeams(profile?.favorite_teams || [])
-      setLoadingTeams(false)
+      setUserTeams(profile?.favorite_teams || null)
     }
 
-    fetchFavoriteTeams()
+    loadTeams()
   }, [user?.id])
 
   function handlePlayClick() {
-    if (!favoriteTeams || favoriteTeams.length === 0) {
-      setShowTeamSelection(true)
-    } else {
+    // Check if user has selected teams
+    if (userTeams && Array.isArray(userTeams) && userTeams.length > 0) {
+      // User has teams - go straight to game
       onPlay()
+    } else {
+      // User hasn't selected teams - show team selection
+      setShowTeamSelection(true)
     }
   }
 
-  function handleTeamsSelected() {
+  function handleTeamsSelected(selectedTeams) {
+    // Update local state with selected teams
+    setUserTeams(selectedTeams)
     setShowTeamSelection(false)
-    setFavoriteTeams([]) // Will be refetched or we could update it
+    // Proceed to game
     onPlay()
   }
 
-  if (showTeamSelection) {
+  // ONLY show TeamSelectionScreen if user clicked Play and needs to select teams
+  if (showTeamSelection === true) {
     return (
       <TeamSelectionScreen
         user={user}
@@ -48,6 +52,8 @@ export default function HomeScreen({ user, username, onPlay, onLogout, onViewPre
       />
     )
   }
+
+  // Default: Always show HomeScreen dashboard first
 
   const initials = username
     .split(' ')

@@ -1,4 +1,54 @@
-export default function HomeScreen({ username, onPlay, onLogout, onViewPredictions }) {
+import { useState, useEffect } from 'react'
+import { supabase } from '../lib/supabase'
+import TeamSelectionScreen from './TeamSelectionScreen'
+
+export default function HomeScreen({ user, username, onPlay, onLogout, onViewPredictions }) {
+  const [showTeamSelection, setShowTeamSelection] = useState(false)
+  const [favoriteTeams, setFavoriteTeams] = useState(null)
+  const [loadingTeams, setLoadingTeams] = useState(true)
+
+  useEffect(() => {
+    // Fetch user's favorite teams
+    async function fetchFavoriteTeams() {
+      if (!user?.id) return
+      
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('favorite_teams')
+        .eq('id', user.id)
+        .single()
+      
+      setFavoriteTeams(profile?.favorite_teams || [])
+      setLoadingTeams(false)
+    }
+
+    fetchFavoriteTeams()
+  }, [user?.id])
+
+  function handlePlayClick() {
+    if (!favoriteTeams || favoriteTeams.length === 0) {
+      setShowTeamSelection(true)
+    } else {
+      onPlay()
+    }
+  }
+
+  function handleTeamsSelected() {
+    setShowTeamSelection(false)
+    setFavoriteTeams([]) // Will be refetched or we could update it
+    onPlay()
+  }
+
+  if (showTeamSelection) {
+    return (
+      <TeamSelectionScreen
+        user={user}
+        onTeamsSelected={handleTeamsSelected}
+        onLogout={onLogout}
+      />
+    )
+  }
+
   const initials = username
     .split(' ')
     .filter(Boolean)
@@ -47,7 +97,7 @@ export default function HomeScreen({ username, onPlay, onLogout, onViewPredictio
             </div>
             <button
               type="button"
-              onClick={onPlay}
+              onClick={handlePlayClick}
               className="w-full bg-white text-black font-bold rounded-2xl py-3 active:scale-95 transition-transform"
             >
               Play

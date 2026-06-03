@@ -100,10 +100,6 @@ export default function App() {
     }
   }
 
-  function handleTeamsSelected(selectedTeams) {
-    setScreen('groups')
-  }
-
   function handlePlay() {
     setScreen('groups')
   }

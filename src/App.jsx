@@ -6,6 +6,7 @@ import HomeScreen from './components/HomeScreen'
 import GroupStage from './components/GroupStage'
 import KnockoutScreen from './components/KnockoutScreen'
 import PredictionsFeed from './components/PredictionsFeed'
+import TeamSelectionScreen from './components/TeamSelectionScreen'
 
 export default function App() {
   const [user, setUser] = useState(null)
@@ -14,6 +15,7 @@ export default function App() {
   const [screen, setScreen] = useState('home')
   const [groupPicks, setGroupPicks] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [needsTeamSelection, setNeedsTeamSelection] = useState(false)
 
   useEffect(() => {
     // Check if user is already logged in
@@ -22,16 +24,23 @@ export default function App() {
       
       if (session?.user) {
         setUser(session.user)
-        setScreen('home')
-        // Fetch username from profiles table
+        // Fetch username and favorite_teams from profiles table
         const { data: profile } = await supabase
           .from('profiles')
-          .select('username')
+          .select('username, favorite_teams')
           .eq('id', session.user.id)
           .single()
         
         if (profile?.username) {
           setUsername(profile.username)
+        }
+
+        // Check if user has selected teams
+        if (!profile?.favorite_teams || profile.favorite_teams.length === 0) {
+          setNeedsTeamSelection(true)
+          setScreen('team-selection')
+        } else {
+          setScreen('home')
         }
       }
       setLoading(false)
@@ -44,21 +53,27 @@ export default function App() {
       (event, session) => {
         if (session?.user) {
           setUser(session.user)
-          setScreen('home')
           supabase
             .from('profiles')
-            .select('username')
+            .select('username, favorite_teams')
             .eq('id', session.user.id)
             .single()
             .then(({ data: profile }) => {
               if (profile?.username) {
                 setUsername(profile.username)
               }
+              if (!profile?.favorite_teams || profile.favorite_teams.length === 0) {
+                setNeedsTeamSelection(true)
+                setScreen('team-selection')
+              } else {
+                setScreen('home')
+              }
             })
         } else {
           setUser(null)
           setUsername('')
           setScreen('home')
+          setNeedsTeamSelection(false)
         }
       }
     )
@@ -66,34 +81,53 @@ export default function App() {
     return () => subscription?.unsubscribe()
   }, [])
 
-  async function loadUsername(userId) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('username')
-      .eq('id', userId)
-      .single()
-
-    if (profile?.username) {
-      setUsername(profile.username)
-    }
-  }
-
   async function handleLoginSuccess(authUser) {
     setUser(authUser)
     setAuthScreen('login')
-    setScreen('home')
     if (authUser?.id) {
-      await loadUsername(authUser.id)
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('username, favorite_teams')
+        .eq('id', authUser.id)
+        .single()
+
+      if (profile?.username) {
+        setUsername(profile.username)
+      }
+
+      // Check if user has selected teams
+      if (!profile?.favorite_teams || profile.favorite_teams.length === 0) {
+        setNeedsTeamSelection(true)
+        setScreen('team-selection')
+      } else {
+        setScreen('home')
+      }
     }
   }
 
   async function handleSignUpSuccess(authUser) {
     setUser(authUser)
     setAuthScreen('login')
-    setScreen('home')
     if (authUser?.id) {
-      await loadUsername(authUser.id)
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('username, favorite_teams')
+        .eq('id', authUser.id)
+        .single()
+
+      if (profile?.username) {
+        setUsername(profile.username)
+      }
+
+      // New user needs to select teams
+      setNeedsTeamSelection(true)
+      setScreen('team-selection')
     }
+  }
+
+  function handleTeamsSelected(selectedTeams) {
+    setNeedsTeamSelection(false)
+    setScreen('home')
   }
 
   function handlePlay() {
@@ -170,6 +204,10 @@ export default function App() {
 
   if (screen === 'groups') {
     return <GroupStage username={username} onNext={handleGroupsNext} onBack={handleBackHome} onHome={handleBackHome} />
+  }
+
+  if (screen === 'team-selection') {
+    return <TeamSelectionScreen user={user} onTeamsSelected={handleTeamsSelected} onLogout={handleLogout} />
   }
 
   return <HomeScreen username={username} onPlay={handlePlay} onLogout={handleLogout} onViewPredictions={handleViewPredictions} />

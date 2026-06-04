@@ -99,7 +99,7 @@ export default function TeamSelectionScreen({ user, onTeamsSelected, onLogout })
     }
   }
 
-  function TierSection({ tier, teams, selected, remaining, title }) {
+  function TierSection({ tierId, maxPicks, teams, selected, remaining, title }) {
     return (
       <div className="mb-8">
         <div className="flex items-center justify-between mb-3">
@@ -107,7 +107,7 @@ export default function TeamSelectionScreen({ user, onTeamsSelected, onLogout })
           <span className={`text-sm font-semibold px-3 py-1 rounded-full ${
             remaining === 0 ? 'bg-green-500/20 text-green-400' : 'bg-white/10 text-white/70'
           }`}>
-            {selected.length}/{tier}
+            {selected.length}/{maxPicks}
           </span>
         </div>
         <div className="grid grid-cols-2 gap-3">
@@ -115,7 +115,7 @@ export default function TeamSelectionScreen({ user, onTeamsSelected, onLogout })
             <button
               key={team}
               type="button"
-              onClick={() => toggleTeam(team, tier)}
+              onClick={() => toggleTeam(team, tierId)}
               disabled={!selected.includes(team) && remaining === 0}
               className={`p-3 rounded-xl border-2 transition-all flex items-center gap-2 font-medium text-sm ${
                 selected.includes(team)
@@ -155,7 +155,8 @@ export default function TeamSelectionScreen({ user, onTeamsSelected, onLogout })
           </p>
 
           <TierSection
-            tier={2}
+            tierId={1}
+            maxPicks={2}
             teams={TIER_1}
             selected={tier1Picks}
             remaining={remainingTier1}
@@ -163,7 +164,8 @@ export default function TeamSelectionScreen({ user, onTeamsSelected, onLogout })
           />
 
           <TierSection
-            tier={1}
+            tierId={2}
+            maxPicks={1}
             teams={TIER_2}
             selected={tier2Picks}
             remaining={remainingTier2}
@@ -171,7 +173,8 @@ export default function TeamSelectionScreen({ user, onTeamsSelected, onLogout })
           />
 
           <TierSection
-            tier={1}
+            tierId={3}
+            maxPicks={1}
             teams={TIER_3}
             selected={tier3Picks}
             remaining={remainingTier3}
@@ -179,7 +182,8 @@ export default function TeamSelectionScreen({ user, onTeamsSelected, onLogout })
           />
 
           <TierSection
-            tier={1}
+            tierId={4}
+            maxPicks={1}
             teams={tier4Options}
             selected={tier4Picks}
             remaining={remainingTier4}

@@ -4,7 +4,7 @@ import TeamSelectionScreen from './TeamSelectionScreen'
 import HowToPlay from './HowToPlay'
 import { FLAGS } from '../data/teams'
 
-export default function HomeScreen({ user, username, onPlay, onLogout, onViewPredictions, onAdmin }) {
+export default function HomeScreen({ user, username, onPlay, onLogout, onViewPredictions, onAdmin, onScorePredictor }) {
   const [showTeamSelection, setShowTeamSelection] = useState(false)
   const [showHowToPlay, setShowHowToPlay] = useState(false)
   const [favoriteTeams, setFavoriteTeams] = useState([])
@@ -221,7 +221,7 @@ export default function HomeScreen({ user, username, onPlay, onLogout, onViewPre
               </button>
             </div>
 
-            {/* Score Predictor - Coming Soon */}
+            {/* Score Predictor - Active */}
             <div className="bg-white/5 border border-white/20 rounded-2xl p-4">
               <p className="text-white font-bold text-base mb-1">Score Predictor</p>
               <p className="text-white/50 text-sm mb-3">
@@ -229,10 +229,10 @@ export default function HomeScreen({ user, username, onPlay, onLogout, onViewPre
               </p>
               <button
                 type="button"
-                disabled
-                className="w-full bg-white/5 text-white/40 font-bold rounded-lg py-2.5 text-sm border border-white/10 cursor-not-allowed"
+                onClick={onScorePredictor}
+                className="w-full bg-white text-black font-bold rounded-lg py-2.5 text-sm active:scale-95 transition-transform"
               >
-                Coming Soon
+                Play
               </button>
             </div>
 

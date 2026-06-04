@@ -76,114 +76,94 @@ export default function HomeScreen({ user, username, onPlay, onLogout, onViewPre
         </div>
       </div>
 
-      <div className="px-4 pb-6 space-y-6">
+      <div className="px-4 pb-20 space-y-8">
+        {/* Games Section */}
         <div>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-white text-xl font-bold">Games</h2>
-            <span className="text-white/40 text-sm">1 available</span>
-          </div>
-
-          <div className="bg-white/5 border border-white/10 rounded-3xl p-5 space-y-4">
-            <div>
-              <p className="text-white text-lg font-bold">World Cup Predictor</p>
-              <p className="text-white/50 text-sm mt-2">
+          <h2 className="text-white text-xl font-bold mb-4">Games</h2>
+          
+          <div className="space-y-3">
+            {/* World Cup Predictor - Active */}
+            <div className="bg-white/5 border border-white/20 rounded-2xl p-4">
+              <p className="text-white font-bold text-base mb-1">World Cup Predictor</p>
+              <p className="text-white/50 text-sm mb-3">
                 Pick your group standings, knockout winners and champion
               </p>
+              <button
+                type="button"
+                onClick={handlePlayClick}
+                className="w-full bg-white text-black font-bold rounded-lg py-2.5 text-sm active:scale-95 transition-transform"
+              >
+                Play
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={handlePlayClick}
-              className="w-full bg-white text-black font-bold rounded-2xl py-3 active:scale-95 transition-transform"
-            >
-              Play
-            </button>
-          </div>
 
-          <div className="bg-white/5 border border-white/10 rounded-3xl p-5 space-y-4">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-white text-lg font-bold">Starting 11</p>
-                <p className="text-white/50 text-sm mt-2">
-                  Pick the starting lineup before each match for your 5 teams
-                </p>
-              </div>
-              <span className="text-xs font-bold px-2 py-1 rounded-lg bg-white/10 text-white/60 whitespace-nowrap ml-2">
-                Coming Soon
-              </span>
-            </div>
-            <button
-              type="button"
-              disabled
-              className="w-full bg-white/5 text-white/40 font-bold rounded-2xl py-3 border border-white/10 cursor-not-allowed"
-            >
-              Coming Soon
-            </button>
-          </div>
-
-          <div className="bg-white/5 border border-white/10 rounded-3xl p-5 space-y-4">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-white text-lg font-bold">Score Predictor</p>
-                <p className="text-white/50 text-sm mt-2">
-                  Predict the exact scoreline for every World Cup match
-                </p>
-              </div>
-              <span className="text-xs font-bold px-2 py-1 rounded-lg bg-white/10 text-white/60 whitespace-nowrap ml-2">
-                Coming Soon
-              </span>
-            </div>
-            <button
-              type="button"
-              disabled
-              className="w-full bg-white/5 text-white/40 font-bold rounded-2xl py-3 border border-white/10 cursor-not-allowed"
-            >
-              Coming Soon
-            </button>
-          </div>
-
-          <div className="bg-white/5 border border-white/10 rounded-3xl p-5 space-y-4">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-white text-lg font-bold">iknowball FPL</p>
-                <p className="text-white/50 text-sm mt-2">
-                  Build a 15-player fantasy squad from your 5 teams
-                </p>
-              </div>
-              <span className="text-xs font-bold px-2 py-1 rounded-lg bg-white/10 text-white/60 whitespace-nowrap ml-2">
-                Coming Soon
-              </span>
-            </div>
-            <button
-              type="button"
-              disabled
-              className="w-full bg-white/5 text-white/40 font-bold rounded-2xl py-3 border border-white/10 cursor-not-allowed"
-            >
-              Coming Soon
-            </button>
-          </div>
-          <div className="bg-white/5 border border-white/10 rounded-3xl p-5 space-y-4">
-            <div>
-              <p className="text-white text-lg font-bold">See all predictions</p>
-              <p className="text-white/50 text-sm mt-2">
-                Browse all saved predictions from the community.
+            {/* Starting 11 - Coming Soon */}
+            <div className="bg-white/5 border border-white/20 rounded-2xl p-4">
+              <p className="text-white font-bold text-base mb-1">Starting 11</p>
+              <p className="text-white/50 text-sm mb-3">
+                Pick the starting lineup before each match for your 5 teams
               </p>
+              <button
+                type="button"
+                disabled
+                className="w-full bg-white/5 text-white/40 font-bold rounded-lg py-2.5 text-sm border border-white/10 cursor-not-allowed"
+              >
+                Coming Soon
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={onViewPredictions}
-              className="w-full bg-white/10 text-white font-bold rounded-2xl py-3 border border-white/20 hover:bg-white/10 active:scale-95 transition-transform"
-            >
-              See all predictions
-            </button>
+
+            {/* Score Predictor - Coming Soon */}
+            <div className="bg-white/5 border border-white/20 rounded-2xl p-4">
+              <p className="text-white font-bold text-base mb-1">Score Predictor</p>
+              <p className="text-white/50 text-sm mb-3">
+                Predict the exact scoreline for every World Cup match
+              </p>
+              <button
+                type="button"
+                disabled
+                className="w-full bg-white/5 text-white/40 font-bold rounded-lg py-2.5 text-sm border border-white/10 cursor-not-allowed"
+              >
+                Coming Soon
+              </button>
+            </div>
+
+            {/* iknowball FPL - Coming Soon */}
+            <div className="bg-white/5 border border-white/20 rounded-2xl p-4">
+              <p className="text-white font-bold text-base mb-1">iknowball FPL</p>
+              <p className="text-white/50 text-sm mb-3">
+                Build a 15-player fantasy squad from your 5 teams
+              </p>
+              <button
+                type="button"
+                disabled
+                className="w-full bg-white/5 text-white/40 font-bold rounded-lg py-2.5 text-sm border border-white/10 cursor-not-allowed"
+              >
+                Coming Soon
+              </button>
+            </div>
           </div>
         </div>
 
+        {/* See All Predictions */}
+        <div className="bg-white/5 border border-white/20 rounded-2xl p-4">
+          <p className="text-white font-bold text-base mb-1">See all predictions</p>
+          <p className="text-white/50 text-sm mb-3">
+            Browse all saved predictions from the community
+          </p>
+          <button
+            type="button"
+            onClick={onViewPredictions}
+            className="w-full bg-white/10 text-white font-bold rounded-lg py-2.5 text-sm border border-white/20 hover:bg-white/15 active:scale-95 transition-all"
+          >
+            Browse predictions
+          </button>
+        </div>
+
+        {/* Leaderboard Section */}
         <div>
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="text-white text-xl font-bold">Leaderboard</h2>
-          </div>
-          <div className="bg-white/5 border border-white/10 rounded-3xl p-5 text-white/50">
-            Leaderboard coming soon
+          <h2 className="text-white text-xl font-bold mb-4">Leaderboard</h2>
+          <div className="bg-white/5 border border-white/20 rounded-2xl p-4">
+            <p className="text-white/50 text-sm">Coming soon</p>
           </div>
         </div>
       </div>

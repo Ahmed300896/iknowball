@@ -1,9 +1,36 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import TeamSelectionScreen from './TeamSelectionScreen'
+import { FLAGS } from '../data/teams'
 
 export default function HomeScreen({ user, username, onPlay, onLogout, onViewPredictions }) {
   const [showTeamSelection, setShowTeamSelection] = useState(false)
+  const [favoriteTeams, setFavoriteTeams] = useState([])
+  const [loadingTeams, setLoadingTeams] = useState(true)
+
+  useEffect(() => {
+    async function fetchFavoriteTeams() {
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('favorite_teams')
+          .eq('id', user.id)
+          .single()
+        
+        if (profile?.favorite_teams && Array.isArray(profile.favorite_teams)) {
+          setFavoriteTeams(profile.favorite_teams)
+        }
+      } catch (error) {
+        console.error('Error fetching favorite teams:', error)
+      } finally {
+        setLoadingTeams(false)
+      }
+    }
+
+    if (user?.id) {
+      fetchFavoriteTeams()
+    }
+  }, [user?.id])
 
   // World Cup Predictor - no team selection required
   function handleWorldCupPlay() {
@@ -28,7 +55,23 @@ export default function HomeScreen({ user, username, onPlay, onLogout, onViewPre
   }
 
   function handleTeamsSelected(selectedTeams) {
-    setShowTeamSelection(false)
+    // Refetch favorite teams to update the My Teams section
+    setLoadingTeams(true)
+    supabase
+      .from('profiles')
+      .select('favorite_teams')
+      .eq('id', user.id)
+      .single()
+      .then(({ data: profile }) => {
+        if (profile?.favorite_teams && Array.isArray(profile.favorite_teams)) {
+          setFavoriteTeams(profile.favorite_teams)
+        }
+      })
+      .catch((error) => console.error('Error refetching teams:', error))
+      .finally(() => {
+        setLoadingTeams(false)
+        setShowTeamSelection(false)
+      })
   }
 
   // ONLY show TeamSelectionScreen when user explicitly clicks Play and needs to select teams
@@ -78,6 +121,50 @@ export default function HomeScreen({ user, username, onPlay, onLogout, onViewPre
       </div>
 
       <div className="px-4 pb-20 space-y-8">
+        {/* My Teams Section */}
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-white text-xl font-bold">My Teams</h2>
+            {favoriteTeams.length === 5 && (
+              <button
+                type="button"
+                onClick={() => setShowTeamSelection(true)}
+                className="text-white text-sm font-semibold px-3 py-1.5 rounded-lg border border-white/20 bg-white/5 hover:bg-white/10"
+              >
+                Change
+              </button>
+            )}
+          </div>
+          
+          {loadingTeams ? (
+            <div className="bg-white/5 border border-white/20 rounded-2xl p-4">
+              <p className="text-white/50 text-sm">Loading teams...</p>
+            </div>
+          ) : favoriteTeams.length === 5 ? (
+            <div className="bg-white/5 border border-white/20 rounded-2xl p-4">
+              <div className="flex items-center gap-2 flex-wrap">
+                {favoriteTeams.map((team) => (
+                  <div key={team} className="flex items-center gap-1 bg-white/10 border border-white/20 rounded-lg px-3 py-2">
+                    <span className="text-lg">{FLAGS[team] || '⚽'}</span>
+                    <span className="text-white text-sm font-medium">{team}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="bg-white/5 border border-white/20 rounded-2xl p-4">
+              <p className="text-white/50 text-sm mb-3">You haven't selected your 5 teams yet. Pick them to unlock team-specific games like Starting 11 and iknowball FPL.</p>
+              <button
+                type="button"
+                onClick={() => setShowTeamSelection(true)}
+                className="w-full bg-white text-black font-bold rounded-lg py-2.5 text-sm active:scale-95 transition-transform"
+              >
+                Pick your 5 teams
+              </button>
+            </div>
+          )}
+        </div>
+
         {/* Games Section */}
         <div>
           <h2 className="text-white text-xl font-bold mb-4">Games</h2>

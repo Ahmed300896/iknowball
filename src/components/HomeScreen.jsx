@@ -2,13 +2,11 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import TeamSelectionScreen from './TeamSelectionScreen'
 import HowToPlay from './HowToPlay'
-import AdminScreen from './AdminScreen'
 import { FLAGS } from '../data/teams'
 
-export default function HomeScreen({ user, username, onPlay, onLogout, onViewPredictions }) {
+export default function HomeScreen({ user, username, onPlay, onLogout, onViewPredictions, onAdmin }) {
   const [showTeamSelection, setShowTeamSelection] = useState(false)
   const [showHowToPlay, setShowHowToPlay] = useState(false)
-  const [showAdmin, setShowAdmin] = useState(false)
   const [favoriteTeams, setFavoriteTeams] = useState([])
   const [loadingTeams, setLoadingTeams] = useState(true)
 
@@ -95,16 +93,6 @@ export default function HomeScreen({ user, username, onPlay, onLogout, onViewPre
     return (
       <HowToPlay
         onBack={() => setShowHowToPlay(false)}
-        onLogout={onLogout}
-      />
-    )
-  }
-
-  // Show AdminScreen when requested
-  if (showAdmin === true) {
-    return (
-      <AdminScreen
-        onBack={() => setShowAdmin(false)}
         onLogout={onLogout}
       />
     )
@@ -286,6 +274,16 @@ export default function HomeScreen({ user, username, onPlay, onLogout, onViewPre
           <div className="bg-white/5 border border-white/20 rounded-2xl p-4">
             <p className="text-white/50 text-sm">Coming soon</p>
           </div>
+        </div>
+
+        <div className="flex justify-center pt-4 pb-2">
+          <button
+            type="button"
+            onClick={onAdmin}
+            className="text-white/20 text-xs hover:text-white/40 transition-colors"
+          >
+            admin
+          </button>
         </div>
       </div>
     </div>

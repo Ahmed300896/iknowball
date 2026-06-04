@@ -26,9 +26,8 @@ export default function HomeScreen({ user, username, onPlay, onLogout, onViewPre
   }
 
   function handleTeamsSelected(selectedTeams) {
-    // After selecting teams, proceed to game
+    // After selecting teams, return to home dashboard
     setShowTeamSelection(false)
-    onPlay()
   }
 
   // ONLY show TeamSelectionScreen when user explicitly clicks Play and needs to select teams

@@ -5,8 +5,13 @@ import TeamSelectionScreen from './TeamSelectionScreen'
 export default function HomeScreen({ user, username, onPlay, onLogout, onViewPredictions }) {
   const [showTeamSelection, setShowTeamSelection] = useState(false)
 
-  async function handlePlayClick() {
-    // Only check for teams when user clicks Play
+  // World Cup Predictor - no team selection required
+  function handleWorldCupPlay() {
+    onPlay()
+  }
+
+  // For future games that require team selection (Starting 11, FPL)
+  async function handleTeamRequiredGameClick() {
     const { data: profile } = await supabase
       .from('profiles')
       .select('favorite_teams')
@@ -15,18 +20,14 @@ export default function HomeScreen({ user, username, onPlay, onLogout, onViewPre
     
     const userTeams = profile?.favorite_teams
     
-    // Check if user has selected teams
     if (userTeams && Array.isArray(userTeams) && userTeams.length > 0) {
-      // User has teams - go straight to game
       onPlay()
     } else {
-      // User hasn't selected teams - show team selection
       setShowTeamSelection(true)
     }
   }
 
   function handleTeamsSelected(selectedTeams) {
-    // After selecting teams, return to home dashboard
     setShowTeamSelection(false)
   }
 
@@ -90,7 +91,7 @@ export default function HomeScreen({ user, username, onPlay, onLogout, onViewPre
               </p>
               <button
                 type="button"
-                onClick={handlePlayClick}
+                onClick={handleWorldCupPlay}
                 className="w-full bg-white text-black font-bold rounded-lg py-2.5 text-sm active:scale-95 transition-transform"
               >
                 Play

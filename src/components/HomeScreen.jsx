@@ -37,6 +37,7 @@ export default function HomeScreen({ user, username, onPlay, onLogout, onViewPre
         user={user}
         onTeamsSelected={handleTeamsSelected}
         onLogout={onLogout}
+        onBack={() => setShowTeamSelection(false)}
       />
     )
   }
@@ -95,6 +96,69 @@ export default function HomeScreen({ user, username, onPlay, onLogout, onViewPre
               className="w-full bg-white text-black font-bold rounded-2xl py-3 active:scale-95 transition-transform"
             >
               Play
+            </button>
+          </div>
+
+          <div className="bg-white/5 border border-white/10 rounded-3xl p-5 space-y-4">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-white text-lg font-bold">Starting 11</p>
+                <p className="text-white/50 text-sm mt-2">
+                  Pick the starting lineup before each match for your 5 teams
+                </p>
+              </div>
+              <span className="text-xs font-bold px-2 py-1 rounded-lg bg-white/10 text-white/60 whitespace-nowrap ml-2">
+                Coming Soon
+              </span>
+            </div>
+            <button
+              type="button"
+              disabled
+              className="w-full bg-white/5 text-white/40 font-bold rounded-2xl py-3 border border-white/10 cursor-not-allowed"
+            >
+              Coming Soon
+            </button>
+          </div>
+
+          <div className="bg-white/5 border border-white/10 rounded-3xl p-5 space-y-4">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-white text-lg font-bold">Score Predictor</p>
+                <p className="text-white/50 text-sm mt-2">
+                  Predict the exact scoreline for every World Cup match
+                </p>
+              </div>
+              <span className="text-xs font-bold px-2 py-1 rounded-lg bg-white/10 text-white/60 whitespace-nowrap ml-2">
+                Coming Soon
+              </span>
+            </div>
+            <button
+              type="button"
+              disabled
+              className="w-full bg-white/5 text-white/40 font-bold rounded-2xl py-3 border border-white/10 cursor-not-allowed"
+            >
+              Coming Soon
+            </button>
+          </div>
+
+          <div className="bg-white/5 border border-white/10 rounded-3xl p-5 space-y-4">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-white text-lg font-bold">iknowball FPL</p>
+                <p className="text-white/50 text-sm mt-2">
+                  Build a 15-player fantasy squad from your 5 teams
+                </p>
+              </div>
+              <span className="text-xs font-bold px-2 py-1 rounded-lg bg-white/10 text-white/60 whitespace-nowrap ml-2">
+                Coming Soon
+              </span>
+            </div>
+            <button
+              type="button"
+              disabled
+              className="w-full bg-white/5 text-white/40 font-bold rounded-2xl py-3 border border-white/10 cursor-not-allowed"
+            >
+              Coming Soon
             </button>
           </div>
           <div className="bg-white/5 border border-white/10 rounded-3xl p-5 space-y-4">

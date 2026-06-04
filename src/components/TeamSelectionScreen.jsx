@@ -7,7 +7,7 @@ const TIER_1 = ['Argentina', 'France', 'Spain', 'England', 'Brazil', 'Portugal',
 const TIER_2 = ['Croatia', 'Denmark', 'Switzerland', 'USA', 'Mexico', 'Senegal', 'Morocco', 'Japan', 'Uruguay', 'Colombia', 'Wales', 'Poland', 'Australia', 'Ecuador', 'Ghana']
 const TIER_3 = ['Cameroon', 'Serbia', 'South Korea', 'Costa Rica', 'Canada', 'Tunisia', 'Qatar', 'IR Iran', 'Saudi Arabia', 'Mali', 'Ivory Coast', 'Burkina Faso', 'Egypt', 'Algeria']
 
-export default function TeamSelectionScreen({ user, onTeamsSelected, onLogout }) {
+export default function TeamSelectionScreen({ user, onTeamsSelected, onLogout, onBack }) {
   const [tier1Picks, setTier1Picks] = useState([])
   const [tier2Picks, setTier2Picks] = useState([])
   const [tier3Picks, setTier3Picks] = useState([])
@@ -137,7 +137,13 @@ export default function TeamSelectionScreen({ user, onTeamsSelected, onLogout })
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
       <div className="sticky top-0 z-20 bg-black/90 backdrop-blur border-b border-white/10 px-4 py-3 flex items-center justify-between">
-        <span className="text-white font-bold text-lg">iknowball</span>
+        <button
+          type="button"
+          onClick={onBack}
+          className="text-white font-bold text-lg hover:opacity-70 transition-opacity"
+        >
+          iknowball
+        </button>
         <button
           type="button"
           onClick={onLogout}

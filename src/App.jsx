@@ -8,6 +8,7 @@ import KnockoutScreen from './components/KnockoutScreen'
 import PredictionsFeed from './components/PredictionsFeed'
 import AdminScreen from './components/AdminScreen'
 import ScorePredictor from './components/ScorePredictor'
+import LeaderboardScreen from './components/LeaderboardScreen'
 
 export default function App() {
   const [user, setUser] = useState(null)
@@ -157,6 +158,10 @@ export default function App() {
     )
   }
 
+  if (screen === 'leaderboard') {
+    return <LeaderboardScreen user={user} onBack={handleBackHome} onLogout={handleLogout} />
+  }
+
   if (screen === 'admin') {
     return <AdminScreen onBack={handleBackHome} onLogout={handleLogout} />
   }
@@ -186,5 +191,5 @@ export default function App() {
     return <GroupStage username={username} onNext={handleGroupsNext} onBack={handleBackHome} onHome={handleBackHome} />
   }
 
-  return <HomeScreen user={user} username={username} onPlay={handlePlay} onLogout={handleLogout} onViewPredictions={handleViewPredictions} onAdmin={() => setScreen('admin')} onScorePredictor={() => setScreen('score-predictor')} />
+  return <HomeScreen user={user} username={username} onPlay={handlePlay} onLogout={handleLogout} onViewPredictions={handleViewPredictions} onAdmin={() => setScreen('admin')} onScorePredictor={() => setScreen('score-predictor')} onLeaderboard={() => setScreen('leaderboard')} />
 }

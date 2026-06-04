@@ -4,7 +4,7 @@ import TeamSelectionScreen from './TeamSelectionScreen'
 import HowToPlay from './HowToPlay'
 import { FLAGS } from '../data/teams'
 
-export default function HomeScreen({ user, username, onPlay, onLogout, onViewPredictions, onAdmin, onScorePredictor }) {
+export default function HomeScreen({ user, username, onPlay, onLogout, onViewPredictions, onAdmin, onScorePredictor, onLeaderboard }) {
   const [showTeamSelection, setShowTeamSelection] = useState(false)
   const [showHowToPlay, setShowHowToPlay] = useState(false)
   const [favoriteTeams, setFavoriteTeams] = useState([])
@@ -269,11 +269,18 @@ export default function HomeScreen({ user, username, onPlay, onLogout, onViewPre
         </div>
 
         {/* Leaderboard Section */}
-        <div>
-          <h2 className="text-white text-xl font-bold mb-4">Leaderboard</h2>
-          <div className="bg-white/5 border border-white/20 rounded-2xl p-4">
-            <p className="text-white/50 text-sm">Coming soon</p>
-          </div>
+        <div className="bg-white/5 border border-white/20 rounded-2xl p-4">
+          <p className="text-white font-bold text-base mb-1">Leaderboard</p>
+          <p className="text-white/50 text-sm mb-3">
+            See who has submitted the most predictions
+          </p>
+          <button
+            type="button"
+            onClick={onLeaderboard}
+            className="w-full bg-white/10 text-white font-bold rounded-lg py-2.5 text-sm border border-white/20 hover:bg-white/15 active:scale-95 transition-all"
+          >
+            View leaderboard
+          </button>
         </div>
 
         <div className="flex justify-center pt-4 pb-2">

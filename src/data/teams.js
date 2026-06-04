@@ -6,7 +6,7 @@ export const FLAGS = {
   'Canada': '🇨🇦',
   'Switzerland': '🇨🇭',
   'Qatar': '🇶🇦',
-  'Bosnia-Herzegovina': '🇧🇦',
+  'Bosnia & Herzegovina': '🇧🇦',
   'Brazil': '🇧🇷',
   'Morocco': '🇲🇦',
   'Scotland': '🏴󠁧󠁢󠁳󠁣󠁴󠁿',
@@ -14,11 +14,11 @@ export const FLAGS = {
   'USA': '🇺🇸',
   'Paraguay': '🇵🇾',
   'Australia': '🇦🇺',
-  'Türkiye': '🇹🇷',
+  'Turkiye': '🇹🇷',
   'Germany': '🇩🇪',
   'Ecuador': '🇪🇨',
   'Ivory Coast': '🇨🇮',
-  'Curaçao': '🇨🇼',
+  'Curacao': '🇨🇼',
   'Netherlands': '🇳🇱',
   'Japan': '🇯🇵',
   'Tunisia': '🇹🇳',
@@ -49,21 +49,21 @@ export const FLAGS = {
   'Ghana': '🇬🇭',
 }
 
-export const groups = {
-  A: ['Mexico', 'South Korea', 'South Africa', 'Czechia'],
-  B: ['Canada', 'Switzerland', 'Qatar', 'Bosnia-Herzegovina'],
-  C: ['Brazil', 'Morocco', 'Scotland', 'Haiti'],
-  D: ['USA', 'Paraguay', 'Australia', 'Türkiye'],
-  E: ['Germany', 'Ecuador', 'Ivory Coast', 'Curaçao'],
-  F: ['Netherlands', 'Japan', 'Tunisia', 'Sweden'],
-  G: ['Belgium', 'Iran', 'Egypt', 'New Zealand'],
-  H: ['Spain', 'Uruguay', 'Saudi Arabia', 'Cape Verde'],
-  I: ['France', 'Senegal', 'Norway', 'Iraq'],
-  J: ['Argentina', 'Austria', 'Algeria', 'Jordan'],
-  K: ['Portugal', 'Colombia', 'Uzbekistan', 'DR Congo'],
-  L: ['England', 'Croatia', 'Panama', 'Ghana'],
-}
+export const groups = [
+  { id: 'A', name: 'Group A', teams: ['Mexico', 'South Korea', 'South Africa', 'Czechia'] },
+  { id: 'B', name: 'Group B', teams: ['Canada', 'Bosnia & Herzegovina', 'Qatar', 'Switzerland'] },
+  { id: 'C', name: 'Group C', teams: ['Brazil', 'Morocco', 'Haiti', 'Scotland'] },
+  { id: 'D', name: 'Group D', teams: ['USA', 'Paraguay', 'Australia', 'Turkiye'] },
+  { id: 'E', name: 'Group E', teams: ['Germany', 'Curacao', 'Ivory Coast', 'Ecuador'] },
+  { id: 'F', name: 'Group F', teams: ['Netherlands', 'Japan', 'Sweden', 'Tunisia'] },
+  { id: 'G', name: 'Group G', teams: ['Belgium', 'Egypt', 'Iran', 'New Zealand'] },
+  { id: 'H', name: 'Group H', teams: ['Spain', 'Cape Verde', 'Saudi Arabia', 'Uruguay'] },
+  { id: 'I', name: 'Group I', teams: ['France', 'Senegal', 'Iraq', 'Norway'] },
+  { id: 'J', name: 'Group J', teams: ['Argentina', 'Algeria', 'Austria', 'Jordan'] },
+  { id: 'K', name: 'Group K', teams: ['Portugal', 'DR Congo', 'Uzbekistan', 'Colombia'] },
+  { id: 'L', name: 'Group L', teams: ['England', 'Croatia', 'Ghana', 'Panama'] },
+]
 
-export const groupNames = Object.keys(groups)
-
-export const allTeams = Object.values(groups).flat()
+export const groupsMap = Object.fromEntries(groups.map(g => [g.id, g.teams]))
+export const groupNames = groups.map(g => g.id)
+export const allTeams = groups.flatMap(g => g.teams)

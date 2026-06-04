@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { groups, groupNames, FLAGS } from '../data/teams'
+import { groupsMap, groupNames, FLAGS } from '../data/teams'
 
 const POSITION_STYLES = [
   'text-yellow-400',
@@ -78,7 +78,7 @@ function GroupCard({ groupLetter, teams, onReorder }) {
 
 export default function GroupStage({ username, onNext, onBack, onHome }) {
   const [picks, setPicks] = useState(() =>
-    Object.fromEntries(groupNames.map(g => [g, [...groups[g]]]))
+    Object.fromEntries(groupNames.map(g => [g, [...groupsMap[g]]]))
   )
 
   function handleReorder(groupLetter, newOrder) {

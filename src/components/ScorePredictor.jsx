@@ -1,31 +1,67 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import { groups, groupNames, FLAGS } from '../data/teams'
+import matches from '../data/schedule'
 
-function buildAllMatches() {
-  const all = {}
-  groupNames.forEach(letter => {
-    const teams = groups[letter]
-    const matches = []
-    for (let i = 0; i < teams.length; i++) {
-      for (let j = i + 1; j < teams.length; j++) {
-        matches.push({ id: `${letter}_${i}_${j}`, home: teams[i], away: teams[j] })
-      }
-    }
-    all[letter] = matches
-  })
-  return all
+const TOTAL_MATCHES = 72
+
+const FLAGS = {
+  'Mexico': '🇲🇽',
+  'South Korea': '🇰🇷',
+  'South Africa': '🇿🇦',
+  'Czechia': '🇨🇿',
+  'Canada': '🇨🇦',
+  'Switzerland': '🇨🇭',
+  'Qatar': '🇶🇦',
+  'Bosnia & Herzegovina': '🇧🇦',
+  'Brazil': '🇧🇷',
+  'Morocco': '🇲🇦',
+  'Scotland': '🏴󠁧󠁢󠁳󠁣󠁴󠁿',
+  'Haiti': '🇭🇹',
+  'United States': '🇺🇸',
+  'Paraguay': '🇵🇾',
+  'Australia': '🇦🇺',
+  'Turkiye': '🇹🇷',
+  'Germany': '🇩🇪',
+  'Ecuador': '🇪🇨',
+  'Ivory Coast': '🇨🇮',
+  'Curacao': '🇨🇼',
+  'Netherlands': '🇳🇱',
+  'Japan': '🇯🇵',
+  'Tunisia': '🇹🇳',
+  'Sweden': '🇸🇪',
+  'Belgium': '🇧🇪',
+  'Iran': '🇮🇷',
+  'Egypt': '🇪🇬',
+  'New Zealand': '🇳🇿',
+  'Spain': '🇪🇸',
+  'Uruguay': '🇺🇾',
+  'Saudi Arabia': '🇸🇦',
+  'Cape Verde': '🇨🇻',
+  'France': '🇫🇷',
+  'Senegal': '🇸🇳',
+  'Norway': '🇳🇴',
+  'Iraq': '🇮🇶',
+  'Argentina': '🇦🇷',
+  'Austria': '🇦🇹',
+  'Algeria': '🇩🇿',
+  'Jordan': '🇯🇴',
+  'Portugal': '🇵🇹',
+  'Colombia': '🇨🇴',
+  'Uzbekistan': '🇺🇿',
+  'DR Congo': '🇨🇩',
+  'England': '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
+  'Croatia': '🇭🇷',
+  'Panama': '🇵🇦',
+  'Ghana': '🇬🇭',
 }
 
-const ALL_MATCHES = buildAllMatches()
-const TOTAL = groupNames.reduce((sum, g) => sum + ALL_MATCHES[g].length, 0)
-
-function initPredictions() {
-  const init = {}
-  groupNames.forEach(letter => {
-    ALL_MATCHES[letter].forEach(m => { init[m.id] = { home: 0, away: 0 } })
+function formatDate(dateStr) {
+  const [y, m, d] = dateStr.split('-').map(Number)
+  return new Date(y, m - 1, d).toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
   })
-  return init
 }
 
 function ScoreInput({ value, onChange }) {
@@ -34,17 +70,17 @@ function ScoreInput({ value, onChange }) {
       <button
         type="button"
         onClick={() => onChange(Math.max(0, value - 1))}
-        className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/10 text-white text-lg font-bold active:bg-white/25 select-none"
+        className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/10 text-white text-lg font-bold active:bg-white/25 select-none"
       >
         −
       </button>
-      <span className="text-white font-bold w-5 text-center tabular-nums text-base select-none">
+      <span className="text-white font-bold w-6 text-center tabular-nums text-lg select-none">
         {value}
       </span>
       <button
         type="button"
         onClick={() => onChange(Math.min(20, value + 1))}
-        className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/10 text-white text-lg font-bold active:bg-white/25 select-none"
+        className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/10 text-white text-lg font-bold active:bg-white/25 select-none"
       >
         +
       </button>
@@ -52,12 +88,14 @@ function ScoreInput({ value, onChange }) {
   )
 }
 
-export default function ScorePredictor({ user, username, onBack, onLogout }) {
-  const [predictions, setPredictions] = useState(initPredictions)
-  const [activeGroup, setActiveGroup] = useState('A')
-  const [confirmed, setConfirmed] = useState(() => new Set())
-  const [saving, setSaving] = useState(false)
-  const [saveState, setSaveState] = useState('idle') // 'idle' | 'saving' | 'saved' | 'error'
+export default function ScorePredictor({ user, onBack, onLogout }) {
+  const today = new Date().toLocaleDateString('en-CA')
+  const todaysMatches = matches.filter(m => m.date === today)
+  const nextMatch = matches.find(m => m.date > today)
+
+  const [allPredictions, setAllPredictions] = useState({})
+  const [scores, setScores] = useState({})
+  const [saveStates, setSaveStates] = useState({})
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -65,63 +103,62 @@ export default function ScorePredictor({ user, username, onBack, onLogout }) {
       try {
         const { data } = await supabase
           .from('score_predictions')
-          .select('predictions, confirmed_ids')
+          .select('predictions')
           .eq('user_id', user.id)
           .single()
 
-        if (data?.predictions) {
-          setPredictions(prev => ({ ...prev, ...data.predictions }))
-        }
-        if (data?.confirmed_ids) {
-          setConfirmed(new Set(data.confirmed_ids))
-        }
+        const saved = data?.predictions ?? {}
+        setAllPredictions(saved)
+
+        // Pre-fill scores for today's matches from saved predictions
+        const prefilled = {}
+        todaysMatches.forEach(m => {
+          prefilled[m.id] = {
+            home: saved[m.id]?.home ?? 0,
+            away: saved[m.id]?.away ?? 0,
+          }
+        })
+        setScores(prefilled)
       } catch {
-        // no existing predictions — start fresh
+        // No saved predictions yet — initialise today's scores to 0-0
+        const init = {}
+        todaysMatches.forEach(m => { init[m.id] = { home: 0, away: 0 } })
+        setScores(init)
       } finally {
         setLoading(false)
       }
     }
     load()
-  }, [user.id])
+  }, [user.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const setScore = useCallback((matchId, side, value) => {
-    setPredictions(prev => ({
+  function setScore(matchId, side, value) {
+    setScores(prev => ({
       ...prev,
       [matchId]: { ...prev[matchId], [side]: value },
     }))
-    setConfirmed(prev => new Set(prev).add(matchId))
-    setSaveState('idle')
-  }, [])
+    // Clear saved state if user edits after saving
+    setSaveStates(prev => ({ ...prev, [matchId]: 'idle' }))
+  }
 
-  async function handleSave() {
-    setSaveState('saving')
+  async function handleSubmit(match) {
+    setSaveStates(prev => ({ ...prev, [match.id]: 'saving' }))
     try {
+      const updated = {
+        ...allPredictions,
+        [match.id]: scores[match.id],
+      }
       const { error } = await supabase
         .from('score_predictions')
-        .upsert(
-          {
-            user_id: user.id,
-            predictions,
-            confirmed_ids: [...confirmed],
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: 'user_id' }
-        )
+        .upsert({ user_id: user.id, predictions: updated }, { onConflict: 'user_id' })
       if (error) throw error
-      setSaveState('saved')
+      setAllPredictions(updated)
+      setSaveStates(prev => ({ ...prev, [match.id]: 'saved' }))
     } catch {
-      setSaveState('error')
+      setSaveStates(prev => ({ ...prev, [match.id]: 'error' }))
     }
   }
 
-  const confirmedCount = confirmed.size
-  const pct = TOTAL > 0 ? (confirmedCount / TOTAL) * 100 : 0
-
-  const saveLabel =
-    saveState === 'saving' ? 'Saving…' :
-    saveState === 'saved'  ? 'Saved ✓' :
-    saveState === 'error'  ? 'Error' :
-    'Save'
+  const predictedCount = Object.keys(allPredictions).length
 
   if (loading) {
     return (
@@ -145,141 +182,127 @@ export default function ScorePredictor({ user, username, onBack, onLogout }) {
           </button>
           <span className="text-white font-bold truncate">Score Predictor</span>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <button
-            type="button"
-            onClick={onLogout}
-            className="text-white/60 text-sm font-semibold px-3 py-1.5 rounded-xl border border-white/20 bg-white/5"
-          >
-            Logout
-          </button>
-          <button
-            type="button"
-            onClick={handleSave}
-            disabled={saveState === 'saving'}
-            className={`text-sm font-bold px-4 py-1.5 rounded-xl active:scale-95 transition-all disabled:opacity-50 ${
-              saveState === 'saved'
-                ? 'bg-white/20 text-white border border-white/20'
-                : saveState === 'error'
-                ? 'bg-red-500/20 text-red-400 border border-red-500/30'
-                : 'bg-white text-black'
-            }`}
-          >
-            {saveLabel}
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={onLogout}
+          className="text-white/60 text-sm font-semibold px-3 py-1.5 rounded-xl border border-white/20 bg-white/5 shrink-0"
+        >
+          Logout
+        </button>
       </div>
 
-      {/* Progress */}
-      <div className="px-4 pt-4 pb-3 border-b border-white/10">
+      {/* Progress counter */}
+      <div className="px-4 py-3 border-b border-white/10">
         <div className="flex items-center justify-between mb-2">
           <span className="text-white/50 text-xs font-medium">Predictions set</span>
           <span className="text-white text-xs font-bold tabular-nums">
-            {confirmedCount} / {TOTAL}
+            {predictedCount} / {TOTAL_MATCHES}
           </span>
         </div>
         <div className="h-1 bg-white/10 rounded-full overflow-hidden">
           <div
             className="h-full bg-white rounded-full transition-all duration-300"
-            style={{ width: `${pct}%` }}
+            style={{ width: `${(predictedCount / TOTAL_MATCHES) * 100}%` }}
           />
         </div>
       </div>
 
-      {/* Group tabs */}
-      <div className="flex overflow-x-auto gap-1.5 px-4 py-3 border-b border-white/10 scrollbar-none">
-        {groupNames.map(letter => {
-          const groupConfirmed = ALL_MATCHES[letter].filter(m => confirmed.has(m.id)).length
-          const groupTotal = ALL_MATCHES[letter].length
-          const done = groupConfirmed === groupTotal
-
-          return (
-            <button
-              key={letter}
-              type="button"
-              onClick={() => setActiveGroup(letter)}
-              className={`shrink-0 flex flex-col items-center justify-center w-10 h-10 rounded-xl text-sm font-bold transition-colors ${
-                activeGroup === letter
-                  ? 'bg-white text-black'
-                  : done
-                  ? 'bg-white/15 text-white border border-white/20'
-                  : 'bg-white/5 text-white/50 border border-white/10'
-              }`}
-            >
-              {letter}
-            </button>
-          )
-        })}
-      </div>
-
-      {/* Match list */}
-      <div className="px-4 pt-4 pb-24 space-y-2">
-        <p className="text-white/40 text-xs uppercase tracking-widest font-semibold mb-3">
-          Group {activeGroup} — predict exact scores
-        </p>
-
-        {ALL_MATCHES[activeGroup].map(match => {
-          const pred = predictions[match.id] ?? { home: 0, away: 0 }
-          const isSet = confirmed.has(match.id)
-
-          return (
-            <div
-              key={match.id}
-              className={`rounded-xl p-3 border transition-colors ${
-                isSet
-                  ? 'bg-white/8 border-white/20'
-                  : 'bg-white/3 border-white/8'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                {/* Home */}
-                <div className="flex items-center gap-1.5 flex-1 min-w-0">
-                  <span className="text-base leading-none shrink-0">
-                    {FLAGS[match.home] ?? '🏳️'}
-                  </span>
-                  <span className="text-white text-sm font-medium truncate">
-                    {match.home}
-                  </span>
-                </div>
-
-                {/* Score controls */}
-                <div className="flex items-center gap-0.5 shrink-0">
-                  <ScoreInput
-                    value={pred.home}
-                    onChange={v => setScore(match.id, 'home', v)}
-                  />
-                  <span className="text-white/25 px-1 text-sm font-bold select-none">—</span>
-                  <ScoreInput
-                    value={pred.away}
-                    onChange={v => setScore(match.id, 'away', v)}
-                  />
-                </div>
-
-                {/* Away */}
-                <div className="flex items-center gap-1.5 flex-1 min-w-0 justify-end">
-                  <span className="text-white text-sm font-medium truncate text-right">
-                    {match.away}
-                  </span>
-                  <span className="text-base leading-none shrink-0">
-                    {FLAGS[match.away] ?? '🏳️'}
-                  </span>
-                </div>
-              </div>
+      {/* Body */}
+      <div className="px-4 py-5 pb-20">
+        {todaysMatches.length === 0 ? (
+          <div className="flex flex-col items-center justify-center pt-20 gap-3 text-center">
+            <p className="text-white text-lg font-semibold">No games today</p>
+            <p className="text-white/50 text-sm">Check back tomorrow!</p>
+            {nextMatch && (
+              <p className="text-white/30 text-xs mt-2">
+                Next match: {formatDate(nextMatch.date)}
+              </p>
+            )}
+          </div>
+        ) : (
+          <>
+            <div className="mb-5">
+              <h2 className="text-white text-xl font-bold">Today's Matches</h2>
+              <p className="text-white/40 text-sm mt-0.5">{formatDate(today)}</p>
             </div>
-          )
-        })}
-      </div>
 
-      {/* Sticky bottom save */}
-      <div className="fixed bottom-0 inset-x-0 px-4 pb-6 pt-3 bg-gradient-to-t from-black via-black/90 to-transparent pointer-events-none">
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={saveState === 'saving'}
-          className="pointer-events-auto w-full bg-white text-black font-bold rounded-xl py-3 text-sm active:scale-95 transition-transform disabled:opacity-50"
-        >
-          {saveLabel}
-        </button>
+            <div className="space-y-3">
+              {todaysMatches.map(match => {
+                const score = scores[match.id] ?? { home: 0, away: 0 }
+                const state = saveStates[match.id] ?? 'idle'
+
+                return (
+                  <div
+                    key={match.id}
+                    className="bg-white/5 border border-white/10 rounded-2xl p-4"
+                  >
+                    {/* Group badge */}
+                    <p className="text-white/40 text-xs font-bold uppercase tracking-widest mb-3">
+                      Group {match.group}
+                    </p>
+
+                    {/* Teams + score inputs */}
+                    <div className="flex items-center gap-2 mb-4">
+                      {/* Home team */}
+                      <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
+                        <span className="text-2xl leading-none">
+                          {FLAGS[match.home] ?? '🏳️'}
+                        </span>
+                        <span className="text-white text-xs font-medium text-center leading-tight truncate w-full text-center">
+                          {match.home}
+                        </span>
+                      </div>
+
+                      {/* Score controls */}
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <ScoreInput
+                          value={score.home}
+                          onChange={v => setScore(match.id, 'home', v)}
+                        />
+                        <span className="text-white/25 text-sm font-bold select-none px-0.5">
+                          —
+                        </span>
+                        <ScoreInput
+                          value={score.away}
+                          onChange={v => setScore(match.id, 'away', v)}
+                        />
+                      </div>
+
+                      {/* Away team */}
+                      <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
+                        <span className="text-2xl leading-none">
+                          {FLAGS[match.away] ?? '🏳️'}
+                        </span>
+                        <span className="text-white text-xs font-medium text-center leading-tight truncate w-full text-center">
+                          {match.away}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Submit button */}
+                    <button
+                      type="button"
+                      onClick={() => handleSubmit(match)}
+                      disabled={state === 'saving'}
+                      className={`w-full font-bold rounded-xl py-2.5 text-sm active:scale-95 transition-all disabled:opacity-50 ${
+                        state === 'saved'
+                          ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                          : state === 'error'
+                          ? 'bg-red-500/20 text-red-400 border border-red-500/30'
+                          : 'bg-white text-black'
+                      }`}
+                    >
+                      {state === 'saving' ? 'Saving…' :
+                       state === 'saved'  ? '✓ Saved!' :
+                       state === 'error'  ? 'Error — try again' :
+                       'Submit Prediction'}
+                    </button>
+                  </div>
+                )
+              })}
+            </div>
+          </>
+        )}
       </div>
     </div>
   )

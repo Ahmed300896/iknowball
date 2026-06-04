@@ -48,25 +48,25 @@ export default function TeamSelectionScreen({ user, onTeamsSelected, onLogout })
     if (tier === 1) {
       if (tier1Picks.includes(team)) {
         setTier1Picks(tier1Picks.filter(t => t !== team))
-      } else if (remainingTier1 > 0) {
+      } else if (tier1Picks.length < 2) {
         setTier1Picks([...tier1Picks, team])
       }
     } else if (tier === 2) {
       if (tier2Picks.includes(team)) {
         setTier2Picks(tier2Picks.filter(t => t !== team))
-      } else if (remainingTier2 > 0) {
+      } else if (tier2Picks.length < 1) {
         setTier2Picks([...tier2Picks, team])
       }
     } else if (tier === 3) {
       if (tier3Picks.includes(team)) {
         setTier3Picks(tier3Picks.filter(t => t !== team))
-      } else if (remainingTier3 > 0) {
+      } else if (tier3Picks.length < 1) {
         setTier3Picks([...tier3Picks, team])
       }
     } else if (tier === 4) {
       if (tier4Picks.includes(team)) {
         setTier4Picks(tier4Picks.filter(t => t !== team))
-      } else if (remainingTier4 > 0) {
+      } else if (tier4Picks.length < 1) {
         setTier4Picks([...tier4Picks, team])
       }
     }

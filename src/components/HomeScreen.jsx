@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import TeamSelectionScreen from './TeamSelectionScreen'
+import HowToPlay from './HowToPlay'
+import AdminScreen from './AdminScreen'
 import { FLAGS } from '../data/teams'
 
 export default function HomeScreen({ user, username, onPlay, onLogout, onViewPredictions }) {
   const [showTeamSelection, setShowTeamSelection] = useState(false)
+  const [showHowToPlay, setShowHowToPlay] = useState(false)
+  const [showAdmin, setShowAdmin] = useState(false)
   const [favoriteTeams, setFavoriteTeams] = useState([])
   const [loadingTeams, setLoadingTeams] = useState(true)
 
@@ -86,6 +90,26 @@ export default function HomeScreen({ user, username, onPlay, onLogout, onViewPre
     )
   }
 
+  // Show HowToPlay when requested
+  if (showHowToPlay === true) {
+    return (
+      <HowToPlay
+        onBack={() => setShowHowToPlay(false)}
+        onLogout={onLogout}
+      />
+    )
+  }
+
+  // Show AdminScreen when requested
+  if (showAdmin === true) {
+    return (
+      <AdminScreen
+        onBack={() => setShowAdmin(false)}
+        onLogout={onLogout}
+      />
+    )
+  }
+
   // Default: Always show HomeScreen dashboard
 
   const initials = username
@@ -99,13 +123,22 @@ export default function HomeScreen({ user, username, onPlay, onLogout, onViewPre
     <div className="min-h-screen bg-black text-white">
       <div className="sticky top-0 z-20 bg-black/90 backdrop-blur border-b border-white/10 px-4 py-3 flex items-center justify-between">
         <span className="text-white font-bold text-lg">iknowball</span>
-        <button
-          type="button"
-          onClick={onLogout}
-          className="text-white/70 text-sm font-semibold px-3 py-2 rounded-xl border border-white/20 bg-white/5 hover:bg-white/10"
-        >
-          Logout
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowHowToPlay(true)}
+            className="text-white/70 text-sm font-semibold px-3 py-2 rounded-xl border border-white/20 bg-white/5 hover:bg-white/10"
+          >
+            How to play
+          </button>
+          <button
+            type="button"
+            onClick={onLogout}
+            className="text-white/70 text-sm font-semibold px-3 py-2 rounded-xl border border-white/20 bg-white/5 hover:bg-white/10"
+          >
+            Logout
+          </button>
+        </div>
       </div>
 
       <div className="px-4 pt-6 pb-6">

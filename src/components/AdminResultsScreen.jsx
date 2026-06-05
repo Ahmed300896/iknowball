@@ -114,7 +114,7 @@ export default function AdminResultsScreen({ user, username, onBack, onLogout })
 
   return (
     <div className="min-h-screen pb-20" style={{ background: '#0a0e1a' }}>
-      <PageHeader title="Admin · Results" showBack onBack={onBack} username={username} />
+      <PageHeader title="Admin · Results" showBack onBack={onBack} username={username} onLogout={onLogout} />
 
       <div className="px-4 py-5 space-y-8">
         {dates.map(date => (

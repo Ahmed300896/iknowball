@@ -97,7 +97,7 @@ export default function LeaderboardScreen({ user, username, onBack, onLogout, cu
 
   return (
     <div className="min-h-screen pb-20" style={{ background: '#0a0e1a' }}>
-      <PageHeader title="Leaderboard" showBack onBack={onBack} username={username} />
+      <PageHeader title="Leaderboard" showBack onBack={onBack} username={username} onLogout={onLogout} />
 
       <div className="px-4 pt-5 pb-4">
         {loading ? (

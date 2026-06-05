@@ -1,4 +1,4 @@
-export default function PageHeader({ title, showBack, onBack, username }) {
+export default function PageHeader({ title, showBack, onBack, username, onLogout }) {
   const initials = (username || 'IK')
     .split(' ')
     .filter(Boolean)
@@ -39,8 +39,11 @@ export default function PageHeader({ title, showBack, onBack, username }) {
           {title}
         </h1>
 
-        {/* Right: avatar */}
-        <div
+        {/* Right: avatar — tap to log out */}
+        <button
+          type="button"
+          onClick={onLogout}
+          title="Log out"
           className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-xs font-bold"
           style={{
             border: '1.5px solid #c9a84c',
@@ -50,7 +53,7 @@ export default function PageHeader({ title, showBack, onBack, username }) {
           }}
         >
           {initials}
-        </div>
+        </button>
       </div>
     </div>
   )

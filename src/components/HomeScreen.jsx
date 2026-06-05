@@ -90,7 +90,7 @@ export default function HomeScreen({
 
   return (
     <div className="min-h-screen pb-20" style={{ background: '#0a0e1a' }}>
-      <PageHeader title="iKnowBall" username={username} />
+      <PageHeader title="iKnowBall" username={username} onLogout={onLogout} />
 
       <div className="px-4 pt-5 space-y-6">
         {/* Welcome block */}
@@ -211,32 +211,6 @@ export default function HomeScreen({
               </span>
             </div>
           </div>
-        </div>
-
-        {/* World Cup Predictor — existing game */}
-        <div>
-          <div className="flex items-center gap-2 mb-3">
-            <div style={{ width: 3, height: 18, background: '#c9a84c', borderRadius: 2 }} />
-            <p className="eyebrow">World Cup Predictor</p>
-          </div>
-          <button
-            type="button"
-            onClick={onPlay}
-            className="card-fifa w-full text-left flex items-center gap-3"
-          >
-            <div className="flex-1 min-w-0">
-              <p className="text-white text-sm" style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 600, letterSpacing: '0.04em' }}>
-                GROUP STAGE & KNOCKOUT
-              </p>
-              <p className="text-xs mt-0.5" style={{ color: '#8b93ab' }}>Pick standings, winners & champion</p>
-            </div>
-            <span
-              className="shrink-0 px-2 py-1 rounded text-xs"
-              style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 600, letterSpacing: '0.08em', background: '#c9a84c', color: '#0a0e1a' }}
-            >
-              PLAY
-            </span>
-          </button>
         </div>
 
         {/* Leaderboard */}

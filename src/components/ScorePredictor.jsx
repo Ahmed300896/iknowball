@@ -141,7 +141,7 @@ export default function ScorePredictor({ user, username, onBack, onLogout, curre
 
   return (
     <div className="min-h-screen pb-20" style={{ background: '#0a0e1a' }}>
-      <PageHeader title="Today's Games" showBack onBack={onBack} username={username} />
+      <PageHeader title="Today's Games" showBack onBack={onBack} username={username} onLogout={onLogout} />
 
       {/* Progress bar */}
       <div className="px-4 py-3" style={{ borderBottom: '1px solid #1e2540' }}>

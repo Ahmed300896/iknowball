@@ -1,59 +1,11 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import matches from '../data/schedule'
+import PageHeader from './PageHeader'
+import TeamBadge from './TeamBadge'
+import BottomNav from './BottomNav'
 
 const TOTAL_MATCHES = 72
-
-const FLAGS = {
-  'Mexico': '🇲🇽',
-  'South Korea': '🇰🇷',
-  'South Africa': '🇿🇦',
-  'Czechia': '🇨🇿',
-  'Canada': '🇨🇦',
-  'Switzerland': '🇨🇭',
-  'Qatar': '🇶🇦',
-  'Bosnia & Herzegovina': '🇧🇦',
-  'Brazil': '🇧🇷',
-  'Morocco': '🇲🇦',
-  'Scotland': '🏴󠁧󠁢󠁳󠁣󠁴󠁿',
-  'Haiti': '🇭🇹',
-  'United States': '🇺🇸',
-  'Paraguay': '🇵🇾',
-  'Australia': '🇦🇺',
-  'Turkiye': '🇹🇷',
-  'Germany': '🇩🇪',
-  'Ecuador': '🇪🇨',
-  'Ivory Coast': '🇨🇮',
-  'Curacao': '🇨🇼',
-  'Netherlands': '🇳🇱',
-  'Japan': '🇯🇵',
-  'Tunisia': '🇹🇳',
-  'Sweden': '🇸🇪',
-  'Belgium': '🇧🇪',
-  'Iran': '🇮🇷',
-  'Egypt': '🇪🇬',
-  'New Zealand': '🇳🇿',
-  'Spain': '🇪🇸',
-  'Uruguay': '🇺🇾',
-  'Saudi Arabia': '🇸🇦',
-  'Cape Verde': '🇨🇻',
-  'France': '🇫🇷',
-  'Senegal': '🇸🇳',
-  'Norway': '🇳🇴',
-  'Iraq': '🇮🇶',
-  'Argentina': '🇦🇷',
-  'Austria': '🇦🇹',
-  'Algeria': '🇩🇿',
-  'Jordan': '🇯🇴',
-  'Portugal': '🇵🇹',
-  'Colombia': '🇨🇴',
-  'Uzbekistan': '🇺🇿',
-  'DR Congo': '🇨🇩',
-  'England': '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
-  'Croatia': '🇭🇷',
-  'Panama': '🇵🇦',
-  'Ghana': '🇬🇭',
-}
 
 function formatDate(dateStr) {
   const [y, m, d] = dateStr.split('-').map(Number)
@@ -64,31 +16,56 @@ function formatDate(dateStr) {
   })
 }
 
-function ScoreInput({ value, onChange }) {
+function formatDateShort(dateStr) {
+  const [y, m, d] = dateStr.split('-').map(Number)
+  return new Date(y, m - 1, d)
+    .toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+    .toUpperCase()
+}
+
+// Vertical stepper: + on top, score in middle, - below
+function ScoreStepper({ value, onChange }) {
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex flex-col items-center gap-0.5">
       <button
         type="button"
-        onClick={() => onChange(Math.max(0, value - 1))}
-        className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/10 text-white text-lg font-bold active:bg-white/25 select-none"
+        onClick={() => onChange(Math.min(20, value + 1))}
+        style={{
+          width: 26, height: 26,
+          background: '#141b30', border: '1px solid #2a3354',
+          borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: '#c9a84c', fontSize: 16, fontWeight: 700,
+          cursor: 'pointer', lineHeight: 1, userSelect: 'none',
+        }}
       >
-        −
+        +
       </button>
-      <span className="text-white font-bold w-6 text-center tabular-nums text-lg select-none">
+      <span
+        style={{
+          fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 30,
+          color: '#ffffff', width: 36, textAlign: 'center', lineHeight: 1.1,
+        }}
+      >
         {value}
       </span>
       <button
         type="button"
-        onClick={() => onChange(Math.min(20, value + 1))}
-        className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/10 text-white text-lg font-bold active:bg-white/25 select-none"
+        onClick={() => onChange(Math.max(0, value - 1))}
+        style={{
+          width: 26, height: 26,
+          background: '#141b30', border: '1px solid #2a3354',
+          borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: '#c9a84c', fontSize: 16, fontWeight: 700,
+          cursor: 'pointer', lineHeight: 1, userSelect: 'none',
+        }}
       >
-        +
+        −
       </button>
     </div>
   )
 }
 
-export default function ScorePredictor({ user, onBack, onLogout }) {
+export default function ScorePredictor({ user, username, onBack, onLogout, currentScreen, onPredict, onRanks }) {
   const today = new Date().toLocaleDateString('en-CA')
   const todaysMatches = matches.filter(m => m.date === today)
   const nextMatch = matches.find(m => m.date > today)
@@ -110,7 +87,6 @@ export default function ScorePredictor({ user, onBack, onLogout }) {
         const saved = data?.predictions ?? {}
         setAllPredictions(saved)
 
-        // Pre-fill scores for today's matches from saved predictions
         const prefilled = {}
         todaysMatches.forEach(m => {
           prefilled[m.id] = {
@@ -120,7 +96,6 @@ export default function ScorePredictor({ user, onBack, onLogout }) {
         })
         setScores(prefilled)
       } catch {
-        // No saved predictions yet — initialise today's scores to 0-0
         const init = {}
         todaysMatches.forEach(m => { init[m.id] = { home: 0, away: 0 } })
         setScores(init)
@@ -132,11 +107,7 @@ export default function ScorePredictor({ user, onBack, onLogout }) {
   }, [user.id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   function setScore(matchId, side, value) {
-    setScores(prev => ({
-      ...prev,
-      [matchId]: { ...prev[matchId], [side]: value },
-    }))
-    // Clear saved state if user edits after saving
+    setScores(prev => ({ ...prev, [matchId]: { ...prev[matchId], [side]: value } }))
     setSaveStates(prev => ({ ...prev, [matchId]: 'idle' }))
   }
 
@@ -162,118 +133,105 @@ export default function ScorePredictor({ user, onBack, onLogout }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <p className="text-white/50">Loading…</p>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0e1a' }}>
+        <p style={{ color: '#6b7494' }}>Loading…</p>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      {/* Header */}
-      <div className="sticky top-0 z-20 bg-black/90 backdrop-blur border-b border-white/10 px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3 min-w-0">
-          <button
-            type="button"
-            onClick={onBack}
-            className="text-white/60 text-sm font-semibold shrink-0"
-          >
-            ← Back
-          </button>
-          <span className="text-white font-bold truncate">Score Predictor</span>
-        </div>
-        <button
-          type="button"
-          onClick={onLogout}
-          className="text-white/60 text-sm font-semibold px-3 py-1.5 rounded-xl border border-white/20 bg-white/5 shrink-0"
-        >
-          Logout
-        </button>
-      </div>
+    <div className="min-h-screen pb-20" style={{ background: '#0a0e1a' }}>
+      <PageHeader title="Today's Games" showBack onBack={onBack} username={username} />
 
-      {/* Progress counter */}
-      <div className="px-4 py-3 border-b border-white/10">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-white/50 text-xs font-medium">Predictions set</span>
-          <span className="text-white text-xs font-bold tabular-nums">
+      {/* Progress bar */}
+      <div className="px-4 py-3" style={{ borderBottom: '1px solid #1e2540' }}>
+        <div className="flex items-center justify-between mb-1.5">
+          <span className="eyebrow">Predictions set</span>
+          <span style={{ fontFamily: 'Oswald, sans-serif', color: '#c9a84c', fontSize: 13, fontWeight: 600 }}>
             {predictedCount} / {TOTAL_MATCHES}
           </span>
         </div>
-        <div className="h-1 bg-white/10 rounded-full overflow-hidden">
+        <div className="h-1 rounded-full overflow-hidden" style={{ background: '#1e2540' }}>
           <div
-            className="h-full bg-white rounded-full transition-all duration-300"
-            style={{ width: `${(predictedCount / TOTAL_MATCHES) * 100}%` }}
+            className="h-full rounded-full transition-all duration-300"
+            style={{ width: `${(predictedCount / TOTAL_MATCHES) * 100}%`, background: '#c9a84c' }}
           />
         </div>
       </div>
 
-      {/* Body */}
-      <div className="px-4 py-5 pb-20">
+      <div className="px-4 py-5">
         {todaysMatches.length === 0 ? (
-          <div className="flex flex-col items-center justify-center pt-20 gap-3 text-center">
-            <p className="text-white text-lg font-semibold">No games today</p>
-            <p className="text-white/50 text-sm">Check back tomorrow!</p>
+          /* No games today — empty state */
+          <div
+            className="mt-8 mx-auto max-w-xs text-center rounded-lg p-8"
+            style={{ background: '#0d1224', border: '1px solid #1e2540' }}
+          >
+            <p className="eyebrow mb-3">Today's Schedule</p>
+            <p className="text-white text-lg mb-2" style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 600 }}>
+              NO GAMES TODAY
+            </p>
+            <p className="text-sm" style={{ color: '#8b93ab' }}>Predictions open before each match day.</p>
             {nextMatch && (
-              <p className="text-white/30 text-xs mt-2">
+              <p className="text-xs mt-4" style={{ color: '#6b7494' }}>
                 Next match: {formatDate(nextMatch.date)}
               </p>
             )}
           </div>
         ) : (
           <>
-            <div className="mb-5">
-              <h2 className="text-white text-xl font-bold">Today's Matches</h2>
-              <p className="text-white/40 text-sm mt-0.5">{formatDate(today)}</p>
-            </div>
+            {/* Date heading */}
+            <p className="text-xs font-semibold tracking-widest mb-4 text-center" style={{ color: '#6b7494', fontFamily: 'Oswald, sans-serif' }}>
+              {formatDateShort(today)}
+            </p>
 
             <div className="space-y-3">
               {todaysMatches.map(match => {
                 const score = scores[match.id] ?? { home: 0, away: 0 }
                 const state = saveStates[match.id] ?? 'idle'
+                const isSaved = !!allPredictions[match.id]
 
                 return (
                   <div
                     key={match.id}
-                    className="bg-white/5 border border-white/10 rounded-2xl p-4"
+                    className="card-fifa"
                   >
-                    {/* Group badge */}
-                    <p className="text-white/40 text-xs font-bold uppercase tracking-widest mb-3">
-                      Group {match.group}
-                    </p>
+                    {/* Submitted indicator */}
+                    {isSaved && state !== 'error' && (
+                      <div className="flex items-center gap-1.5 mb-3">
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                          <circle cx="6" cy="6" r="5.5" fill="#3ddc84" fillOpacity="0.15" stroke="#3ddc84" strokeWidth="1"/>
+                          <path d="M3.5 6L5.2 7.7L8.5 4.5" stroke="#3ddc84" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        <span className="text-xs" style={{ color: '#3ddc84', fontFamily: 'Oswald, sans-serif', letterSpacing: '0.1em', fontWeight: 600 }}>
+                          SUBMITTED
+                        </span>
+                      </div>
+                    )}
 
-                    {/* Teams + score inputs */}
+                    {/* Group badge */}
+                    <p className="eyebrow mb-3">Group {match.group}</p>
+
+                    {/* Scorebug row */}
                     <div className="flex items-center gap-2 mb-4">
                       {/* Home team */}
-                      <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
-                        <span className="text-2xl leading-none">
-                          {FLAGS[match.home] ?? '🏳️'}
-                        </span>
-                        <span className="text-white text-xs font-medium text-center leading-tight truncate w-full text-center">
+                      <div className="flex flex-col items-center gap-1.5 flex-1 min-w-0">
+                        <TeamBadge team={match.home} size={32} />
+                        <span className="text-white text-xs font-medium text-center truncate w-full" style={{ fontFamily: 'Oswald, sans-serif', letterSpacing: '0.02em' }}>
                           {match.home}
                         </span>
                       </div>
 
-                      {/* Score controls */}
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <ScoreInput
-                          value={score.home}
-                          onChange={v => setScore(match.id, 'home', v)}
-                        />
-                        <span className="text-white/25 text-sm font-bold select-none px-0.5">
-                          —
-                        </span>
-                        <ScoreInput
-                          value={score.away}
-                          onChange={v => setScore(match.id, 'away', v)}
-                        />
+                      {/* Score steppers */}
+                      <div className="flex items-center gap-2 shrink-0">
+                        <ScoreStepper value={score.home} onChange={v => setScore(match.id, 'home', v)} />
+                        <span style={{ color: '#2a3354', fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 24, lineHeight: 1 }}>:</span>
+                        <ScoreStepper value={score.away} onChange={v => setScore(match.id, 'away', v)} />
                       </div>
 
                       {/* Away team */}
-                      <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
-                        <span className="text-2xl leading-none">
-                          {FLAGS[match.away] ?? '🏳️'}
-                        </span>
-                        <span className="text-white text-xs font-medium text-center leading-tight truncate w-full text-center">
+                      <div className="flex flex-col items-center gap-1.5 flex-1 min-w-0">
+                        <TeamBadge team={match.away} size={32} />
+                        <span className="text-white text-xs font-medium text-center truncate w-full" style={{ fontFamily: 'Oswald, sans-serif', letterSpacing: '0.02em' }}>
                           {match.away}
                         </span>
                       </div>
@@ -284,18 +242,19 @@ export default function ScorePredictor({ user, onBack, onLogout }) {
                       type="button"
                       onClick={() => handleSubmit(match)}
                       disabled={state === 'saving'}
-                      className={`w-full font-bold rounded-xl py-2.5 text-sm active:scale-95 transition-all disabled:opacity-50 ${
-                        state === 'saved'
-                          ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                          : state === 'error'
-                          ? 'bg-red-500/20 text-red-400 border border-red-500/30'
-                          : 'bg-white text-black'
-                      }`}
+                      className={state === 'saved' ? 'btn-outline' : 'btn-gold'}
+                      style={
+                        state === 'error'
+                          ? { background: 'transparent', border: '1px solid #e24b4a', color: '#e24b4a' }
+                          : state === 'saved'
+                          ? { borderColor: '#3ddc84', color: '#3ddc84' }
+                          : {}
+                      }
                     >
-                      {state === 'saving' ? 'Saving…' :
-                       state === 'saved'  ? '✓ Saved!' :
-                       state === 'error'  ? 'Error — try again' :
-                       'Submit Prediction'}
+                      {state === 'saving' ? 'SAVING…' :
+                       state === 'saved'  ? '✓ SAVED' :
+                       state === 'error'  ? 'ERROR — TRY AGAIN' :
+                       'SUBMIT PREDICTION'}
                     </button>
                   </div>
                 )
@@ -304,6 +263,13 @@ export default function ScorePredictor({ user, onBack, onLogout }) {
           </>
         )}
       </div>
+
+      <BottomNav
+        currentScreen={currentScreen ?? 'score-predictor'}
+        onHome={onBack}
+        onPredict={onPredict ?? (() => {})}
+        onRanks={onRanks ?? (() => {})}
+      />
     </div>
   )
 }

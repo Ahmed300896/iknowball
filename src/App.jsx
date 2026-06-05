@@ -160,11 +160,11 @@ export default function App() {
   }
 
   if (screen === 'leaderboard') {
-    return <LeaderboardScreen user={user} onBack={handleBackHome} onLogout={handleLogout} />
+    return <LeaderboardScreen user={user} username={username} onBack={handleBackHome} onLogout={handleLogout} currentScreen="leaderboard" onPredict={() => setScreen('score-predictor')} onRanks={() => setScreen('leaderboard')} />
   }
 
   if (screen === 'admin-results') {
-    return <AdminResultsScreen user={user} onBack={handleBackHome} onLogout={handleLogout} />
+    return <AdminResultsScreen user={user} username={username} onBack={handleBackHome} onLogout={handleLogout} />
   }
 
   if (screen === 'admin') {
@@ -172,7 +172,7 @@ export default function App() {
   }
 
   if (screen === 'score-predictor') {
-    return <ScorePredictor user={user} username={username} onBack={handleBackHome} onLogout={handleLogout} />
+    return <ScorePredictor user={user} username={username} onBack={handleBackHome} onLogout={handleLogout} currentScreen="score-predictor" onPredict={() => setScreen('score-predictor')} onRanks={() => setScreen('leaderboard')} />
   }
 
   if (screen === 'feed') {
@@ -196,5 +196,5 @@ export default function App() {
     return <GroupStage username={username} onNext={handleGroupsNext} onBack={handleBackHome} onHome={handleBackHome} />
   }
 
-  return <HomeScreen user={user} username={username} onPlay={handlePlay} onLogout={handleLogout} onViewPredictions={handleViewPredictions} onAdmin={() => setScreen('admin-results')} onScorePredictor={() => setScreen('score-predictor')} onLeaderboard={() => setScreen('leaderboard')} />
+  return <HomeScreen user={user} username={username} onPlay={handlePlay} onLogout={handleLogout} onViewPredictions={handleViewPredictions} onAdmin={() => setScreen('admin-results')} onScorePredictor={() => setScreen('score-predictor')} onLeaderboard={() => setScreen('leaderboard')} currentScreen="home" onPredict={() => setScreen('score-predictor')} onRanks={() => setScreen('leaderboard')} />
 }

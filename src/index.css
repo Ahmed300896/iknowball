@@ -1,3 +1,130 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  body {
+    background-color: #0a0e1a;
+    font-family: 'Inter', sans-serif;
+    color: #ffffff;
+    min-height: 100vh;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  input, select {
+    background-color: #141b30;
+    border: 1px solid #2a3354;
+    color: #ffffff;
+    border-radius: 4px;
+    padding: 10px 12px;
+    width: 100%;
+    font-family: 'Inter', sans-serif;
+  }
+
+  input::placeholder {
+    color: #6b7494;
+  }
+
+  input:focus, select:focus {
+    border-color: #c9a84c;
+    outline: none;
+  }
+
+  select option {
+    background-color: #141b30;
+  }
+}
+
+@layer components {
+  .btn-gold {
+    display: block;
+    width: 100%;
+    background-color: #c9a84c;
+    color: #0a0e1a;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 11px 16px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.15s;
+    text-align: center;
+  }
+
+  .btn-gold:hover {
+    background-color: #e0c068;
+  }
+
+  .btn-gold:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .btn-outline {
+    display: block;
+    width: 100%;
+    background: transparent;
+    border: 1px solid #c9a84c;
+    color: #c9a84c;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 11px 16px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.15s;
+    text-align: center;
+  }
+
+  .btn-outline:hover {
+    background-color: rgba(201, 168, 76, 0.1);
+  }
+
+  .btn-outline:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .card-fifa {
+    background-color: #0d1224;
+    border: 1px solid #1e2540;
+    border-left: 3px solid #c9a84c;
+    border-radius: 0 6px 6px 0;
+    padding: 14px 16px;
+  }
+
+  .eyebrow {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #c9a84c;
+    font-family: 'Oswald', sans-serif;
+  }
+
+  .input-fifa {
+    background-color: #141b30 !important;
+    border: 1px solid #2a3354 !important;
+    color: #ffffff !important;
+    border-radius: 4px;
+    padding: 10px 12px;
+    width: 100%;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .input-fifa:focus {
+    border-color: #c9a84c !important;
+    outline: none;
+  }
+}

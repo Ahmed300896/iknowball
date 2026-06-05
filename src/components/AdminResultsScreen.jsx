@@ -1,12 +1,10 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import matches from '../data/schedule'
-import { FLAGS as TEAM_FLAGS } from '../data/teams'
+import PageHeader from './PageHeader'
+import TeamBadge from './TeamBadge'
 
 const ADMIN_ID = '0d3be115-d531-4146-9256-120dc7d047bc'
-
-// schedule.js uses "United States"; teams.js uses "USA"
-const FLAGS = { ...TEAM_FLAGS, 'United States': '🇺🇸' }
 
 const matchesByDate = matches.reduce((acc, m) => {
   ;(acc[m.date] ??= []).push(m)
@@ -16,11 +14,9 @@ const dates = Object.keys(matchesByDate).sort()
 
 function formatDate(dateStr) {
   const [y, m, d] = dateStr.split('-').map(Number)
-  return new Date(y, m - 1, d).toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-  })
+  return new Date(y, m - 1, d)
+    .toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+    .toUpperCase()
 }
 
 function ScoreInput({ value, onChange }) {
@@ -29,17 +25,25 @@ function ScoreInput({ value, onChange }) {
       <button
         type="button"
         onClick={() => onChange(Math.max(0, value - 1))}
-        className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/10 text-white text-lg font-bold active:bg-white/25 select-none"
+        style={{
+          width: 28, height: 28, background: '#141b30', border: '1px solid #2a3354', borderRadius: 4,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: '#c9a84c', fontSize: 16, fontWeight: 700, cursor: 'pointer', userSelect: 'none',
+        }}
       >
         −
       </button>
-      <span className="text-white font-bold w-6 text-center tabular-nums text-lg select-none">
+      <span style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 20, color: '#fff', width: 32, textAlign: 'center' }}>
         {value}
       </span>
       <button
         type="button"
         onClick={() => onChange(Math.min(20, value + 1))}
-        className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/10 text-white text-lg font-bold active:bg-white/25 select-none"
+        style={{
+          width: 28, height: 28, background: '#141b30', border: '1px solid #2a3354', borderRadius: 4,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: '#c9a84c', fontSize: 16, fontWeight: 700, cursor: 'pointer', userSelect: 'none',
+        }}
       >
         +
       </button>
@@ -47,7 +51,7 @@ function ScoreInput({ value, onChange }) {
   )
 }
 
-export default function AdminResultsScreen({ user, onBack, onLogout }) {
+export default function AdminResultsScreen({ user, username, onBack, onLogout }) {
   const [scores, setScores] = useState({})
   const [saveStates, setSaveStates] = useState({})
   const [loading, setLoading] = useState(true)
@@ -91,13 +95,9 @@ export default function AdminResultsScreen({ user, onBack, onLogout }) {
 
   if (user.id !== ADMIN_ID) {
     return (
-      <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-4">
-        <p className="text-white/60 text-sm">Unauthorized</p>
-        <button
-          type="button"
-          onClick={onBack}
-          className="text-white/60 text-sm font-semibold px-4 py-2 rounded-xl border border-white/20 bg-white/5"
-        >
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4" style={{ background: '#0a0e1a' }}>
+        <p className="eyebrow">Unauthorized</p>
+        <button type="button" className="btn-outline" style={{ width: 'auto', padding: '8px 24px' }} onClick={onBack}>
           Go back
         </button>
       </div>
@@ -106,64 +106,46 @@ export default function AdminResultsScreen({ user, onBack, onLogout }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <p className="text-white/50">Loading…</p>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0e1a' }}>
+        <p style={{ color: '#6b7494' }}>Loading…</p>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="sticky top-0 z-20 bg-black/90 backdrop-blur border-b border-white/10 px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3 min-w-0">
-          <button type="button" onClick={onBack} className="text-white/60 text-sm font-semibold shrink-0">
-            ← Back
-          </button>
-          <span className="text-white font-bold truncate">Results Entry</span>
-        </div>
-        <button
-          type="button"
-          onClick={onLogout}
-          className="text-white/60 text-sm font-semibold px-3 py-1.5 rounded-xl border border-white/20 bg-white/5 shrink-0"
-        >
-          Logout
-        </button>
-      </div>
+    <div className="min-h-screen pb-20" style={{ background: '#0a0e1a' }}>
+      <PageHeader title="Admin · Results" showBack onBack={onBack} username={username} />
 
-      <div className="px-4 py-5 pb-20 space-y-8">
+      <div className="px-4 py-5 space-y-8">
         {dates.map(date => (
           <div key={date}>
-            <p className="text-white/40 text-xs font-bold uppercase tracking-widest mb-3">
-              {formatDate(date)}
-            </p>
+            <p className="eyebrow mb-3">{formatDate(date)}</p>
             <div className="space-y-3">
               {matchesByDate[date].map(match => {
                 const score = scores[match.id] ?? { home: 0, away: 0 }
                 const state = saveStates[match.id] ?? 'idle'
 
                 return (
-                  <div key={match.id} className="bg-white/5 border border-white/10 rounded-2xl p-4">
-                    <p className="text-white/40 text-xs font-bold uppercase tracking-widest mb-3">
-                      Group {match.group}
-                    </p>
+                  <div key={match.id} className="card-fifa">
+                    <p className="eyebrow mb-3">Group {match.group}</p>
 
                     <div className="flex items-center gap-2 mb-4">
-                      <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
-                        <span className="text-2xl leading-none">{FLAGS[match.home] ?? '🏳️'}</span>
-                        <span className="text-white text-xs font-medium text-center leading-tight truncate w-full">
+                      <div className="flex flex-col items-center gap-1.5 flex-1 min-w-0">
+                        <TeamBadge team={match.home} size={30} />
+                        <span className="text-white text-xs text-center truncate w-full" style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 600 }}>
                           {match.home}
                         </span>
                       </div>
 
                       <div className="flex items-center gap-1.5 shrink-0">
                         <ScoreInput value={score.home} onChange={v => setScore(match.id, 'home', v)} />
-                        <span className="text-white/25 text-sm font-bold select-none px-0.5">—</span>
+                        <span style={{ color: '#2a3354', fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 20 }}>—</span>
                         <ScoreInput value={score.away} onChange={v => setScore(match.id, 'away', v)} />
                       </div>
 
-                      <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
-                        <span className="text-2xl leading-none">{FLAGS[match.away] ?? '🏳️'}</span>
-                        <span className="text-white text-xs font-medium text-center leading-tight truncate w-full">
+                      <div className="flex flex-col items-center gap-1.5 flex-1 min-w-0">
+                        <TeamBadge team={match.away} size={30} />
+                        <span className="text-white text-xs text-center truncate w-full" style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 600 }}>
                           {match.away}
                         </span>
                       </div>
@@ -173,18 +155,19 @@ export default function AdminResultsScreen({ user, onBack, onLogout }) {
                       type="button"
                       onClick={() => handleSave(match)}
                       disabled={state === 'saving'}
-                      className={`w-full font-bold rounded-xl py-2.5 text-sm active:scale-95 transition-all disabled:opacity-50 ${
-                        state === 'saved'
-                          ? 'bg-green-500/20 text-green-400 border border-green-500/30'
-                          : state === 'error'
-                          ? 'bg-red-500/20 text-red-400 border border-red-500/30'
-                          : 'bg-white text-black'
-                      }`}
+                      className={state === 'saved' ? 'btn-outline' : 'btn-gold'}
+                      style={
+                        state === 'error'
+                          ? { background: 'transparent', border: '1px solid #e24b4a', color: '#e24b4a' }
+                          : state === 'saved'
+                          ? { borderColor: '#3ddc84', color: '#3ddc84' }
+                          : {}
+                      }
                     >
-                      {state === 'saving' ? 'Saving…' :
-                       state === 'saved'  ? '✓ Saved!' :
-                       state === 'error'  ? 'Error — try again' :
-                       'Save Result'}
+                      {state === 'saving' ? 'SAVING…' :
+                       state === 'saved'  ? '✓ SAVED' :
+                       state === 'error'  ? 'ERROR — TRY AGAIN' :
+                       'SAVE RESULT'}
                     </button>
                   </div>
                 )

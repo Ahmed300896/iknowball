@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import matches from '../data/schedule'
 import { FLAGS as TEAM_FLAGS } from '../data/teams'
 
-const ADMIN_ID = '381ba0a0-7c88-42e9-82ab-37c12b5b0010'
+const ADMIN_ID = '0d3be115-d531-4146-9256-120dc7d047bc'
 
 // schedule.js uses "United States"; teams.js uses "USA"
 const FLAGS = { ...TEAM_FLAGS, 'United States': '🇺🇸' }

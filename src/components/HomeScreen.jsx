@@ -283,7 +283,7 @@ export default function HomeScreen({ user, username, onPlay, onLogout, onViewPre
           </button>
         </div>
 
-        {user.id === '381ba0a0-7c88-42e9-82ab-37c12b5b0010' && (
+        {user.id === '0d3be115-d531-4146-9256-120dc7d047bc' && (
           <div className="flex justify-center pt-4 pb-2">
             <button
               type="button"

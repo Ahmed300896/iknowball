@@ -11,12 +11,6 @@ export default function HomeScreen({ user, username, onPlay, onLogout, onViewPre
   const [loadingTeams, setLoadingTeams] = useState(true)
 
   useEffect(() => {
-    console.log('[HomeScreen] user.id:', user?.id)
-    console.log('[HomeScreen] ADMIN_ID:', '0d3be115-d531-4146-9256-120dc7d047bc')
-    console.log('[HomeScreen] isAdmin:', user?.id === '0d3be115-d531-4146-9256-120dc7d047bc')
-  }, [user?.id])
-
-  useEffect(() => {
     async function fetchFavoriteTeams() {
       try {
         const { data: profile } = await supabase

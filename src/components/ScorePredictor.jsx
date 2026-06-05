@@ -114,8 +114,8 @@ export default function ScorePredictor({ user, onBack, onLogout }) {
         const prefilled = {}
         todaysMatches.forEach(m => {
           prefilled[m.id] = {
-            home: saved[m.id]?.home ?? 0,
-            away: saved[m.id]?.away ?? 0,
+            home: saved[m.id]?.homeScore ?? 0,
+            away: saved[m.id]?.awayScore ?? 0,
           }
         })
         setScores(prefilled)
@@ -145,7 +145,7 @@ export default function ScorePredictor({ user, onBack, onLogout }) {
     try {
       const updated = {
         ...allPredictions,
-        [match.id]: scores[match.id],
+        [match.id]: { homeScore: scores[match.id].home, awayScore: scores[match.id].away },
       }
       const { error } = await supabase
         .from('score_predictions')

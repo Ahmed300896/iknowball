@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import { calculatePoints } from '../lib/scoring'
+import { results } from '../data/results'
 
 const TOTAL_MATCHES = 72
 
@@ -25,12 +27,21 @@ export default function LeaderboardScreen({ user, onBack, onLogout }) {
       )
 
       const ranked = (predictions ?? [])
-        .map(row => ({
-          userId: row.user_id,
-          username: profileMap[row.user_id] ?? 'Unknown',
-          count: Object.keys(row.predictions ?? {}).length,
-        }))
-        .sort((a, b) => b.count - a.count)
+        .map(row => {
+          const preds = row.predictions ?? {}
+          let points = 0
+          for (const [matchId, pred] of Object.entries(preds)) {
+            const actual = results[matchId]
+            if (actual) points += calculatePoints(pred, actual)
+          }
+          return {
+            userId: row.user_id,
+            username: profileMap[row.user_id] ?? 'Unknown',
+            count: Object.keys(preds).length,
+            points,
+          }
+        })
+        .sort((a, b) => b.points - a.points || b.count - a.count)
 
       setRows(ranked)
       setLoading(false)
@@ -107,9 +118,10 @@ export default function LeaderboardScreen({ user, onBack, onLogout }) {
                       <span className="ml-2 text-blue-400 text-xs font-medium">you</span>
                     )}
                   </span>
-                  <span className="text-white/50 text-xs tabular-nums shrink-0">
-                    {row.count} / {TOTAL_MATCHES}
-                  </span>
+                  <div className="flex flex-col items-end shrink-0">
+                    <span className="text-white text-sm font-bold tabular-nums">{row.points} pts</span>
+                    <span className="text-white/40 text-xs tabular-nums">{row.count} / {TOTAL_MATCHES}</span>
+                  </div>
                 </div>
               )
             })}
@@ -127,9 +139,10 @@ export default function LeaderboardScreen({ user, onBack, onLogout }) {
                 {rows[currentUserIndex]?.username}
                 <span className="ml-2 text-blue-400 text-xs font-medium">you</span>
               </span>
-              <span className="text-white/50 text-xs tabular-nums shrink-0">
-                {rows[currentUserIndex]?.count} / {TOTAL_MATCHES}
-              </span>
+              <div className="flex flex-col items-end shrink-0">
+                <span className="text-white text-sm font-bold tabular-nums">{rows[currentUserIndex]?.points} pts</span>
+                <span className="text-white/40 text-xs tabular-nums">{rows[currentUserIndex]?.count} / {TOTAL_MATCHES}</span>
+              </div>
             </div>
           </div>
         )}

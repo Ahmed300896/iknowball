@@ -140,6 +140,9 @@ export default function LeaderboardScreen({ user, username, onBack, onLogout, cu
                       >
                         {row.points} PTS
                       </p>
+                      <p style={{ fontSize: 10, color: '#6b7494', marginTop: 1 }}>
+                        {row.count} predictions
+                      </p>
                       {/* Podium base */}
                       <div
                         className="w-full mt-2 rounded-t flex items-center justify-center"
@@ -179,19 +182,21 @@ export default function LeaderboardScreen({ user, username, onBack, onLogout, cu
                         {rank}
                       </span>
                       <Avatar username={row.username} size={32} ringColor={isCurrentUser ? '#c9a84c' : undefined} />
-                      <span
-                        className="flex-1 truncate text-sm"
-                        style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 600, color: isCurrentUser ? '#c9a84c' : '#ffffff', letterSpacing: '0.02em' }}
-                      >
-                        {row.username}
-                        {isCurrentUser && <span className="ml-2 text-xs" style={{ color: '#c9a84c', opacity: 0.7 }}>YOU</span>}
-                      </span>
-                      <div className="text-right shrink-0">
-                        <p style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 14, color: isCurrentUser ? '#c9a84c' : '#ffffff' }}>
-                          {row.points} <span style={{ fontSize: 10, opacity: 0.6 }}>PTS</span>
-                        </p>
-                        <p style={{ fontSize: 10, color: '#6b7494' }}>{row.count}/{TOTAL_MATCHES}</p>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span
+                            className="truncate text-sm"
+                            style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 600, color: isCurrentUser ? '#c9a84c' : '#ffffff', letterSpacing: '0.02em' }}
+                          >
+                            {row.username}
+                          </span>
+                          {isCurrentUser && <span className="text-xs shrink-0" style={{ color: '#c9a84c', opacity: 0.7 }}>YOU</span>}
+                        </div>
+                        <p style={{ fontSize: 10, color: '#6b7494', marginTop: 1 }}>{row.count} predictions</p>
                       </div>
+                      <p className="shrink-0" style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 14, color: isCurrentUser ? '#c9a84c' : '#ffffff' }}>
+                        {row.points} <span style={{ fontSize: 10, opacity: 0.6 }}>PTS</span>
+                      </p>
                     </div>
                   )
                 })}
@@ -215,16 +220,18 @@ export default function LeaderboardScreen({ user, username, onBack, onLogout, cu
               {currentUserIndex + 1}
             </span>
             <Avatar username={rows[currentUserIndex]?.username} size={28} ring ringColor="#c9a84c" />
-            <span className="flex-1 truncate text-sm" style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 600, color: '#c9a84c', letterSpacing: '0.02em' }}>
-              {rows[currentUserIndex]?.username}
-              <span className="ml-2 text-xs" style={{ opacity: 0.7 }}>YOU</span>
-            </span>
-            <div className="text-right shrink-0">
-              <p style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 14, color: '#c9a84c' }}>
-                {rows[currentUserIndex]?.points} <span style={{ fontSize: 10, opacity: 0.6 }}>PTS</span>
-              </p>
-              <p style={{ fontSize: 10, color: '#6b7494' }}>{rows[currentUserIndex]?.count}/{TOTAL_MATCHES}</p>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="truncate text-sm" style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 600, color: '#c9a84c', letterSpacing: '0.02em' }}>
+                  {rows[currentUserIndex]?.username}
+                </span>
+                <span className="text-xs shrink-0" style={{ color: '#c9a84c', opacity: 0.7 }}>YOU</span>
+              </div>
+              <p style={{ fontSize: 10, color: '#6b7494', marginTop: 1 }}>{rows[currentUserIndex]?.count} predictions</p>
             </div>
+            <p className="shrink-0" style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 14, color: '#c9a84c' }}>
+              {rows[currentUserIndex]?.points} <span style={{ fontSize: 10, opacity: 0.6 }}>PTS</span>
+            </p>
           </div>
         </div>
       )}

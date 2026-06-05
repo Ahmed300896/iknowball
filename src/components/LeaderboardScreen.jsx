@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { calculatePoints } from '../lib/scoring'
-import { results } from '../data/results'
 
 const TOTAL_MATCHES = 72
 
@@ -17,10 +16,15 @@ export default function LeaderboardScreen({ user, onBack, onLogout }) {
 
   useEffect(() => {
     async function load() {
-      const [{ data: predictions }, { data: profiles }] = await Promise.all([
+      const [{ data: predictions }, { data: profiles }, { data: matchResultsData }] = await Promise.all([
         supabase.from('score_predictions').select('user_id, predictions'),
         supabase.from('profiles').select('id, username'),
+        supabase.from('match_results').select('match_id, home_score, away_score'),
       ])
+
+      const resultsMap = Object.fromEntries(
+        (matchResultsData ?? []).map(r => [r.match_id, { homeScore: r.home_score, awayScore: r.away_score }])
+      )
 
       const profileMap = Object.fromEntries(
         (profiles ?? []).map(p => [p.id, p.username])
@@ -31,7 +35,7 @@ export default function LeaderboardScreen({ user, onBack, onLogout }) {
           const preds = row.predictions ?? {}
           let points = 0
           for (const [matchId, pred] of Object.entries(preds)) {
-            const actual = results[matchId]
+            const actual = resultsMap[Number(matchId)]
             if (actual) points += calculatePoints(pred, actual)
           }
           return {

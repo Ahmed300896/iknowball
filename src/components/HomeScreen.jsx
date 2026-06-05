@@ -283,15 +283,17 @@ export default function HomeScreen({ user, username, onPlay, onLogout, onViewPre
           </button>
         </div>
 
-        <div className="flex justify-center pt-4 pb-2">
-          <button
-            type="button"
-            onClick={onAdmin}
-            className="text-white/20 text-xs hover:text-white/40 transition-colors"
-          >
-            admin
-          </button>
-        </div>
+        {user.id === '381ba0a0-7c88-42e9-82ab-37c12b5b0010' && (
+          <div className="flex justify-center pt-4 pb-2">
+            <button
+              type="button"
+              onClick={onAdmin}
+              className="text-white/20 text-xs hover:text-white/40 transition-colors"
+            >
+              admin
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )

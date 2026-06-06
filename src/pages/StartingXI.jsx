@@ -4,7 +4,7 @@ import schedule from "../data/schedule";
 
 var SCHEDULE = schedule;
 
-export default function StartingXI({ onBack }) {
+export default function StartingXI({ onBack, onTeamSelect }) {
   const [view, setView] = useState("matches");
   const [userTeams, setUserTeams] = useState([]);
   const [matches, setMatches] = useState([]);
@@ -268,7 +268,7 @@ export default function StartingXI({ onBack }) {
           </p>
           <button
             type="button"
-            onClick={onBack}
+            onClick={onTeamSelect}
             style={{
               background: "#c9a84c",
               color: "#0a0e1a",

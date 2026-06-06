@@ -12,6 +12,7 @@ import LeaderboardScreen from './components/LeaderboardScreen'
 import AdminResultsScreen from './components/AdminResultsScreen'
 import AdminPanel from './pages/AdminPanel'
 import StartingXI from './pages/StartingXI'
+import TeamSelectionScreen from './components/TeamSelectionScreen'
 
 export default function App() {
   const [user, setUser] = useState(null)
@@ -161,8 +162,12 @@ export default function App() {
     )
   }
 
+  if (screen === 'team-selection') {
+    return <TeamSelectionScreen user={user} username={username} onTeamsSelected={handleBackHome} onLogout={handleLogout} onBack={handleBackHome} />
+  }
+
   if (screen === 'starting-xi') {
-    return <StartingXI user={user} username={username} onBack={handleBackHome} onLogout={handleLogout} currentScreen="starting-xi" onPredict={() => setScreen('score-predictor')} onRanks={() => setScreen('leaderboard')} />
+    return <StartingXI user={user} username={username} onBack={handleBackHome} onLogout={handleLogout} onTeamSelect={() => setScreen('team-selection')} currentScreen="starting-xi" onPredict={() => setScreen('score-predictor')} onRanks={() => setScreen('leaderboard')} />
   }
 
   if (screen === 'admin-panel') {

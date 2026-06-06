@@ -204,7 +204,7 @@ async function main() {
 
     const rows = players.map(p => ({
       name:         p.name,
-      position:     mapPosition(p.pos) ?? null,  // null if API doesn't provide position
+      position:     mapPosition(p.pos) || "Unknown",
       shirt_number: p.number ?? null,
       team:         ourName,
     }))

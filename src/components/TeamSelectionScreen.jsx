@@ -1,64 +1,98 @@
 import { useState, useEffect } from "react"
 import { supabase } from "../lib/supabase"
-import { groups, FLAGS } from "../data/teams"
+import { allTeams, FLAGS } from "../data/teams"
 import PageHeader from "./PageHeader"
 
+var TIER_1 = ["Argentina", "France", "Spain", "England", "Brazil", "Portugal", "Belgium", "Netherlands", "Italy", "Germany"]
+var TIER_2 = ["Croatia", "Denmark", "Switzerland", "USA", "Mexico", "Senegal", "Morocco", "Japan", "Uruguay", "Colombia", "Poland", "Australia", "Ecuador", "Ghana", "Wales"]
+var TIER_3 = ["Cameroon", "Serbia", "South Korea", "Canada", "Tunisia", "Qatar", "Iran", "Saudi Arabia", "South Africa", "Czechia", "Haiti", "Ivory Coast", "Algeria", "Norway", "Austria"]
+
+var UPPER = new Set([].concat(TIER_1, TIER_2, TIER_3))
+var TIER_4 = allTeams.filter(function (t) { return !UPPER.has(t) }).sort()
+
+var TIERS = [
+  { id: 1, label: "TIER 1", description: "Elite nations", teams: TIER_1, limit: 2 },
+  { id: 2, label: "TIER 2", description: "Strong nations", teams: TIER_2, limit: 1 },
+  { id: 3, label: "TIER 3", description: "Rising nations", teams: TIER_3, limit: 1 },
+  { id: 4, label: "TIER 4", description: "Other nations", teams: TIER_4, limit: 1 },
+]
+
+function getFlag(team) { return FLAGS[team] || "⚽" }
+
+function tierForTeam(team) {
+  if (TIER_1.includes(team)) return 1
+  if (TIER_2.includes(team)) return 2
+  if (TIER_3.includes(team)) return 3
+  return 4
+}
+
 export default function TeamSelectionScreen({ user, username, onTeamsSelected, onLogout, onBack }) {
-  const [selected, setSelected] = useState([])
-  const [savedTeams, setSavedTeams] = useState(null)
-  const [locked, setLocked] = useState(false)
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState("")
+  var [picks, setPicks] = useState({ 1: [], 2: [], 3: [], 4: [] })
+  var [savedTeams, setSavedTeams] = useState(null)
+  var [locked, setLocked] = useState(false)
+  var [loading, setLoading] = useState(true)
+  var [saving, setSaving] = useState(false)
+  var [error, setError] = useState("")
 
   useEffect(function () {
     async function loadExisting() {
-      const { data } = await supabase
+      var res = await supabase
         .from("user_teams")
         .select("teams, locked")
         .eq("user_id", user.id)
         .single()
-      if (data) {
-        setSavedTeams(data.teams)
-        setLocked(data.locked)
-        if (!data.locked) setSelected(data.teams)
+      if (res.data) {
+        setSavedTeams(res.data.teams)
+        setLocked(res.data.locked)
+        if (!res.data.locked && res.data.teams) {
+          var restored = { 1: [], 2: [], 3: [], 4: [] }
+          res.data.teams.forEach(function (team) {
+            var t = tierForTeam(team)
+            restored[t] = [...restored[t], team]
+          })
+          setPicks(restored)
+        }
       }
       setLoading(false)
     }
     loadExisting()
   }, [user.id])
 
-  function toggle(team) {
+  function toggle(team, tierId) {
     if (locked) return
-    if (selected.includes(team)) {
-      setSelected(selected.filter(function (t) { return t !== team }))
-    } else if (selected.length < 5) {
-      setSelected([...selected, team])
-    }
+    var limit = tierId === 1 ? 2 : 1
+    setPicks(function (prev) {
+      var current = prev[tierId]
+      if (current.includes(team)) {
+        return Object.assign({}, prev, { [tierId]: current.filter(function (t) { return t !== team }) })
+      }
+      if (current.length >= limit) return prev
+      return Object.assign({}, prev, { [tierId]: [...current, team] })
+    })
   }
 
+  var allSelected = [].concat(picks[1], picks[2], picks[3], picks[4])
+  var isComplete = picks[1].length === 2 && picks[2].length === 1 && picks[3].length === 1 && picks[4].length === 1
+
   async function handleSave() {
-    if (selected.length !== 5 || saving) return
+    if (!isComplete || saving) return
     setSaving(true)
     setError("")
     try {
-      const { error: upsertError } = await supabase
+      var { error: upsertError } = await supabase
         .from("user_teams")
         .upsert(
-          { user_id: user.id, teams: selected, locked: false },
+          { user_id: user.id, teams: allSelected, locked: false },
           { onConflict: "user_id" }
         )
       if (upsertError) throw upsertError
-
-      // Also keep profiles.favorite_teams in sync
       await supabase
         .from("profiles")
-        .update({ favorite_teams: selected })
+        .update({ favorite_teams: allSelected })
         .eq("id", user.id)
-
-      onTeamsSelected(selected)
+      onTeamsSelected(allSelected)
     } catch (err) {
-      setError("Failed to save teams. Please try again.")
+      setError("Failed to save. Please try again.")
       setSaving(false)
     }
   }
@@ -71,26 +105,20 @@ export default function TeamSelectionScreen({ user, username, onTeamsSelected, o
     )
   }
 
-  // Locked view
   if (locked && savedTeams) {
     return (
       <div className="min-h-screen pb-20" style={{ background: "#0a0e1a" }}>
         <PageHeader title="My Teams" showBack onBack={onBack} username={username} onLogout={onLogout} />
         <div className="px-4 pt-8 text-center">
           <p className="eyebrow mb-3">Team Selection</p>
-          <p className="text-white text-xl mb-2" style={{ fontFamily: "Oswald, sans-serif", fontWeight: 700 }}>
-            YOUR TEAMS ARE LOCKED IN
-          </p>
+          <p className="text-xl mb-2" style={{ fontFamily: "Oswald, sans-serif", fontWeight: 700, color: "#fff" }}>YOUR TEAMS ARE LOCKED IN</p>
           <p className="text-sm mb-8" style={{ color: "#8b93ab" }}>Team selection is locked for the tournament.</p>
           <div className="space-y-2 max-w-sm mx-auto">
             {savedTeams.map(function (team) {
               return (
-                <div
-                  key={team}
-                  className="flex items-center gap-3 px-4 py-3 rounded"
-                  style={{ background: "#0d1224", border: "1px solid #1e2540", borderLeft: "3px solid #c9a84c" }}
-                >
-                  <span className="text-xl">{FLAGS[team] || "⚽"}</span>
+                <div key={team} className="flex items-center gap-3 px-4 py-3 rounded"
+                  style={{ background: "#0d1224", border: "1px solid #1e2540", borderLeft: "3px solid #c9a84c" }}>
+                  <span className="text-xl">{getFlag(team)}</span>
                   <span style={{ fontFamily: "Oswald, sans-serif", fontWeight: 600, color: "#fff", letterSpacing: "0.04em" }}>{team}</span>
                 </div>
               )
@@ -101,61 +129,74 @@ export default function TeamSelectionScreen({ user, username, onTeamsSelected, o
     )
   }
 
-  const isComplete = selected.length === 5
-
   return (
-    <div className="min-h-screen pb-40" style={{ background: "#0a0e1a" }}>
+    <div className="min-h-screen pb-48" style={{ background: "#0a0e1a" }}>
       <PageHeader title="Pick Your Teams" showBack onBack={onBack} username={username} onLogout={onLogout} />
 
       <div className="px-4 pt-4 pb-2">
         <p className="eyebrow mb-1">Team Selection</p>
         <p className="text-sm" style={{ color: "#8b93ab" }}>
-          Pick exactly 5 teams from the World Cup 2026 groups
+          Pick 2 from Tier 1 and 1 each from Tiers 2, 3, and 4
         </p>
       </div>
 
-      <div className="px-4 pb-4 space-y-5">
-        {groups.map(function (group) {
+      <div className="px-4 pb-4 space-y-6">
+        {TIERS.map(function (tier) {
+          var tierPicks = picks[tier.id]
+          var remaining = tier.limit - tierPicks.length
+          var tierDone = remaining === 0
           return (
-            <div key={group.id}>
-              <p className="eyebrow mb-2">Group {group.id}</p>
+            <div key={tier.id}>
+              {/* Tier header */}
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <span className="eyebrow">{tier.label}</span>
+                  <span style={{ fontSize: 10, color: "#6b7494", marginLeft: 6 }}>· {tier.description}</span>
+                </div>
+                <span
+                  style={{
+                    fontFamily: "Oswald, sans-serif", fontWeight: 700, fontSize: 11,
+                    letterSpacing: "0.08em", padding: "3px 8px", borderRadius: 3,
+                    background: tierDone ? "rgba(61,220,132,0.12)" : "rgba(201,168,76,0.1)",
+                    border: tierDone ? "1px solid #3ddc84" : "1px solid #c9a84c",
+                    color: tierDone ? "#3ddc84" : "#c9a84c",
+                  }}
+                >
+                  {tierDone ? "✓ DONE" : "PICK " + tier.limit}
+                </span>
+              </div>
+
               <div className="grid grid-cols-2 gap-2">
-                {group.teams.map(function (team) {
-                  const isSelected = selected.includes(team)
-                  const isDisabled = !isSelected && selected.length >= 5
+                {tier.teams.map(function (team) {
+                  var isSel = tierPicks.includes(team)
+                  var isDisabled = !isSel && tierDone
                   return (
                     <button
                       key={team}
                       type="button"
-                      onClick={function () { toggle(team) }}
+                      onClick={function () { toggle(team, tier.id) }}
                       disabled={isDisabled}
                       style={{
-                        background: isSelected ? "rgba(201,168,76,0.12)" : "#0d1224",
-                        border: isSelected ? "1px solid #c9a84c" : "1px solid #1e2540",
-                        borderLeft: isSelected ? "3px solid #c9a84c" : "3px solid #1e2540",
+                        background: isSel ? "rgba(201,168,76,0.12)" : "#0d1224",
+                        border: isSel ? "1px solid #c9a84c" : "1px solid #1e2540",
+                        borderLeft: isSel ? "3px solid #c9a84c" : "3px solid #1e2540",
                         borderRadius: "0 6px 6px 0",
-                        padding: "10px 12px",
+                        padding: "9px 12px",
                         display: "flex",
                         alignItems: "center",
                         gap: 8,
-                        opacity: isDisabled ? 0.4 : 1,
+                        opacity: isDisabled ? 0.35 : 1,
                         cursor: isDisabled ? "not-allowed" : "pointer",
                         textAlign: "left",
+                        width: "100%",
                       }}
                     >
-                      <span style={{ fontSize: 18, lineHeight: 1 }}>{FLAGS[team] || "⚽"}</span>
-                      <span
-                        style={{
-                          fontFamily: "Oswald, sans-serif",
-                          fontWeight: 600,
-                          fontSize: 12,
-                          letterSpacing: "0.04em",
-                          color: isSelected ? "#c9a84c" : "#ffffff",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
+                      <span style={{ fontSize: 17, lineHeight: 1, flexShrink: 0 }}>{getFlag(team)}</span>
+                      <span style={{
+                        fontFamily: "Oswald, sans-serif", fontWeight: 600, fontSize: 12,
+                        letterSpacing: "0.04em", color: isSel ? "#c9a84c" : "#fff",
+                        overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                      }}>
                         {team}
                       </span>
                     </button>
@@ -173,34 +214,28 @@ export default function TeamSelectionScreen({ user, username, onTeamsSelected, o
         style={{ background: "#0a0e1a", borderTop: "1px solid #1e2540" }}
       >
         {/* Selected pills */}
-        {selected.length > 0 && (
+        {allSelected.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
-            {selected.map(function (team) {
+            {allSelected.map(function (team) {
               return (
-                <div
-                  key={team}
-                  className="flex items-center gap-1 px-2 py-1 rounded"
-                  style={{ background: "rgba(201,168,76,0.1)", border: "1px solid #c9a84c" }}
-                >
-                  <span style={{ fontSize: 13 }}>{FLAGS[team] || "⚽"}</span>
-                  <span style={{ fontFamily: "Oswald, sans-serif", fontSize: 11, fontWeight: 600, color: "#c9a84c", letterSpacing: "0.06em" }}>{team}</span>
+                <div key={team} className="flex items-center gap-1 px-2 py-1 rounded"
+                  style={{ background: "rgba(201,168,76,0.1)", border: "1px solid #c9a84c" }}>
+                  <span style={{ fontSize: 12 }}>{getFlag(team)}</span>
+                  <span style={{ fontFamily: "Oswald, sans-serif", fontSize: 10, fontWeight: 600, color: "#c9a84c", letterSpacing: "0.06em" }}>{team}</span>
                 </div>
               )
             })}
           </div>
         )}
 
-        <div className="flex items-center justify-between mb-1">
-          <span className="eyebrow">{selected.length} / 5 selected</span>
-          {isComplete && <span style={{ color: "#3ddc84", fontSize: 11, fontFamily: "Oswald, sans-serif", fontWeight: 600, letterSpacing: "0.06em" }}>READY TO LOCK IN</span>}
+        <div className="flex items-center justify-between">
+          <span className="eyebrow">{allSelected.length} / 5 selected</span>
+          {isComplete && <span style={{ color: "#3ddc84", fontSize: 11, fontFamily: "Oswald, sans-serif", fontWeight: 600, letterSpacing: "0.06em" }}>READY</span>}
         </div>
 
-        {/* Progress bar */}
         <div className="h-1 rounded-full overflow-hidden" style={{ background: "#1e2540" }}>
-          <div
-            className="h-full rounded-full transition-all duration-300"
-            style={{ width: (selected.length / 5 * 100) + "%", background: isComplete ? "#3ddc84" : "#c9a84c" }}
-          />
+          <div className="h-full rounded-full transition-all duration-300"
+            style={{ width: (allSelected.length / 5 * 100) + "%", background: isComplete ? "#3ddc84" : "#c9a84c" }} />
         </div>
 
         {error && <p style={{ color: "#e24b4a", fontSize: 12 }}>{error}</p>}

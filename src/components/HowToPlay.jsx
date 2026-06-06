@@ -85,7 +85,7 @@ export default function HowToPlay({ onBack, onLogout, username }) {
                   <span style={{ fontSize: 10, color: "#6b7494" }}>Strong nations</span>
                 </div>
                 <p style={{ fontSize: 12, color: "#8b93ab", lineHeight: 1.6 }}>
-                  USA, Mexico, Japan, Morocco, Croatia, Uruguay, Colombia, Denmark, Switzerland and more
+                  USA, Mexico, Japan, Senegal, Croatia, Uruguay, Colombia, Norway, Canada, Switzerland and more
                 </p>
               </div>
 
@@ -128,7 +128,7 @@ export default function HowToPlay({ onBack, onLogout, username }) {
             {[
               {
                 n: "1",
-                title: "Pick Your 5 Teams",
+                title: "Pick Your 6 Teams",
                 text: "Before June 11, select 6 teams to follow: 2 from the top 10 ranked nations, 3 from the next tier, and 1 from the rest. Your picks lock when the tournament starts.",
               },
               {

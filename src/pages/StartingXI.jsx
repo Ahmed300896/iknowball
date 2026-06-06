@@ -9,6 +9,7 @@ export default function StartingXI({ onBack, onTeamSelect }) {
   const [userTeams, setUserTeams] = useState([]);
   const [matches, setMatches] = useState([]);
   const [selectedMatch, setSelectedMatch] = useState(null);
+  const [selectedTeam, setSelectedTeam] = useState(null);
   const [players, setPlayers] = useState([]);
   const [selectedPlayers, setSelectedPlayers] = useState([]);
   const [existingPredictions, setExistingPredictions] = useState({});
@@ -58,11 +59,13 @@ export default function StartingXI({ onBack, onTeamSelect }) {
   }, []);
 
   async function handleMatchClick(match) {
-    const userTeam = userTeams.find(function (t) {
+    const found = userTeams.find(function (t) {
       return t.trim().toLowerCase() === match.home.trim().toLowerCase() ||
         t.trim().toLowerCase() === match.away.trim().toLowerCase();
     });
+    const team = found ? found.trim() : "";
     setSelectedMatch(match);
+    setSelectedTeam(team);
     setSelectedPlayers(existingPredictions[String(match.id)] ?? []);
     setSavedMsg("");
     setView("players");
@@ -71,7 +74,7 @@ export default function StartingXI({ onBack, onTeamSelect }) {
     const { data } = await supabase
       .from("players")
       .select("name, position, shirt_number")
-      .eq("team", userTeam)
+      .eq("team", team)
       .order("shirt_number", { ascending: true });
 
     setPlayers(data ?? []);
@@ -119,6 +122,7 @@ export default function StartingXI({ onBack, onTeamSelect }) {
     setTimeout(function () {
       setView("matches");
       setSelectedMatch(null);
+      setSelectedTeam(null);
       setPlayers([]);
       setSelectedPlayers([]);
       setSavedMsg("");
@@ -127,7 +131,7 @@ export default function StartingXI({ onBack, onTeamSelect }) {
 
   // ── PLAYER VIEW ──────────────────────────────────────────────────────────
   if (view === "players" && selectedMatch) {
-    const userTeam = userTeams.includes(selectedMatch.home) ? selectedMatch.home : selectedMatch.away;
+    const userTeam = selectedTeam || "";
 
     return (
       <div style={{ minHeight: "100vh", background: "#0a0e1a", color: "#fff", paddingBottom: 100 }}>

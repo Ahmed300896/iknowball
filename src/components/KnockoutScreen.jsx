@@ -11,29 +11,29 @@ const ROUNDS = [
 ]
 
 // Official FIFA 2026 R32 bracket.
-// For 3rd-place slots the qualifying group is unknown until the tournament ends,
-// so we use the 3rd-place team from the first group listed as a placeholder.
-function buildR32Slots(groupPicks) {
+// 24 automatic qualifiers: winners + runners-up from all 12 groups (M1-M12).
+// 8 wildcard spots: the user-selected 3rd-place teams (M13-M16).
+function buildR32Slots(groupPicks, thirdPlacePicks) {
   const w = g => groupPicks[g]?.[0] ?? '?'
   const r = g => groupPicks[g]?.[1] ?? '?'
-  const t = g => groupPicks[g]?.[2] ?? '?'
+  const tp = thirdPlacePicks || []
   return [
-    [w('A'), r('B')],   // M1
-    [w('C'), r('D')],   // M2
-    [w('E'), r('F')],   // M3
-    [w('G'), r('H')],   // M4
-    [w('I'), r('J')],   // M5
-    [w('K'), r('L')],   // M6
-    [r('A'), w('B')],   // M7
-    [r('C'), w('D')],   // M8
-    [r('E'), w('F')],   // M9
-    [r('G'), w('H')],   // M10
-    [r('I'), w('J')],   // M11
-    [r('K'), w('L')],   // M12
-    [t('A'), t('B')],   // M13
-    [t('C'), t('D')],   // M14
-    [t('E'), t('F')],   // M15
-    [t('G'), t('H')],   // M16
+    [w('A'), r('B')],              // M1
+    [w('C'), r('D')],              // M2
+    [w('E'), r('F')],              // M3
+    [w('G'), r('H')],              // M4
+    [w('I'), r('J')],              // M5
+    [w('K'), r('L')],              // M6
+    [r('A'), w('B')],              // M7
+    [r('C'), w('D')],              // M8
+    [r('E'), w('F')],              // M9
+    [r('G'), w('H')],              // M10
+    [r('I'), w('J')],              // M11
+    [r('K'), w('L')],              // M12
+    [tp[0] || '?', tp[1] || '?'], // M13 - 3rd place wildcard
+    [tp[2] || '?', tp[3] || '?'], // M14 - 3rd place wildcard
+    [tp[4] || '?', tp[5] || '?'], // M15 - 3rd place wildcard
+    [tp[6] || '?', tp[7] || '?'], // M16 - 3rd place wildcard
   ]
 }
 function MatchCard({ teamA, teamB, picked, onPick }) {
@@ -72,8 +72,8 @@ function MatchCard({ teamA, teamB, picked, onPick }) {
   )
 }
 
-export default function KnockoutScreen({ username, groupPicks, onSubmit, onBack, onViewPredictions, onHome }) {
-  const r32Slots = useMemo(() => buildR32Slots(groupPicks), [groupPicks])
+export default function KnockoutScreen({ username, groupPicks, thirdPlacePicks, onSubmit, onBack, onViewPredictions, onHome }) {
+  const r32Slots = useMemo(() => buildR32Slots(groupPicks, thirdPlacePicks), [groupPicks, thirdPlacePicks])
 
   const [roundIndex, setRoundIndex] = useState(0)
   const [allPicks, setAllPicks] = useState(() =>

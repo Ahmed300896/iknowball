@@ -13,6 +13,7 @@ import AdminResultsScreen from './components/AdminResultsScreen'
 import AdminPanel from './pages/AdminPanel'
 import StartingXI from './pages/StartingXI'
 import HowToPlay from './components/HowToPlay'
+import ThirdPlacePicker from './components/ThirdPlacePicker'
 import TeamSelectionScreen from './components/TeamSelectionScreen'
 
 export default function App() {
@@ -21,6 +22,7 @@ export default function App() {
   const [authScreen, setAuthScreen] = useState('login')
   const [screen, setScreen] = useState('home')
   const [groupPicks, setGroupPicks] = useState(null)
+  const [thirdPlacePicks, setThirdPlacePicks] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -122,6 +124,11 @@ export default function App() {
 
   function handleGroupsNext(picks) {
     setGroupPicks(picks)
+    setScreen('third-place')
+  }
+
+  function handleThirdPlaceConfirm(picks) {
+    setThirdPlacePicks(picks)
     setScreen('knockout')
   }
 
@@ -199,13 +206,26 @@ export default function App() {
     return <PredictionsFeed username={username} onLogout={handleLogout} onHome={handleBackHome} />
   }
 
+  if (screen === 'third-place') {
+    return (
+      <ThirdPlacePicker
+        groupPicks={groupPicks}
+        onConfirm={handleThirdPlaceConfirm}
+        onBack={() => setScreen('groups')}
+        username={username}
+        onLogout={handleLogout}
+      />
+    )
+  }
+
   if (screen === 'knockout') {
     return (
       <KnockoutScreen
         username={username}
         groupPicks={groupPicks}
+        thirdPlacePicks={thirdPlacePicks}
         onSubmit={handleKnockoutSubmit}
-        onBack={handleBackHome}
+        onBack={() => setScreen('third-place')}
         onViewPredictions={handleViewPredictions}
         onHome={handleBackHome}
       />

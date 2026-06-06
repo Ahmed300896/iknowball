@@ -67,7 +67,7 @@ function TrophyIcon() {
 
 export default function HomeScreen({
   user, username, onPlay, onLogout, onViewPredictions,
-  onAdmin, onScorePredictor, onLeaderboard, onStartingXI, onChampionPick,
+  onAdmin, onScorePredictor, onLeaderboard, onStartingXI, onChampionPick, onHowToPlay,
   currentScreen, onPredict, onRanks,
 }) {
   const [showTeamSelection, setShowTeamSelection] = useState(false)
@@ -254,6 +254,17 @@ export default function HomeScreen({
         <button type="button" className="btn-outline" onClick={onLeaderboard}>
           View Leaderboard
         </button>
+
+        {/* How to Play */}
+        <div style={{ textAlign: "center" }}>
+          <button
+            type="button"
+            onClick={onHowToPlay}
+            style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "Oswald, sans-serif", fontWeight: 600, fontSize: 12, letterSpacing: "0.12em", color: "#c9a84c", opacity: 0.8, textTransform: "uppercase" }}
+          >
+            ? How to Play
+          </button>
+        </div>
 
         {/* Admin link — admin only */}
         {isAdmin && (

@@ -74,7 +74,6 @@ export default function ScorePredictor({ user, username, onBack, onLogout, curre
   const [scores, setScores] = useState({})
   const [saveStates, setSaveStates] = useState({})
   const [loading, setLoading] = useState(true)
-  const [showInfo, setShowInfo] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -160,24 +159,11 @@ export default function ScorePredictor({ user, username, onBack, onLogout, curre
         </div>
       </div>
 
-      {/* How to play */}
+      {/* Info line */}
       <div style={{ padding: "10px 16px", borderBottom: "1px solid #1e2540" }}>
-        <button
-          type="button"
-          onClick={function () { setShowInfo(function (v) { return !v }) }}
-          style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "Oswald, sans-serif", fontWeight: 600, fontSize: 11, letterSpacing: "0.1em", color: "#c9a84c", padding: 0, textTransform: "uppercase" }}
-        >
-          {showInfo ? "▲ How to Play" : "? How to Play"}
-        </button>
-        {showInfo && (
-          <div style={{ marginTop: 8, background: "rgba(201,168,76,0.06)", border: "1px solid rgba(201,168,76,0.2)", borderRadius: 6, padding: "10px 12px" }}>
-            <p style={{ fontSize: 12, color: "#8b93ab", lineHeight: 1.65, margin: 0 }}>
-              Predict the exact scoreline for each match. Get it exactly right = points. Wrong = 0.{" "}
-              <span style={{ color: "#c9a84c", fontWeight: 600 }}>Points:</span>{" "}
-              Group 5pts · R32 10pts · R16 20pts · QF 35pts · SF 50pts · Final 75pts. Predictions lock at kickoff.
-            </p>
-          </div>
-        )}
+        <p style={{ fontSize: 12, color: "#8b93ab", lineHeight: 1.6, margin: 0 }}>
+          Predict the exact scoreline for every match before kickoff. Submit your prediction and check back after the match to see your points.
+        </p>
       </div>
 
       <div className="px-4 py-5">

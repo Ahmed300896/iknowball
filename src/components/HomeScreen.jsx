@@ -105,22 +105,24 @@ export default function HomeScreen({
     <div className="min-h-screen pb-20" style={{ background: '#0a0e1a' }}>
       <PageHeader title="iKnowBall" username={username} onLogout={onLogout} />
 
+      {/* How to Play — top of page */}
+      <div style={{ padding: "10px 16px", borderBottom: "1px solid #1e2540", display: "flex", justifyContent: "flex-end" }}>
+        <button
+          type="button"
+          onClick={onHowToPlay}
+          style={{ background: "none", border: "1px solid rgba(201,168,76,0.4)", borderRadius: 4, cursor: "pointer", fontFamily: "Oswald, sans-serif", fontWeight: 600, fontSize: 11, letterSpacing: "0.1em", color: "#c9a84c", padding: "5px 10px", textTransform: "uppercase" }}
+        >
+          ? How to Play
+        </button>
+      </div>
+
       <div className="px-4 pt-5 space-y-6">
         {/* Welcome block */}
-        <div className="flex items-end justify-between">
-          <div>
-            <p className="eyebrow mb-1">Welcome back</p>
-            <h2 className="text-3xl text-white" style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700 }}>
-              {username}
-            </h2>
-          </div>
-          <button
-            type="button"
-            onClick={onHowToPlay}
-            style={{ background: "none", border: "1px solid rgba(201,168,76,0.4)", borderRadius: 4, cursor: "pointer", fontFamily: "Oswald, sans-serif", fontWeight: 600, fontSize: 11, letterSpacing: "0.1em", color: "#c9a84c", padding: "5px 10px", textTransform: "uppercase", marginBottom: 4, flexShrink: 0 }}
-          >
-            ? How to Play
-          </button>
+        <div>
+          <p className="eyebrow mb-1">Welcome back</p>
+          <h2 className="text-3xl text-white" style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700 }}>
+            {username}
+          </h2>
         </div>
 
         {/* Countdown card */}

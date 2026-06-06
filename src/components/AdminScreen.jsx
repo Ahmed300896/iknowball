@@ -1,6 +1,13 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { FLAGS } from '../data/teams'
+import matches from '../data/schedule'
+import { calculateAndSaveUserPoints } from '../lib/resultsHelper'
+
+// teams.js uses "USA" but schedule.js uses "United States"
+const SCHEDULE_NAME = {
+  'USA': 'United States',
+}
 
 const TEAMS = Object.keys(FLAGS)
 
@@ -10,6 +17,7 @@ export default function AdminScreen({ onBack, onLogout }) {
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
 
   // Form state
   const [formData, setFormData] = useState({
@@ -62,6 +70,8 @@ export default function AdminScreen({ onBack, onLogout }) {
 
     try {
       setLoading(true)
+      setError('')
+      setSuccess('')
       const { error: insertError } = await supabase
         .from('results')
         .insert([
@@ -77,6 +87,18 @@ export default function AdminScreen({ onBack, onLogout }) {
 
       if (insertError) throw insertError
 
+      // Find the matching match in schedule.js and calculate points for all users
+      var scheduleName = function(name) { return SCHEDULE_NAME[name] || name }
+      var scheduleHome = scheduleName(formData.home_team)
+      var scheduleAway = scheduleName(formData.away_team)
+      var match = matches.find(function(m) {
+        return m.home === scheduleHome && m.away === scheduleAway
+      })
+
+      if (match) {
+        await calculateAndSaveUserPoints(match.id)
+      }
+
       setFormData({
         home_team: '',
         away_team: '',
@@ -85,11 +107,11 @@ export default function AdminScreen({ onBack, onLogout }) {
         stage: 'group',
         match_date: ''
       })
-      setError('')
+      setSuccess('Result saved and points calculated for all users!')
       await fetchResults()
     } catch (err) {
       console.error('Error saving result:', err)
-      setError('Failed to save result')
+      setError('Failed to save result: ' + err.message)
     } finally {
       setLoading(false)
     }
@@ -268,6 +290,7 @@ export default function AdminScreen({ onBack, onLogout }) {
             </div>
 
             {error && <p className="text-red-400 text-sm">{error}</p>}
+            {success && <p className="text-green-400 text-sm">{success}</p>}
 
             <button
               type="submit"

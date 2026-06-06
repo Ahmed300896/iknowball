@@ -125,28 +125,58 @@ export default function HowToPlay({ onBack, onLogout, username }) {
         <div style={{ marginBottom: 28 }}>
           <SectionHeading label="Starting XI" />
           <Card>
-            <p style={{ fontSize: 13, color: "#8b93ab", lineHeight: 1.65, marginBottom: 14 }}>
-              Before each match involving one of your teams, predict their starting 11 players. Pick exactly 11 from that team's squad before kickoff.
-            </p>
-            <AllOrNothing text="Get 7 or more correct = points for that match. Get 6 or fewer = 0 points." />
-            <p style={{ fontSize: 13, color: "#8b93ab", lineHeight: 1.6 }}>
-              Points earned per correct player increase with each round — group stage pays the least, the final pays the most.
-            </p>
+            {[
+              {
+                n: "1",
+                title: "Pick Your 5 Teams",
+                text: "Before June 11, select 5 teams to follow: 2 from the top 10 ranked nations, 1 from ranked 11-25, 1 from 26-40, and 1 from the rest. Your picks lock when the tournament starts.",
+              },
+              {
+                n: "2",
+                title: "Predict the Starting XI",
+                text: "Before each of your teams' matches, pick exactly 11 players from their squad. You must submit before kickoff — no changes once the match starts.",
+              },
+              {
+                n: "3",
+                title: "Score Points",
+                text: "Earn 1 point per correct player. Predict 7 or more correctly to earn a bonus. Points are worth more in the knockout rounds than the group stage.",
+              },
+            ].map(function (step, i) {
+              return (
+                <div key={step.n} style={{ display: "flex", gap: 12, alignItems: "flex-start", marginBottom: i < 2 ? 14 : 0 }}>
+                  <div style={{
+                    width: 24, height: 24, borderRadius: "50%",
+                    background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.4)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    flexShrink: 0, marginTop: 1,
+                  }}>
+                    <span style={{ fontFamily: "Oswald, sans-serif", fontWeight: 700, fontSize: 11, color: "#c9a84c" }}>
+                      {step.n}
+                    </span>
+                  </div>
+                  <div>
+                    <p style={{ fontFamily: "Oswald, sans-serif", fontWeight: 700, fontSize: 12, letterSpacing: "0.06em", color: "#fff", margin: "0 0 4px" }}>
+                      {step.title}
+                    </p>
+                    <p style={{ fontSize: 12, color: "#8b93ab", lineHeight: 1.6, margin: 0 }}>
+                      {step.text}
+                    </p>
+                  </div>
+                </div>
+              )
+            })}
           </Card>
         </div>
 
         {/* ── CHAMPION PICK ─────────────────────────────────────────── */}
         <div style={{ marginBottom: 28 }}>
           <SectionHeading label="Champion Pick" />
-          <Card faded>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-              <span style={{ fontFamily: "Oswald, sans-serif", fontWeight: 700, fontSize: 13, letterSpacing: "0.06em", color: "#fff" }}>COMING SOON</span>
-              <div style={{ background: "rgba(201,168,76,0.12)", border: "1px solid rgba(201,168,76,0.3)", borderRadius: 3, padding: "2px 8px" }}>
-                <span style={{ fontFamily: "Oswald, sans-serif", fontWeight: 700, fontSize: 9, letterSpacing: "0.12em", color: "#c9a84c" }}>IN DEVELOPMENT</span>
-              </div>
-            </div>
-            <p style={{ fontSize: 13, color: "#8b93ab", lineHeight: 1.65 }}>
-              Pick one team to win the entire World Cup. Get it right and earn a massive points bonus that could shake up the leaderboard.
+          <Card>
+            <p style={{ fontFamily: "Oswald, sans-serif", fontWeight: 700, fontSize: 13, letterSpacing: "0.06em", color: "#fff", margin: "0 0 10px" }}>
+              CHAMPION PICK
+            </p>
+            <p style={{ fontSize: 13, color: "#8b93ab", lineHeight: 1.65, margin: 0 }}>
+              Before the tournament starts, pick one team to win the entire World Cup. If your team wins, you earn a massive points bonus that could completely shake up the leaderboard. You only get one pick and it cannot be changed after June 11.
             </p>
           </Card>
         </div>

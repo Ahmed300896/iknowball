@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { supabase } from "../lib/supabaseClient";
-import { SCHEDULE } from "../data/schedule";
+import { supabase } from "../lib/supabase";
+import schedule from "../data/schedule";
+
+var SCHEDULE = schedule;
 
 export default function StartingXI() {
   const [view, setView] = useState("matches");

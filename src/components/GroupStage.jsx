@@ -1,35 +1,73 @@
-import { useState } from 'react'
-import { groupsMap, groupNames, FLAGS } from '../data/teams'
+import { useState } from "react"
+import { groupsMap, groupNames, FLAGS } from "../data/teams"
 
-const POSITION_STYLES = [
-  'text-yellow-400',
-  'text-slate-300',
-  'text-orange-400',
-  'text-slate-500',
-]
+var POSITION_COLORS = ["#c9a84c", "#8b93ab", "#6b7494", "#3d4560"]
+var POSITION_LABELS = ["1ST", "2ND", "3RD", "4TH"]
+
+function getFlag(team) { return FLAGS[team] || "⚽" }
 
 function TeamRow({ team, position, isFirst, isLast, onMoveUp, onMoveDown }) {
-  const isEliminated = position === 4
-
+  var isEliminated = position === 4
+  var isAdvancing = position <= 2
   return (
-    <div className={`flex items-center gap-3 px-3 py-3 rounded-xl border bg-white/5 border-white/10 ${
-      isEliminated ? 'opacity-40' : ''
-    }`}>
-      <span className={`w-5 text-center font-bold text-sm ${POSITION_STYLES[position - 1]}`}>
-        {position}
+    <div style={{
+      display: "flex",
+      alignItems: "center",
+      gap: 10,
+      padding: "10px 12px",
+      background: isAdvancing ? "rgba(201,168,76,0.06)" : "#0a0e1a",
+      border: isAdvancing ? "1px solid rgba(201,168,76,0.2)" : "1px solid #1e2540",
+      borderLeft: isAdvancing ? "3px solid #c9a84c" : position === 3 ? "3px solid #6b7494" : "3px solid #2a3354",
+      borderRadius: "0 6px 6px 0",
+      opacity: isEliminated ? 0.4 : 1,
+    }}>
+      <span style={{
+        fontFamily: "Oswald, sans-serif",
+        fontWeight: 700,
+        fontSize: 9,
+        letterSpacing: "0.12em",
+        color: POSITION_COLORS[position - 1],
+        width: 26,
+        textAlign: "center",
+        flexShrink: 0,
+      }}>
+        {POSITION_LABELS[position - 1]}
       </span>
-      <span className="text-xl leading-none">
-        {FLAGS[team] ?? '🏳️'}
+      <span style={{ fontSize: 17, lineHeight: 1, flexShrink: 0 }}>
+        {getFlag(team)}
       </span>
-      <span className="flex-1 text-sm font-medium text-white">
+      <span style={{
+        flex: 1,
+        fontFamily: "Oswald, sans-serif",
+        fontWeight: 600,
+        fontSize: 13,
+        letterSpacing: "0.03em",
+        color: isEliminated ? "#6b7494" : "#fff",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+      }}>
         {team}
       </span>
-      <div className="flex flex-col gap-0.5">
+      <div style={{ display: "flex", flexDirection: "column", gap: 3, flexShrink: 0 }}>
         <button
           type="button"
           onClick={onMoveUp}
           disabled={isFirst}
-          className="w-8 h-8 flex items-center justify-center rounded-lg text-white/60 active:bg-white/10 disabled:opacity-20 disabled:cursor-not-allowed"
+          style={{
+            width: 26,
+            height: 26,
+            background: "none",
+            border: "1px solid #1e2540",
+            borderRadius: 4,
+            color: isFirst ? "#2a3354" : "#c9a84c",
+            cursor: isFirst ? "not-allowed" : "pointer",
+            fontSize: 9,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            lineHeight: 1,
+          }}
         >
           ▲
         </button>
@@ -37,7 +75,20 @@ function TeamRow({ team, position, isFirst, isLast, onMoveUp, onMoveDown }) {
           type="button"
           onClick={onMoveDown}
           disabled={isLast}
-          className="w-8 h-8 flex items-center justify-center rounded-lg text-white/60 active:bg-white/10 disabled:opacity-20 disabled:cursor-not-allowed"
+          style={{
+            width: 26,
+            height: 26,
+            background: "none",
+            border: "1px solid #1e2540",
+            borderRadius: 4,
+            color: isLast ? "#2a3354" : "#c9a84c",
+            cursor: isLast ? "not-allowed" : "pointer",
+            fontSize: 9,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            lineHeight: 1,
+          }}
         >
           ▼
         </button>
@@ -48,91 +99,137 @@ function TeamRow({ team, position, isFirst, isLast, onMoveUp, onMoveDown }) {
 
 function GroupCard({ groupLetter, teams, onReorder }) {
   function move(index, direction) {
-    const next = [...teams]
-    const swap = index + direction
-    ;[next[index], next[swap]] = [next[swap], next[index]]
+    var next = teams.slice()
+    var swap = index + direction
+    var tmp = next[index]
+    next[index] = next[swap]
+    next[swap] = tmp
     onReorder(groupLetter, next)
   }
 
   return (
-    <div className="bg-white/5 rounded-2xl p-4">
-      <h2 className="text-white/50 text-xs font-bold uppercase tracking-widest mb-3">
-        Group {groupLetter}
-      </h2>
-      <div className="flex flex-col gap-2">
-        {teams.map((team, i) => (
-          <TeamRow
-            key={team}
-            team={team}
-            position={i + 1}
-            isFirst={i === 0}
-            isLast={i === teams.length - 1}
-            onMoveUp={() => move(i, -1)}
-            onMoveDown={() => move(i, 1)}
-          />
-        ))}
+    <div style={{
+      background: "#0d1224",
+      border: "1px solid #1e2540",
+      borderRadius: 8,
+      padding: "14px",
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+        <div style={{ height: 2, width: 14, background: "#c9a84c", borderRadius: 1, flexShrink: 0 }} />
+        <span style={{
+          fontFamily: "Oswald, sans-serif",
+          fontWeight: 700,
+          fontSize: 10,
+          letterSpacing: "0.2em",
+          textTransform: "uppercase",
+          color: "#c9a84c",
+        }}>
+          Group {groupLetter}
+        </span>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        {teams.map(function (team, i) {
+          return (
+            <TeamRow
+              key={team}
+              team={team}
+              position={i + 1}
+              isFirst={i === 0}
+              isLast={i === teams.length - 1}
+              onMoveUp={function () { move(i, -1) }}
+              onMoveDown={function () { move(i, 1) }}
+            />
+          )
+        })}
       </div>
     </div>
   )
 }
 
 export default function GroupStage({ username, onNext, onBack, onHome }) {
-  const [picks, setPicks] = useState(() =>
-    Object.fromEntries(groupNames.map(g => [g, [...groupsMap[g]]]))
-  )
+  var [picks, setPicks] = useState(function () {
+    return Object.fromEntries(groupNames.map(function (g) { return [g, groupsMap[g].slice()] }))
+  })
 
   function handleReorder(groupLetter, newOrder) {
-    setPicks(prev => ({ ...prev, [groupLetter]: newOrder }))
+    setPicks(function (prev) { return Object.assign({}, prev, { [groupLetter]: newOrder }) })
   }
 
-  const allRanked = groupNames.every(g => picks[g]?.length === 4)
+  var allRanked = groupNames.every(function (g) { return picks[g] && picks[g].length === 4 })
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="sticky top-0 z-20 bg-black/90 backdrop-blur border-b border-white/10 px-4 py-3 flex items-center justify-between">
+    <div style={{ minHeight: "100vh", background: "#0a0e1a", color: "#fff", paddingBottom: 100 }}>
+      {/* Header */}
+      <div style={{ height: 3, background: "#c9a84c" }} />
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "12px 16px",
+        borderBottom: "1px solid #1e2540",
+      }}>
         <button
           type="button"
           onClick={onBack}
-          className="text-white/70 text-sm font-semibold px-3 py-2 rounded-xl border border-white/20 bg-white/5 hover:bg-white/10"
+          style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", padding: 0 }}
         >
-          Back
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M11 4L6 9L11 14" stroke="#c9a84c" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
         </button>
+        <p style={{ fontFamily: "Oswald, sans-serif", fontWeight: 700, fontSize: 16, letterSpacing: "0.08em", color: "#fff", margin: 0 }}>
+          GROUP STAGE
+        </p>
+        <div style={{ width: 18 }} />
+      </div>
+
+      {/* Info strip */}
+      <div style={{ padding: "14px 16px", borderBottom: "1px solid #1e2540" }}>
+        <p style={{ fontFamily: "Oswald, sans-serif", fontWeight: 700, fontSize: 17, color: "#fff", marginBottom: 4 }}>
+          Pick your group standings
+        </p>
+        <p style={{ fontSize: 12, color: "#8b93ab", lineHeight: 1.6, margin: "0 0 10px" }}>
+          Use the arrows to rank each group 1st to 4th
+        </p>
+        <p style={{ fontSize: 11, color: "#3ddc84", fontWeight: 600, margin: "0 0 3px" }}>
+          ✓ Top 2 from each group advance automatically
+        </p>
+        <p style={{ fontSize: 11, color: "#8b93ab", margin: 0 }}>
+          ★ 3rd place teams compete for 8 wildcard spots
+        </p>
+      </div>
+
+      {/* Group cards */}
+      <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: 12 }}>
+        {groupNames.map(function (g) {
+          return (
+            <GroupCard key={g} groupLetter={g} teams={picks[g]} onReorder={handleReorder} />
+          )
+        })}
+      </div>
+
+      {/* Fixed footer */}
+      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, padding: "12px 16px", background: "#0a0e1a", borderTop: "1px solid #1e2540" }}>
         <button
           type="button"
-          onClick={onHome}
-          className="text-white font-bold text-lg hover:text-white/70 transition-colors"
-        >
-          iknowball
-        </button>
-        <span className="text-white/40 text-sm">{username}</span>
-      </div>
-
-      <div className="px-4 pt-6 pb-4">
-        <h1 className="text-white text-2xl font-bold">Pick your group standings</h1>
-        <p className="text-white/40 text-sm mt-1">Use the arrows to rank each group 1st to 4th</p>
-        <div className="flex flex-col gap-1 mt-3">
-          <p className="text-xs font-semibold" style={{ color: '#3ddc84' }}>
-            ✓ Top 2 from each group advance automatically
-          </p>
-          <p className="text-xs" style={{ color: '#8b93ab' }}>
-            ★ 3rd place teams compete for 8 wildcard spots
-          </p>
-        </div>
-      </div>
-
-      <div className="px-4 pb-32 flex flex-col gap-4">
-        {groupNames.map(g => (
-          <GroupCard key={g} groupLetter={g} teams={picks[g]} onReorder={handleReorder} />
-        ))}
-      </div>
-
-      <div className="fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur border-t border-white/10 px-4 py-4">
-        <button
-          onClick={() => onNext(picks)}
+          onClick={function () { onNext(picks) }}
           disabled={!allRanked}
-          className="w-full bg-white text-black font-bold text-lg rounded-xl py-3 disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 transition-transform"
+          style={{
+            width: "100%",
+            padding: "11px 16px",
+            background: allRanked ? "#c9a84c" : "#1e2540",
+            color: allRanked ? "#0a0e1a" : "#6b7494",
+            border: "none",
+            borderRadius: 4,
+            fontFamily: "Oswald, sans-serif",
+            fontWeight: 600,
+            fontSize: 13,
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+            cursor: allRanked ? "pointer" : "not-allowed",
+          }}
         >
-          Next
+          Next — Pick 3rd Place Teams
         </button>
       </div>
     </div>

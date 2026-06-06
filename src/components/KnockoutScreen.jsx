@@ -1,124 +1,147 @@
-import { useState, useMemo } from 'react'
-import { FLAGS } from '../data/teams'
-import { supabase } from '../lib/supabase'
+import { useState, useMemo } from "react"
+import { FLAGS } from "../data/teams"
+import { supabase } from "../lib/supabase"
 
-const ROUNDS = [
-  { key: 'r32',   label: 'Round of 32',    count: 16 },
-  { key: 'r16',   label: 'Round of 16',    count: 8 },
-  { key: 'qf',    label: 'Quarter-finals', count: 4 },
-  { key: 'sf',    label: 'Semi-finals',    count: 2 },
-  { key: 'final', label: 'Final',          count: 1 },
+var ROUNDS = [
+  { key: "r32",   label: "Round of 32",    count: 16 },
+  { key: "r16",   label: "Round of 16",    count: 8 },
+  { key: "qf",    label: "Quarter-finals", count: 4 },
+  { key: "sf",    label: "Semi-finals",    count: 2 },
+  { key: "final", label: "Final",          count: 1 },
 ]
 
 // Official FIFA 2026 R32 bracket.
 // 24 automatic qualifiers: winners + runners-up from all 12 groups (M1-M12).
 // 8 wildcard spots: the user-selected 3rd-place teams (M13-M16).
 function buildR32Slots(groupPicks, thirdPlacePicks) {
-  const w = g => groupPicks[g]?.[0] ?? '?'
-  const r = g => groupPicks[g]?.[1] ?? '?'
-  const tp = thirdPlacePicks || []
+  var w = function (g) { return groupPicks[g] ? groupPicks[g][0] : "?" }
+  var r = function (g) { return groupPicks[g] ? groupPicks[g][1] : "?" }
+  var tp = thirdPlacePicks || []
   return [
-    [w('A'), r('B')],              // M1
-    [w('C'), r('D')],              // M2
-    [w('E'), r('F')],              // M3
-    [w('G'), r('H')],              // M4
-    [w('I'), r('J')],              // M5
-    [w('K'), r('L')],              // M6
-    [r('A'), w('B')],              // M7
-    [r('C'), w('D')],              // M8
-    [r('E'), w('F')],              // M9
-    [r('G'), w('H')],              // M10
-    [r('I'), w('J')],              // M11
-    [r('K'), w('L')],              // M12
-    [tp[0] || '?', tp[1] || '?'], // M13 - 3rd place wildcard
-    [tp[2] || '?', tp[3] || '?'], // M14 - 3rd place wildcard
-    [tp[4] || '?', tp[5] || '?'], // M15 - 3rd place wildcard
-    [tp[6] || '?', tp[7] || '?'], // M16 - 3rd place wildcard
+    [w("A"), r("B")],              // M1
+    [w("C"), r("D")],              // M2
+    [w("E"), r("F")],              // M3
+    [w("G"), r("H")],              // M4
+    [w("I"), r("J")],              // M5
+    [w("K"), r("L")],              // M6
+    [r("A"), w("B")],              // M7
+    [r("C"), w("D")],              // M8
+    [r("E"), w("F")],              // M9
+    [r("G"), w("H")],              // M10
+    [r("I"), w("J")],              // M11
+    [r("K"), w("L")],              // M12
+    [tp[0] || "?", tp[1] || "?"], // M13 - 3rd place wildcard
+    [tp[2] || "?", tp[3] || "?"], // M14 - 3rd place wildcard
+    [tp[4] || "?", tp[5] || "?"], // M15 - 3rd place wildcard
+    [tp[6] || "?", tp[7] || "?"], // M16 - 3rd place wildcard
   ]
 }
+
+function getFlag(team) { return FLAGS[team] || "⚽" }
+
 function MatchCard({ teamA, teamB, picked, onPick }) {
   return (
-    <div className="bg-white/5 rounded-2xl overflow-hidden border border-white/10">
-      <button
-        type="button"
-        onClick={() => onPick(teamA)}
-        className={`w-full flex items-center gap-3 px-4 py-4 transition-colors text-left ${
-          picked === teamA ? 'bg-white text-black' : 'text-white active:bg-white/10'
-        }`}
-      >
-        <span className="text-xl w-7 text-center leading-none">{FLAGS[teamA] ?? '🏳️'}</span>
-        <span className="flex-1 font-medium">{teamA}</span>
-        {picked === teamA && <span className="font-bold text-black/50">✓</span>}
-      </button>
-
-      <div className="flex items-center gap-3 px-4 py-0.5">
-        <div className="flex-1 h-px bg-white/10" />
-        <span className="text-white/20 text-xs">vs</span>
-        <div className="flex-1 h-px bg-white/10" />
-      </div>
-
-      <button
-        type="button"
-        onClick={() => onPick(teamB)}
-        className={`w-full flex items-center gap-3 px-4 py-4 transition-colors text-left ${
-          picked === teamB ? 'bg-white text-black' : 'text-white active:bg-white/10'
-        }`}
-      >
-        <span className="text-xl w-7 text-center leading-none">{FLAGS[teamB] ?? '🏳️'}</span>
-        <span className="flex-1 font-medium">{teamB}</span>
-        {picked === teamB && <span className="font-bold text-black/50">✓</span>}
-      </button>
+    <div style={{ background: "#0d1224", border: "1px solid #1e2540", borderRadius: 8, overflow: "hidden" }}>
+      {[teamA, teamB].map(function (team, idx) {
+        var isPicked = picked === team
+        return (
+          <div key={team}>
+            {idx === 1 && (
+              <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "3px 14px" }}>
+                <div style={{ flex: 1, height: 1, background: "#1e2540" }} />
+                <span style={{ fontFamily: "Oswald, sans-serif", fontSize: 9, letterSpacing: "0.12em", color: "#3d4560" }}>VS</span>
+                <div style={{ flex: 1, height: 1, background: "#1e2540" }} />
+              </div>
+            )}
+            <button
+              type="button"
+              onClick={function () { onPick(team) }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+                padding: "14px 14px",
+                width: "100%",
+                textAlign: "left",
+                background: isPicked ? "rgba(201,168,76,0.1)" : "transparent",
+                border: "none",
+                borderLeft: isPicked ? "3px solid #c9a84c" : "3px solid transparent",
+                cursor: "pointer",
+              }}
+            >
+              <span style={{ fontSize: 20, lineHeight: 1, width: 26, textAlign: "center", flexShrink: 0 }}>
+                {getFlag(team)}
+              </span>
+              <span style={{
+                flex: 1,
+                fontFamily: "Oswald, sans-serif",
+                fontWeight: 600,
+                fontSize: 13,
+                letterSpacing: "0.04em",
+                color: isPicked ? "#c9a84c" : "#fff",
+              }}>
+                {team}
+              </span>
+              {isPicked && (
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ flexShrink: 0 }}>
+                  <circle cx="8" cy="8" r="7" fill="rgba(201,168,76,0.2)" stroke="#c9a84c" strokeWidth="1.5" />
+                  <path d="M5 8L7 10L11 6" stroke="#c9a84c" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              )}
+            </button>
+          </div>
+        )
+      })}
     </div>
   )
 }
 
 export default function KnockoutScreen({ username, groupPicks, thirdPlacePicks, onSubmit, onBack, onViewPredictions, onHome }) {
-  const r32Slots = useMemo(() => buildR32Slots(groupPicks, thirdPlacePicks), [groupPicks, thirdPlacePicks])
+  var r32Slots = useMemo(function () { return buildR32Slots(groupPicks, thirdPlacePicks) }, [groupPicks, thirdPlacePicks])
 
-  const [roundIndex, setRoundIndex] = useState(0)
-  const [allPicks, setAllPicks] = useState(() =>
-    Object.fromEntries(ROUNDS.map(({ key, count }) => [key, Array(count).fill(null)]))
-  )
-  const [successChampion, setSuccessChampion] = useState(null)
-  const [showSuccess, setShowSuccess] = useState(false)
+  var [roundIndex, setRoundIndex] = useState(0)
+  var [allPicks, setAllPicks] = useState(function () {
+    return Object.fromEntries(ROUNDS.map(function (r) { return [r.key, Array(r.count).fill(null)] }))
+  })
+  var [successChampion, setSuccessChampion] = useState(null)
+  var [showSuccess, setShowSuccess] = useState(false)
+  var [saving, setSaving] = useState(false)
+  var [saveError, setSaveError] = useState("")
 
-  const currentRound = ROUNDS[roundIndex]
-  const currentPicks = allPicks[currentRound.key]
+  var currentRound = ROUNDS[roundIndex]
+  var currentPicks = allPicks[currentRound.key]
 
-  const matches = roundIndex === 0
+  var matches = roundIndex === 0
     ? r32Slots
-    : (() => {
-        const prevPicks = allPicks[ROUNDS[roundIndex - 1].key]
-        return Array.from({ length: currentRound.count }, (_, i) => [
-          prevPicks[i * 2],
-          prevPicks[i * 2 + 1],
-        ])
+    : (function () {
+        var prevPicks = allPicks[ROUNDS[roundIndex - 1].key]
+        return Array.from({ length: currentRound.count }, function (_, i) {
+          return [prevPicks[i * 2], prevPicks[i * 2 + 1]]
+        })
       })()
 
   function handlePick(matchIndex, winner) {
-    setAllPicks(prev => ({
-      ...prev,
-      [currentRound.key]: prev[currentRound.key].map((p, i) => i === matchIndex ? winner : p),
-    }))
+    setAllPicks(function (prev) {
+      return Object.assign({}, prev, {
+        [currentRound.key]: prev[currentRound.key].map(function (p, i) { return i === matchIndex ? winner : p }),
+      })
+    })
   }
 
-  const [saving, setSaving] = useState(false)
-  const [saveError, setSaveError] = useState('')
-
-  const allPicked = currentPicks.every(p => p !== null)
-  const isFinal = roundIndex === ROUNDS.length - 1
+  var allPicked = currentPicks.every(function (p) { return p !== null })
+  var isFinal = roundIndex === ROUNDS.length - 1
 
   async function handleNext() {
     if (!isFinal) {
-      setRoundIndex(r => r + 1)
+      setRoundIndex(function (r) { return r + 1 })
       return
     }
 
     setSaving(true)
-    setSaveError('')
+    setSaveError("")
 
-    const champion = allPicks.final[0]
-    const { error } = await supabase.from('predictions').insert({
+    var champion = allPicks.final[0]
+    var { error } = await supabase.from("predictions").insert({
       nickname: username,
       group_picks: groupPicks,
       knockout: {
@@ -134,8 +157,8 @@ export default function KnockoutScreen({ username, groupPicks, thirdPlacePicks, 
     setSaving(false)
 
     if (error) {
-      console.error('Supabase insert error:', error)
-      setSaveError('Something went wrong. Please try again.')
+      console.error("Supabase insert error:", error)
+      setSaveError("Something went wrong. Please try again.")
       return
     }
 
@@ -143,49 +166,73 @@ export default function KnockoutScreen({ username, groupPicks, thirdPlacePicks, 
     setShowSuccess(true)
   }
 
+  // ── Success screen ───────────────────────────────────────────────────────
+
   if (showSuccess) {
     return (
-      <div className="min-h-screen bg-black text-white">
-        <div className="sticky top-0 z-20 bg-black/90 backdrop-blur border-b border-white/10 px-4 py-3 flex items-center justify-between">
+      <div style={{ minHeight: "100vh", background: "#0a0e1a", color: "#fff" }}>
+        <div style={{ height: 3, background: "#c9a84c" }} />
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid #1e2540" }}>
           <button
             type="button"
             onClick={onBack}
-            className="text-white/70 text-sm font-semibold px-3 py-2 rounded-xl border border-white/20 bg-white/5 hover:bg-white/10"
+            style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", padding: 0 }}
           >
-            Back
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M11 4L6 9L11 14" stroke="#c9a84c" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
           </button>
-          <button
-            type="button"
-            onClick={onHome}
-            className="font-bold text-lg hover:text-white/70 transition-colors"
-          >
-            iknowball
-          </button>
-          <span className="text-white/40 text-sm">{username}</span>
+          <p style={{ fontFamily: "Oswald, sans-serif", fontWeight: 700, fontSize: 16, letterSpacing: "0.08em", color: "#fff", margin: 0 }}>
+            KNOCKOUT BRACKET
+          </p>
+          <div style={{ width: 18 }} />
         </div>
 
-        <div className="px-4 pt-10 pb-8">
-          <div className="bg-white/5 border border-white/10 rounded-3xl p-6 text-center space-y-6">
-            <p className="text-white/40 text-sm uppercase tracking-widest">Success</p>
-            <h1 className="text-white text-3xl font-bold">Prediction saved!</h1>
-            <div className="mx-auto w-24 h-24 rounded-full bg-white/10 flex items-center justify-center text-5xl">
-              {FLAGS[successChampion] ?? '🏳️'}
+        <div style={{ padding: "32px 16px" }}>
+          <div style={{ background: "#0d1224", border: "1px solid #1e2540", borderRadius: 12, padding: "32px 24px", textAlign: "center" }}>
+            <p style={{ fontFamily: "Oswald, sans-serif", fontSize: 10, letterSpacing: "0.2em", color: "#c9a84c", marginBottom: 12 }}>
+              PREDICTION SAVED
+            </p>
+            <p style={{ fontFamily: "Oswald, sans-serif", fontWeight: 700, fontSize: 24, color: "#fff", marginBottom: 24 }}>
+              Your pick is locked in!
+            </p>
+            <div style={{
+              width: 72, height: 72, borderRadius: "50%",
+              background: "rgba(201,168,76,0.1)", border: "1px solid rgba(201,168,76,0.3)",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              fontSize: 36, margin: "0 auto 16px",
+            }}>
+              {getFlag(successChampion)}
             </div>
-            <p className="text-white text-lg font-semibold">{successChampion}</p>
-            <div className="space-y-3">
+            <p style={{ fontFamily: "Oswald, sans-serif", fontWeight: 700, fontSize: 16, color: "#c9a84c", letterSpacing: "0.06em", marginBottom: 28 }}>
+              {successChampion}
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               <button
                 type="button"
                 onClick={onBack}
-                className="w-full bg-white text-black font-bold rounded-2xl py-3 active:scale-95 transition-transform"
+                style={{
+                  width: "100%", padding: "11px 16px",
+                  background: "#c9a84c", color: "#0a0e1a",
+                  border: "none", borderRadius: 4,
+                  fontFamily: "Oswald, sans-serif", fontWeight: 600, fontSize: 13,
+                  letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer",
+                }}
               >
-                Back to home
+                Back to Home
               </button>
               <button
                 type="button"
                 onClick={onViewPredictions}
-                className="w-full bg-white/10 text-white font-bold rounded-2xl py-3 border border-white/20 hover:bg-white/10 active:scale-95 transition-transform"
+                style={{
+                  width: "100%", padding: "11px 16px",
+                  background: "transparent", color: "#c9a84c",
+                  border: "1px solid rgba(201,168,76,0.4)", borderRadius: 4,
+                  fontFamily: "Oswald, sans-serif", fontWeight: 600, fontSize: 13,
+                  letterSpacing: "0.1em", textTransform: "uppercase", cursor: "pointer",
+                }}
               >
-                See all predictions
+                See All Predictions
               </button>
             </div>
           </div>
@@ -194,60 +241,84 @@ export default function KnockoutScreen({ username, groupPicks, thirdPlacePicks, 
     )
   }
 
+  // ── Main bracket screen ──────────────────────────────────────────────────
+
   return (
-    <div className="min-h-screen bg-black text-white">
-      <div className="sticky top-0 z-20 bg-black/90 backdrop-blur border-b border-white/10 px-4 py-3 flex items-center justify-between">
+    <div style={{ minHeight: "100vh", background: "#0a0e1a", color: "#fff", paddingBottom: 100 }}>
+      {/* Header */}
+      <div style={{ height: 3, background: "#c9a84c" }} />
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid #1e2540" }}>
         <button
           type="button"
           onClick={onBack}
-          className="text-white/70 text-sm font-semibold px-3 py-2 rounded-xl border border-white/20 bg-white/5 hover:bg-white/10"
+          style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", padding: 0 }}
         >
-          Back
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M11 4L6 9L11 14" stroke="#c9a84c" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
         </button>
-        <button
-          type="button"
-          onClick={onHome}
-          className="font-bold text-lg hover:text-white/70 transition-colors"
-        >
-          iknowball
-        </button>
-        <span className="text-white/40 text-sm">{username}</span>
+        <p style={{ fontFamily: "Oswald, sans-serif", fontWeight: 700, fontSize: 16, letterSpacing: "0.08em", color: "#fff", margin: 0 }}>
+          KNOCKOUT BRACKET
+        </p>
+        <div style={{ width: 18 }} />
       </div>
 
-      <div className="px-4 pt-6 pb-5">
-        <p className="text-white/40 text-xs font-bold uppercase tracking-widest mb-1">
-          Round {roundIndex + 1} of {ROUNDS.length}
+      {/* Round info */}
+      <div style={{ padding: "14px 16px", borderBottom: "1px solid #1e2540" }}>
+        <p style={{ fontFamily: "Oswald, sans-serif", fontSize: 10, letterSpacing: "0.2em", color: "#6b7494", margin: "0 0 3px" }}>
+          ROUND {roundIndex + 1} OF {ROUNDS.length}
         </p>
-        <h1 className="text-white text-2xl font-bold">{currentRound.label}</h1>
+        <p style={{ fontFamily: "Oswald, sans-serif", fontWeight: 700, fontSize: 20, color: "#fff", margin: 0 }}>
+          {currentRound.label}
+        </p>
         {roundIndex === 0 && (
-          <p className="text-xs mt-2" style={{ color: '#8b93ab' }}>
-            32 teams: 24 group qualifiers (1st &amp; 2nd from each group) + 8 best 3rd-place teams. 3rd-place matchups are approximate — final pairings depend on which groups they qualify from.
+          <p style={{ fontSize: 11, color: "#8b93ab", marginTop: 6, lineHeight: 1.6 }}>
+            32 teams: 24 group qualifiers (1st &amp; 2nd from each group) + 8 best 3rd-place teams.
+            3rd-place matchups are approximate — final pairings depend on which groups they qualify from.
           </p>
         )}
       </div>
 
-      <div className="px-4 pb-32 flex flex-col gap-8">
-        {matches.map(([teamA, teamB], i) => (
-          <MatchCard
-            key={i}
-            teamA={teamA}
-            teamB={teamB}
-            picked={currentPicks[i]}
-            onPick={winner => handlePick(i, winner)}
-          />
-        ))}
+      {/* Match cards */}
+      <div style={{ padding: "16px", display: "flex", flexDirection: "column", gap: 10 }}>
+        {matches.map(function (pair, i) {
+          return (
+            <MatchCard
+              key={i}
+              teamA={pair[0]}
+              teamB={pair[1]}
+              picked={currentPicks[i]}
+              onPick={function (winner) { handlePick(i, winner) }}
+            />
+          )
+        })}
       </div>
 
-      <div className="fixed bottom-0 left-0 right-0 bg-black/90 backdrop-blur border-t border-white/10 px-4 py-4">
+      {/* Fixed footer */}
+      <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, padding: "12px 16px", background: "#0a0e1a", borderTop: "1px solid #1e2540" }}>
         {saveError && (
-          <p className="text-red-400 text-sm text-center mb-3">{saveError}</p>
+          <p style={{ textAlign: "center", fontSize: 12, color: "#e24b4a", marginBottom: 8 }}>{saveError}</p>
         )}
         <button
+          type="button"
           onClick={handleNext}
           disabled={!allPicked || saving}
-          className="w-full bg-white text-black font-bold text-lg rounded-xl py-3 disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 transition-transform"
+          style={{
+            width: "100%",
+            padding: "11px 16px",
+            background: allPicked && !saving ? "#c9a84c" : "#1e2540",
+            color: allPicked && !saving ? "#0a0e1a" : "#6b7494",
+            border: "none",
+            borderRadius: 4,
+            fontFamily: "Oswald, sans-serif",
+            fontWeight: 600,
+            fontSize: 13,
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+            cursor: allPicked && !saving ? "pointer" : "not-allowed",
+          }}
         >
-          {saving ? 'Saving...' : isFinal ? 'Submit my prediction' : 'Next'}
+          {saving ? "Saving..." : isFinal ? "Submit My Prediction" : "Next Round"}
         </button>
       </div>
     </div>

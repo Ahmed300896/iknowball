@@ -4,7 +4,7 @@ import schedule from "../data/schedule";
 
 var SCHEDULE = schedule;
 
-export default function StartingXI() {
+export default function StartingXI({ onBack }) {
   const [view, setView] = useState("matches");
   const [userTeams, setUserTeams] = useState([]);
   const [matches, setMatches] = useState([]);
@@ -239,17 +239,53 @@ export default function StartingXI() {
 
   // ── MATCH LIST VIEW ──────────────────────────────────────────────────────
   return (
-    <div style={{ minHeight: "100vh", background: "#0a0e1a", color: "#fff", padding: "20px 16px 80px" }}>
-      <p style={{ fontFamily: "Oswald, sans-serif", fontWeight: 700, fontSize: 22, letterSpacing: "0.06em", marginBottom: 4 }}>
-        STARTING XI
-      </p>
+    <div style={{ minHeight: "100vh", background: "#0a0e1a", color: "#fff", paddingBottom: 80 }}>
+      {/* Header */}
+      <div style={{ height: 3, background: "#c9a84c" }} />
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", borderBottom: "1px solid #1e2540" }}>
+        <button
+          type="button"
+          onClick={onBack}
+          style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", padding: 0 }}
+        >
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+            <path d="M11 4L6 9L11 14" stroke="#c9a84c" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+        <p style={{ fontFamily: "Oswald, sans-serif", fontWeight: 700, fontSize: 16, letterSpacing: "0.08em", color: "#fff", margin: 0 }}>
+          STARTING XI
+        </p>
+        <div style={{ width: 18 }} />
+      </div>
 
+      <div style={{ padding: "20px 16px 0" }}>
       {loading ? (
         <p style={{ color: "#6b7494", fontSize: 14, marginTop: 40, textAlign: "center" }}>Loading…</p>
       ) : userTeams.length === 0 ? (
-        <p style={{ color: "#8b93ab", fontSize: 14, marginTop: 40, textAlign: "center" }}>
-          No teams selected. Pick your 5 teams first.
-        </p>
+        <div style={{ textAlign: "center", marginTop: 60 }}>
+          <p style={{ color: "#8b93ab", fontSize: 14, marginBottom: 20 }}>
+            You haven't picked your 5 teams yet.
+          </p>
+          <button
+            type="button"
+            onClick={onBack}
+            style={{
+              background: "#c9a84c",
+              color: "#0a0e1a",
+              border: "none",
+              borderRadius: 4,
+              fontFamily: "Oswald, sans-serif",
+              fontWeight: 600,
+              fontSize: 13,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              padding: "11px 24px",
+              cursor: "pointer",
+            }}
+          >
+            Pick Your 5 Teams
+          </button>
+        </div>
       ) : matches.length === 0 ? (
         <p style={{ color: "#8b93ab", fontSize: 14, marginTop: 40, textAlign: "center" }}>
           No upcoming matches for your teams.
@@ -293,6 +329,7 @@ export default function StartingXI() {
           })}
         </div>
       )}
+      </div>
     </div>
   );
 }

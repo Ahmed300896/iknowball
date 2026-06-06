@@ -1,264 +1,296 @@
-import { useState, useEffect } from 'react'
-import { supabase } from '../lib/supabase'
-import schedule from '../data/schedule'
-import PageHeader from '../components/PageHeader'
-import BottomNav from '../components/BottomNav'
+import React, { useState, useEffect } from "react";
+import { supabase } from "../lib/supabaseClient";
+import { SCHEDULE } from "../data/schedule";
 
-function formatDate(dateStr) {
-  var p = dateStr.split('-').map(Number)
-  return new Date(p[0], p[1] - 1, p[2]).toLocaleDateString('en-US', {
-    weekday: 'short', month: 'short', day: 'numeric',
-  })
-}
-
-export default function StartingXI({ user, username, onBack, onLogout, currentScreen, onPredict, onRanks }) {
-  var today = new Date().toLocaleDateString('en-CA')
-
-  var [view, setView] = useState('matches')
-  var [userTeams, setUserTeams] = useState([])
-  var [matches, setMatches] = useState([])
-  var [loadingTeams, setLoadingTeams] = useState(true)
-
-  var [activeMatch, setActiveMatch] = useState(null)
-  var [activeTeam, setActiveTeam] = useState('')
-  var [players, setPlayers] = useState([])
-  var [loadingPlayers, setLoadingPlayers] = useState(false)
-  var [selected, setSelected] = useState([])
-  var [saving, setSaving] = useState(false)
-  var [message, setMessage] = useState('')
+export default function StartingXI() {
+  const [view, setView] = useState("matches");
+  const [userTeams, setUserTeams] = useState([]);
+  const [matches, setMatches] = useState([]);
+  const [selectedMatch, setSelectedMatch] = useState(null);
+  const [players, setPlayers] = useState([]);
+  const [selectedPlayers, setSelectedPlayers] = useState([]);
+  const [existingPredictions, setExistingPredictions] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [loadingPlayers, setLoadingPlayers] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [savedMsg, setSavedMsg] = useState("");
 
   useEffect(function () {
-    async function fetchTeams() {
-      var res = await supabase
-        .from('user_teams')
-        .select('teams')
-        .eq('user_id', user.id)
-        .single()
+    async function init() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { setLoading(false); return; }
 
-      if (res.data && res.data.teams) {
-        var teams = res.data.teams
-        setUserTeams(teams)
-        var filtered = schedule.filter(function (m) {
-          return m.date >= today && (teams.includes(m.home) || teams.includes(m.away))
-        })
-        setMatches(filtered)
-      }
-      setLoadingTeams(false)
+      const today = new Date().toLocaleDateString("en-CA");
+
+      // Fetch user's teams
+      const { data: teamsRow } = await supabase
+        .from("user_teams")
+        .select("teams")
+        .eq("user_id", user.id)
+        .single();
+
+      const teams = teamsRow?.teams ?? [];
+      setUserTeams(teams);
+
+      // Filter schedule to upcoming matches involving user's teams
+      const upcoming = (SCHEDULE || []).filter(function (m) {
+        return m.date >= today && (teams.includes(m.home) || teams.includes(m.away));
+      });
+      setMatches(upcoming);
+
+      // Fetch all existing predictions for this user
+      const { data: preds } = await supabase
+        .from("starting_xi_predictions")
+        .select("match_id, players")
+        .eq("user_id", user.id);
+
+      const predObj = {};
+      (preds ?? []).forEach(function (row) {
+        predObj[String(row.match_id)] = row.players;
+      });
+      setExistingPredictions(predObj);
+
+      setLoading(false);
     }
-    fetchTeams()
-  }, [user.id])
+    init();
+  }, []);
 
   async function handleMatchClick(match) {
-    var team = userTeams.includes(match.home) ? match.home : match.away
-    setActiveMatch(match)
-    setActiveTeam(team)
-    setSelected([])
-    setMessage('')
-    setLoadingPlayers(true)
-    setView('players')
+    const team = userTeams.includes(match.home) ? match.home : match.away;
+    setSelectedMatch(match);
+    setSelectedPlayers(existingPredictions[String(match.id)] ?? []);
+    setSavedMsg("");
+    setView("players");
+    setLoadingPlayers(true);
 
-    var res = await supabase
-      .from('players')
-      .select('name, position, shirt_number')
-      .eq('team_name', team)
-      .order('shirt_number', { ascending: true })
+    const { data } = await supabase
+      .from("players")
+      .select("name, position, shirt_number")
+      .eq("team_name", team)
+      .order("shirt_number", { ascending: true });
 
-    setPlayers(res.data ?? [])
-    setLoadingPlayers(false)
+    setPlayers(data ?? []);
+    setLoadingPlayers(false);
   }
 
   function togglePlayer(name) {
-    if (selected.includes(name)) {
-      setSelected(selected.filter(function (n) { return n !== name }))
-    } else if (selected.length < 11) {
-      setSelected([...selected, name])
+    if (selectedPlayers.includes(name)) {
+      setSelectedPlayers(selectedPlayers.filter(function (n) { return n !== name; }));
+    } else if (selectedPlayers.length < 11) {
+      setSelectedPlayers([...selectedPlayers, name]);
     }
   }
 
   async function handleSubmit() {
-    if (selected.length !== 11 || saving) return
-    setSaving(true)
-    setMessage('')
-    try {
-      var res = await supabase
-        .from('starting_xi_predictions')
-        .upsert(
-          { user_id: user.id, match_id: String(activeMatch.id), players: selected },
-          { onConflict: 'user_id,match_id' }
-        )
-      if (res.error) throw res.error
-      setMessage('Prediction saved!')
-      setTimeout(function () {
-        setView('matches')
-        setActiveMatch(null)
-        setPlayers([])
-        setSelected([])
-        setMessage('')
-      }, 1000)
-    } catch (err) {
-      setMessage('Error: ' + err.message)
-    } finally {
-      setSaving(false)
+    if (selectedPlayers.length !== 11 || saving) return;
+    setSaving(true);
+    setSavedMsg("");
+
+    const { data: { user } } = await supabase.auth.getUser();
+    const { error } = await supabase
+      .from("starting_xi_predictions")
+      .upsert(
+        {
+          user_id: user.id,
+          match_id: String(selectedMatch.id),
+          players: selectedPlayers,
+        },
+        { onConflict: "user_id,match_id" }
+      );
+
+    setSaving(false);
+
+    if (error) {
+      setSavedMsg("Error: " + error.message);
+      return;
     }
+
+    setExistingPredictions(function (prev) {
+      const next = Object.assign({}, prev);
+      next[String(selectedMatch.id)] = selectedPlayers;
+      return next;
+    });
+    setSavedMsg("Prediction saved!");
+    setTimeout(function () {
+      setView("matches");
+      setSelectedMatch(null);
+      setPlayers([]);
+      setSelectedPlayers([]);
+      setSavedMsg("");
+    }, 1000);
   }
 
-  // ── PLAYER VIEW ─────────────────────────────────────────────────────
-  if (view === 'players' && activeMatch) {
+  // ── PLAYER VIEW ──────────────────────────────────────────────────────────
+  if (view === "players" && selectedMatch) {
+    const userTeam = userTeams.includes(selectedMatch.home) ? selectedMatch.home : selectedMatch.away;
+
     return (
-      <div className='min-h-screen pb-24' style={{ background: '#0a0e1a' }}>
-        <PageHeader
-          title={activeTeam + ' XI'}
-          showBack
-          onBack={function () { setView('matches') }}
-          username={username}
-          onLogout={onLogout}
-        />
-
-        <div className='px-4 py-3' style={{ borderBottom: '1px solid #1e2540' }}>
-          <p className='eyebrow mb-1'>Group {activeMatch.group} · {formatDate(activeMatch.date)}</p>
-          <p style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 600, fontSize: 14, color: '#fff' }}>
-            {activeMatch.home} vs {activeMatch.away}
+      <div style={{ minHeight: "100vh", background: "#0a0e1a", color: "#fff", paddingBottom: 100 }}>
+        {/* Header */}
+        <div style={{ borderBottom: "1px solid #1e2540", padding: "14px 16px" }}>
+          <button
+            type="button"
+            onClick={function () { setView("matches"); }}
+            style={{ background: "none", border: "none", color: "#c9a84c", fontFamily: "Oswald, sans-serif", fontWeight: 600, fontSize: 13, cursor: "pointer", letterSpacing: "0.08em", marginBottom: 8 }}
+          >
+            ← BACK
+          </button>
+          <p style={{ fontFamily: "Oswald, sans-serif", fontWeight: 700, fontSize: 18, color: "#fff", letterSpacing: "0.04em" }}>
+            {selectedMatch.home} vs {selectedMatch.away}
           </p>
-          <p style={{ fontSize: 11, color: '#8b93ab', marginTop: 3 }}>
-            Pick {activeTeam}'s starting 11
+          <p style={{ fontSize: 12, color: "#8b93ab", marginTop: 3 }}>
+            Pick {userTeam}'s starting 11
           </p>
         </div>
 
-        <div className='px-4 py-2.5' style={{ borderBottom: '1px solid #1e2540' }}>
-          <div className='flex items-center justify-between mb-1.5'>
-            <span className='eyebrow'>Selected</span>
-            <span style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 13, color: selected.length === 11 ? '#3ddc84' : '#c9a84c' }}>
-              {selected.length} / 11
-            </span>
-          </div>
-          <div className='h-1 rounded-full overflow-hidden' style={{ background: '#1e2540' }}>
-            <div
-              className='h-full rounded-full transition-all duration-200'
-              style={{ width: (selected.length / 11 * 100) + '%', background: selected.length === 11 ? '#3ddc84' : '#c9a84c' }}
-            />
-          </div>
+        {/* Counter */}
+        <div style={{ padding: "10px 16px", borderBottom: "1px solid #1e2540", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <span style={{ fontFamily: "Oswald, sans-serif", fontSize: 11, letterSpacing: "0.14em", textTransform: "uppercase", color: "#c9a84c" }}>Selected</span>
+          <span style={{ fontFamily: "Oswald, sans-serif", fontWeight: 700, fontSize: 14, color: selectedPlayers.length === 11 ? "#3ddc84" : "#c9a84c" }}>
+            {selectedPlayers.length} / 11
+          </span>
         </div>
 
-        <div className='px-4 py-4 space-y-2 pb-32'>
+        {/* Players */}
+        <div style={{ padding: "12px 16px", display: "flex", flexDirection: "column", gap: 8 }}>
           {loadingPlayers ? (
-            <p style={{ color: '#6b7494' }}>Loading players…</p>
+            <p style={{ color: "#6b7494", fontSize: 14 }}>Loading players…</p>
           ) : players.length === 0 ? (
-            <p style={{ color: '#8b93ab', textAlign: 'center', paddingTop: 40 }}>No players found for {activeTeam}.</p>
+            <p style={{ color: "#8b93ab", fontSize: 14, textAlign: "center", paddingTop: 40 }}>
+              No players found for {userTeam}.
+            </p>
           ) : (
             players.map(function (p) {
-              var isSel = selected.includes(p.name)
-              var isDisabled = !isSel && selected.length >= 11
+              const isSel = selectedPlayers.includes(p.name);
+              const isDisabled = !isSel && selectedPlayers.length >= 11;
               return (
                 <button
                   key={p.name}
-                  type='button'
+                  type="button"
                   disabled={isDisabled}
-                  onClick={function () { togglePlayer(p.name) }}
+                  onClick={function () { togglePlayer(p.name); }}
                   style={{
-                    width: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
+                    display: "flex",
+                    alignItems: "center",
                     gap: 10,
-                    padding: '10px 14px',
-                    background: isSel ? 'rgba(201,168,76,0.1)' : '#0d1224',
-                    border: isSel ? '1px solid #c9a84c' : '1px solid #1e2540',
-                    borderLeft: isSel ? '3px solid #c9a84c' : '3px solid #1e2540',
-                    borderRadius: '0 6px 6px 0',
+                    padding: "10px 14px",
+                    background: isSel ? "rgba(201,168,76,0.1)" : "#0d1224",
+                    border: isSel ? "1px solid #c9a84c" : "1px solid #1e2540",
+                    borderLeft: isSel ? "3px solid #c9a84c" : "3px solid #1e2540",
+                    borderRadius: "0 6px 6px 0",
+                    color: isSel ? "#c9a84c" : "#fff",
                     opacity: isDisabled ? 0.3 : 1,
-                    cursor: isDisabled ? 'not-allowed' : 'pointer',
-                    textAlign: 'left',
+                    cursor: isDisabled ? "not-allowed" : "pointer",
+                    textAlign: "left",
+                    width: "100%",
                   }}
                 >
                   {p.shirt_number != null && (
-                    <span style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 12, color: isSel ? '#c9a84c' : '#6b7494', width: 20, textAlign: 'center', flexShrink: 0 }}>
+                    <span style={{ fontFamily: "Oswald, sans-serif", fontWeight: 700, fontSize: 12, color: isSel ? "#c9a84c" : "#6b7494", width: 20, textAlign: "center", flexShrink: 0 }}>
                       {p.shirt_number}
                     </span>
                   )}
-                  <span style={{ flex: 1, fontFamily: 'Oswald, sans-serif', fontWeight: 600, fontSize: 13, color: isSel ? '#c9a84c' : '#fff' }}>
+                  <span style={{ flex: 1, fontFamily: "Oswald, sans-serif", fontWeight: 600, fontSize: 13, letterSpacing: "0.02em" }}>
                     {p.name}
                   </span>
                   {p.position && (
-                    <span style={{ fontSize: 10, color: '#6b7494', flexShrink: 0 }}>{p.position}</span>
+                    <span style={{ fontSize: 10, color: "#6b7494", flexShrink: 0 }}>{p.position}</span>
                   )}
                 </button>
-              )
+              );
             })
           )}
         </div>
 
-        <div className='fixed bottom-0 left-0 right-0 px-4 py-4' style={{ background: '#0a0e1a', borderTop: '1px solid #1e2540' }}>
-          {message && (
-            <p style={{ textAlign: 'center', fontSize: 13, marginBottom: 8, color: message.startsWith('Error') ? '#e24b4a' : '#3ddc84' }}>
-              {message}
+        {/* Submit footer */}
+        <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, padding: "12px 16px", background: "#0a0e1a", borderTop: "1px solid #1e2540" }}>
+          {savedMsg && (
+            <p style={{ textAlign: "center", fontSize: 13, marginBottom: 8, color: savedMsg.startsWith("Error") ? "#e24b4a" : "#3ddc84" }}>
+              {savedMsg}
             </p>
           )}
           <button
-            type='button'
-            className='btn-gold'
-            disabled={selected.length !== 11 || saving}
+            type="button"
+            disabled={selectedPlayers.length !== 11 || saving}
             onClick={handleSubmit}
+            style={{
+              width: "100%",
+              padding: "11px 16px",
+              background: selectedPlayers.length === 11 && !saving ? "#c9a84c" : "#1e2540",
+              color: selectedPlayers.length === 11 && !saving ? "#0a0e1a" : "#6b7494",
+              border: "none",
+              borderRadius: 4,
+              fontFamily: "Oswald, sans-serif",
+              fontWeight: 600,
+              fontSize: 13,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              cursor: selectedPlayers.length === 11 && !saving ? "pointer" : "not-allowed",
+            }}
           >
-            {saving ? 'Saving…' : 'Submit Prediction'}
+            {saving ? "Saving…" : "Submit Prediction"}
           </button>
         </div>
       </div>
-    )
+    );
   }
 
-  // ── MATCH LIST VIEW ─────────────────────────────────────────────────
+  // ── MATCH LIST VIEW ──────────────────────────────────────────────────────
   return (
-    <div className='min-h-screen pb-20' style={{ background: '#0a0e1a' }}>
-      <PageHeader title='Starting XI' showBack onBack={onBack} username={username} onLogout={onLogout} />
+    <div style={{ minHeight: "100vh", background: "#0a0e1a", color: "#fff", padding: "20px 16px 80px" }}>
+      <p style={{ fontFamily: "Oswald, sans-serif", fontWeight: 700, fontSize: 22, letterSpacing: "0.06em", marginBottom: 4 }}>
+        STARTING XI
+      </p>
 
-      <div className='px-4 pt-5'>
-        {loadingTeams ? (
-          <div className='flex items-center justify-center pt-20'>
-            <p style={{ color: '#6b7494' }}>Loading…</p>
-          </div>
-        ) : userTeams.length === 0 ? (
-          <div className='text-center pt-16'>
-            <p style={{ fontFamily: 'Oswald, sans-serif', fontSize: 18, color: '#fff', marginBottom: 8 }}>NO TEAMS SELECTED</p>
-            <p style={{ fontSize: 13, color: '#8b93ab' }}>Pick your 5 teams to unlock Starting XI.</p>
-          </div>
-        ) : matches.length === 0 ? (
-          <div className='text-center pt-16'>
-            <p style={{ fontFamily: 'Oswald, sans-serif', fontSize: 18, color: '#fff', marginBottom: 8 }}>NO UPCOMING MATCHES</p>
-            <p style={{ fontSize: 13, color: '#8b93ab' }}>Your teams have no upcoming group stage matches.</p>
-          </div>
-        ) : (
-          <div className='space-y-3'>
-            <div className='flex items-center gap-2 mb-4'>
-              <div style={{ width: 3, height: 18, background: '#c9a84c', borderRadius: 2 }} />
-              <p className='eyebrow'>Upcoming Matches</p>
-            </div>
-            {matches.map(function (match) {
-              return (
-                <button
-                  key={match.id}
-                  type='button'
-                  onClick={function () { handleMatchClick(match) }}
-                  className='card-fifa w-full text-left'
-                >
-                  <p className='eyebrow mb-1'>Group {match.group} · {formatDate(match.date)}</p>
-                  <p style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 600, fontSize: 14, color: '#fff' }}>
+      {loading ? (
+        <p style={{ color: "#6b7494", fontSize: 14, marginTop: 40, textAlign: "center" }}>Loading…</p>
+      ) : userTeams.length === 0 ? (
+        <p style={{ color: "#8b93ab", fontSize: 14, marginTop: 40, textAlign: "center" }}>
+          No teams selected. Pick your 5 teams first.
+        </p>
+      ) : matches.length === 0 ? (
+        <p style={{ color: "#8b93ab", fontSize: 14, marginTop: 40, textAlign: "center" }}>
+          No upcoming matches for your teams.
+        </p>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 16 }}>
+          {matches.map(function (match) {
+            const hasPred = !!existingPredictions[String(match.id)];
+            return (
+              <div
+                key={match.id}
+                onClick={function () { handleMatchClick(match); }}
+                style={{
+                  background: "#0d1224",
+                  border: "1px solid #1e2540",
+                  borderLeft: "3px solid #c9a84c",
+                  borderRadius: "0 6px 6px 0",
+                  padding: "14px 16px",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <div>
+                  <p style={{ fontFamily: "Oswald, sans-serif", fontSize: 10, fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: "#c9a84c", marginBottom: 4 }}>
+                    Group {match.group} · {match.date}
+                  </p>
+                  <p style={{ fontFamily: "Oswald, sans-serif", fontWeight: 600, fontSize: 14, color: "#fff", letterSpacing: "0.02em" }}>
                     {match.home} vs {match.away}
                   </p>
-                  <p style={{ fontSize: 11, color: '#8b93ab', marginTop: 3 }}>
-                    Tap to pick your XI
-                  </p>
-                </button>
-              )
-            })}
-          </div>
-        )}
-      </div>
-
-      <BottomNav
-        currentScreen={currentScreen ?? 'starting-xi'}
-        onHome={onBack}
-        onPredict={onPredict ?? function () {}}
-        onRanks={onRanks ?? function () {}}
-      />
+                </div>
+                {hasPred && (
+                  <svg width="22" height="22" viewBox="0 0 22 22" fill="none" style={{ flexShrink: 0 }}>
+                    <circle cx="11" cy="11" r="10" fill="rgba(61,220,132,0.15)" stroke="#3ddc84" strokeWidth="1.5"/>
+                    <path d="M7 11L9.5 13.5L15 8" stroke="#3ddc84" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
-  )
+  );
 }

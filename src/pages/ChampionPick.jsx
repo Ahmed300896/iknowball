@@ -11,6 +11,7 @@ export default function ChampionPick({ onBack, onLogout, username }) {
   var [saving, setSaving] = useState(false)
   var [savedMsg, setSavedMsg] = useState("")
   var [loading, setLoading] = useState(true)
+  var [showInfo, setShowInfo] = useState(false)
 
   useEffect(function () {
     async function load() {
@@ -66,6 +67,24 @@ export default function ChampionPick({ onBack, onLogout, username }) {
   return (
     <div style={{ minHeight: "100vh", background: "#0a0e1a", color: "#fff", paddingBottom: 120 }}>
       <PageHeader title="CHAMPION PICK" showBack onBack={onBack} username={username} onLogout={onLogout} />
+
+      {/* How to play */}
+      <div style={{ padding: "10px 16px", borderBottom: "1px solid #1e2540" }}>
+        <button
+          type="button"
+          onClick={function () { setShowInfo(function (v) { return !v; }); }}
+          style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "Oswald, sans-serif", fontWeight: 600, fontSize: 11, letterSpacing: "0.1em", color: "#c9a84c", padding: 0, textTransform: "uppercase" }}
+        >
+          {showInfo ? "▲ How to Play" : "? How to Play"}
+        </button>
+        {showInfo && (
+          <div style={{ marginTop: 8, background: "rgba(201,168,76,0.06)", border: "1px solid rgba(201,168,76,0.2)", borderRadius: 6, padding: "10px 12px" }}>
+            <p style={{ fontSize: 12, color: "#8b93ab", lineHeight: 1.65, margin: 0 }}>
+              Pick one team to win the entire World Cup. Lock in your pick before June 11. Big points if you get it right.
+            </p>
+          </div>
+        )}
+      </div>
 
       <div style={{ padding: "20px 16px 0" }}>
         <p style={{ fontSize: 13, color: "#8b93ab", lineHeight: 1.65, marginBottom: 24 }}>

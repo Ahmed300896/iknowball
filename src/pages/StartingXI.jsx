@@ -17,6 +17,7 @@ export default function StartingXI({ onBack, onTeamSelect }) {
   const [loadingPlayers, setLoadingPlayers] = useState(false);
   const [saving, setSaving] = useState(false);
   const [savedMsg, setSavedMsg] = useState("");
+  const [showInfo, setShowInfo] = useState(false);
 
   useEffect(function () {
     async function init() {
@@ -263,6 +264,24 @@ export default function StartingXI({ onBack, onTeamSelect }) {
           STARTING XI
         </p>
         <div style={{ width: 18 }} />
+      </div>
+
+      {/* How to play */}
+      <div style={{ padding: "10px 16px", borderBottom: "1px solid #1e2540" }}>
+        <button
+          type="button"
+          onClick={function () { setShowInfo(function (v) { return !v; }); }}
+          style={{ background: "none", border: "none", cursor: "pointer", fontFamily: "Oswald, sans-serif", fontWeight: 600, fontSize: 11, letterSpacing: "0.1em", color: "#c9a84c", padding: 0, textTransform: "uppercase" }}
+        >
+          {showInfo ? "▲ How to Play" : "? How to Play"}
+        </button>
+        {showInfo && (
+          <div style={{ marginTop: 8, background: "rgba(201,168,76,0.06)", border: "1px solid rgba(201,168,76,0.2)", borderRadius: 6, padding: "10px 12px" }}>
+            <p style={{ fontSize: 12, color: "#8b93ab", lineHeight: 1.65, margin: 0 }}>
+              Pick the starting 11 players for your teams before each match. Get 7 or more correct = full points. Less than 7 = 0 points. Points increase each round.
+            </p>
+          </div>
+        )}
       </div>
 
       <div style={{ padding: "20px 16px 0" }}>

@@ -108,7 +108,14 @@ export default function ScorePredictor({ user, username, onBack, onLogout, curre
     setSaveStates(prev => ({ ...prev, [matchId]: 'idle' }))
   }
 
+  // A match is locked once its date is in the past (we only have dates, not kickoff times).
+  // On the match day itself, predictions remain open until midnight.
+  function isMatchLocked(matchDate) {
+    return matchDate < today
+  }
+
   async function handleSubmit(match) {
+    if (isMatchLocked(match.date)) return // server-side guard: silently refuse
     setSaveStates(prev => ({ ...prev, [match.id]: 'saving' }))
     try {
       const updated = {
@@ -202,7 +209,70 @@ export default function ScorePredictor({ user, username, onBack, onLogout, curre
                     const score = scores[match.id] ?? { home: 0, away: 0 }
                     const state = saveStates[match.id] ?? 'idle'
                     const isSaved = !!allPredictions[match.id]
+                    const locked = isMatchLocked(match.date)
+                    const savedPred = allPredictions[match.id]
 
+                    if (locked) {
+                      // ── Locked card ──────────────────────────────────────
+                      return (
+                        <div key={match.id} className="card-fifa" style={{ opacity: 0.75 }}>
+                          {/* Header row: group badge + lock badge */}
+                          <div className="flex items-center justify-between mb-3">
+                            <p className="eyebrow">Group {match.group}</p>
+                            <div className="flex items-center gap-1" style={{ background: 'rgba(107,116,148,0.15)', border: '1px solid #2a3354', borderRadius: 3, padding: '2px 7px' }}>
+                              <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+                                <rect x="2" y="5" width="8" height="6" rx="1" stroke="#6b7494" strokeWidth="1.2"/>
+                                <path d="M4 5V3.5C4 2.4 4.9 1.5 6 1.5C7.1 1.5 8 2.4 8 3.5V5" stroke="#6b7494" strokeWidth="1.2"/>
+                              </svg>
+                              <span style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 9, letterSpacing: '0.12em', color: '#6b7494' }}>
+                                LOCKED
+                              </span>
+                            </div>
+                          </div>
+
+                          {/* Team names */}
+                          <div className="flex items-center gap-2 mb-3">
+                            <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
+                              <TeamBadge team={match.home} size={28} />
+                              <span className="text-xs text-center truncate w-full" style={{ fontFamily: 'Oswald, sans-serif', color: '#6b7494', letterSpacing: '0.02em' }}>
+                                {match.home}
+                              </span>
+                            </div>
+
+                            {/* Predicted score or no-prediction label */}
+                            <div className="flex flex-col items-center gap-1 shrink-0">
+                              {savedPred ? (
+                                <div className="flex items-center gap-1">
+                                  <span style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 28, color: '#3d4560', lineHeight: 1, width: 32, textAlign: 'center' }}>
+                                    {savedPred.homeScore}
+                                  </span>
+                                  <span style={{ color: '#2a3354', fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 20, lineHeight: 1 }}>:</span>
+                                  <span style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 28, color: '#3d4560', lineHeight: 1, width: 32, textAlign: 'center' }}>
+                                    {savedPred.awayScore}
+                                  </span>
+                                </div>
+                              ) : (
+                                <span style={{ fontFamily: 'Oswald, sans-serif', fontSize: 10, letterSpacing: '0.08em', color: '#3d4560' }}>
+                                  NO PREDICTION
+                                </span>
+                              )}
+                              <span style={{ fontSize: 9, color: '#3d4560', fontFamily: 'Oswald, sans-serif', letterSpacing: '0.08em' }}>
+                                {savedPred ? 'YOUR PICK' : '—'}
+                              </span>
+                            </div>
+
+                            <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
+                              <TeamBadge team={match.away} size={28} />
+                              <span className="text-xs text-center truncate w-full" style={{ fontFamily: 'Oswald, sans-serif', color: '#6b7494', letterSpacing: '0.02em' }}>
+                                {match.away}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    }
+
+                    // ── Unlocked card ──────────────────────────────────────
                     return (
                       <div key={match.id} className="card-fifa">
                         {/* Submitted indicator */}

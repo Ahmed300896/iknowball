@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import { calculateScorePoints } from '../lib/scoring'
 import PageHeader from './PageHeader'
 import BottomNav from './BottomNav'
 
@@ -39,29 +40,55 @@ export default function LeaderboardScreen({ user, username, onBack, onLogout, cu
 
   useEffect(() => {
     async function load() {
-      const [{ data: pointsData }, { data: profiles }] = await Promise.all([
-        supabase.from('user_points').select('user_id, points'),
+      // Fetch predictions, results, and profiles in parallel
+      var [predRes, resultsRes, profilesRes] = await Promise.all([
+        supabase.from('score_predictions').select('user_id, predictions'),
+        supabase.from('match_results').select('match_id, home_score, away_score, match_type'),
         supabase.from('profiles').select('id, username'),
       ])
 
-      const profileMap = Object.fromEntries(
-        (profiles ?? []).map(p => [p.id, p.username])
+      var predData = predRes.data ?? []
+      var resultsData = resultsRes.data ?? []
+      var profiles = profilesRes.data ?? []
+
+      var profileMap = Object.fromEntries(
+        profiles.map(function (p) { return [p.id, p.username] })
       )
 
-      // Sum all point rows per user
-      const totals = {}
-      for (const row of (pointsData ?? [])) {
-        totals[row.user_id] = (totals[row.user_id] ?? 0) + row.points
-      }
+      // Build a results lookup keyed by match_id (string)
+      var resultsMap = {}
+      resultsData.forEach(function (r) {
+        resultsMap[String(r.match_id)] = {
+          homeScore: r.home_score,
+          awayScore: r.away_score,
+          matchType: r.match_type,
+        }
+      })
 
-      const ranked = Object.entries(totals)
-        .map(([userId, points]) => ({
-          userId,
-          username: profileMap[userId] ?? 'Unknown',
-          points,
-        }))
-        .sort((a, b) => b.points - a.points)
+      // For each user who has made predictions, compute their total score points.
+      // Users with no matched results yet will show 0 pts but still appear.
+      var ranked = predData.map(function (row) {
+        var predictions = row.predictions || {}
+        var total = 0
+        Object.keys(predictions).forEach(function (matchId) {
+          var result = resultsMap[String(matchId)]
+          if (!result) return
+          var pred = predictions[matchId]
+          if (!pred) return
+          total += calculateScorePoints(
+            { homeScore: pred.homeScore, awayScore: pred.awayScore },
+            { homeScore: result.homeScore, awayScore: result.awayScore },
+            result.matchType
+          )
+        })
+        return {
+          userId: row.user_id,
+          username: profileMap[row.user_id] || 'Unknown',
+          points: total,
+        }
+      })
 
+      ranked.sort(function (a, b) { return b.points - a.points })
       setRows(ranked)
       setLoading(false)
     }

@@ -168,15 +168,15 @@ export default function HowToPlay({ onBack, onLogout, username }) {
           </Card>
         </div>
 
-        {/* ── CHAMPION PICK ─────────────────────────────────────────── */}
+        {/* ── WORLD CUP PREDICTOR ───────────────────────────────────── */}
         <div style={{ marginBottom: 28 }}>
-          <SectionHeading label="Champion Pick" />
+          <SectionHeading label="World Cup Predictor" />
           <Card>
             <p style={{ fontFamily: "Oswald, sans-serif", fontWeight: 700, fontSize: 13, letterSpacing: "0.06em", color: "#fff", margin: "0 0 10px" }}>
-              CHAMPION PICK
+              WORLD CUP PREDICTOR
             </p>
             <p style={{ fontSize: 13, color: "#8b93ab", lineHeight: 1.65, margin: 0 }}>
-              Before the tournament starts, pick one team to win the entire World Cup. If your team wins, you earn a massive points bonus that could completely shake up the leaderboard. You only get one pick and it cannot be changed after June 11.
+              Before the tournament starts, predict the group stage standings for all 12 groups. The top 2 from each group advance automatically, plus the 8 best 3rd-place teams. Then predict the knockout bracket all the way to the Final. Points are weighted heavily toward the later rounds.
             </p>
           </Card>
         </div>
@@ -186,7 +186,7 @@ export default function HowToPlay({ onBack, onLogout, username }) {
           <SectionHeading label="Leaderboard" />
           <Card>
             <p style={{ fontSize: 13, color: "#8b93ab", lineHeight: 1.65 }}>
-              Points from Score Predictor, Starting XI, and Champion Pick all combine into one total score. The leaderboard ranks every player in your league so you can track who is pulling ahead round by round.
+              Points from Score Predictor, Starting XI, and World Cup Predictor all combine into one total score. The leaderboard ranks every player in your league so you can track who is pulling ahead round by round.
             </p>
           </Card>
         </div>

@@ -219,6 +219,11 @@ export default function KnockoutScreen({ username, groupPicks, onSubmit, onBack,
           Round {roundIndex + 1} of {ROUNDS.length}
         </p>
         <h1 className="text-white text-2xl font-bold">{currentRound.label}</h1>
+        {roundIndex === 0 && (
+          <p className="text-xs mt-2" style={{ color: '#8b93ab' }}>
+            32 teams: 24 group qualifiers (1st &amp; 2nd from each group) + 8 best 3rd-place teams. 3rd-place matchups are approximate — final pairings depend on which groups they qualify from.
+          </p>
+        )}
       </div>
 
       <div className="px-4 pb-32 flex flex-col gap-8">

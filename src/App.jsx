@@ -12,7 +12,6 @@ import LeaderboardScreen from './components/LeaderboardScreen'
 import AdminResultsScreen from './components/AdminResultsScreen'
 import AdminPanel from './pages/AdminPanel'
 import StartingXI from './pages/StartingXI'
-import ChampionPick from './pages/ChampionPick'
 import HowToPlay from './components/HowToPlay'
 import TeamSelectionScreen from './components/TeamSelectionScreen'
 
@@ -172,10 +171,6 @@ export default function App() {
     return <StartingXI user={user} username={username} onBack={handleBackHome} onLogout={handleLogout} onTeamSelect={() => setScreen('team-selection')} currentScreen="starting-xi" onPredict={() => setScreen('score-predictor')} onRanks={() => setScreen('leaderboard')} />
   }
 
-  if (screen === 'champion-pick') {
-    return <ChampionPick onBack={handleBackHome} onLogout={handleLogout} username={username} />
-  }
-
   if (screen === 'how-to-play') {
     return <HowToPlay onBack={handleBackHome} onLogout={handleLogout} username={username} />
   }
@@ -221,5 +216,5 @@ export default function App() {
     return <GroupStage username={username} onNext={handleGroupsNext} onBack={handleBackHome} onHome={handleBackHome} />
   }
 
-  return <HomeScreen user={user} username={username} onPlay={handlePlay} onLogout={handleLogout} onViewPredictions={handleViewPredictions} onAdmin={() => setScreen('admin-panel')} onScorePredictor={() => setScreen('score-predictor')} onLeaderboard={() => setScreen('leaderboard')} onStartingXI={() => setScreen('starting-xi')} onChampionPick={() => setScreen('champion-pick')} onHowToPlay={() => setScreen('how-to-play')} currentScreen="home" onPredict={() => setScreen('score-predictor')} onRanks={() => setScreen('leaderboard')} />
+  return <HomeScreen user={user} username={username} onPlay={handlePlay} onLogout={handleLogout} onViewPredictions={handleViewPredictions} onAdmin={() => setScreen('admin-panel')} onScorePredictor={() => setScreen('score-predictor')} onLeaderboard={() => setScreen('leaderboard')} onStartingXI={() => setScreen('starting-xi')} onWorldCupPredictor={() => setScreen('groups')} onHowToPlay={() => setScreen('how-to-play')} currentScreen="home" onPredict={() => setScreen('score-predictor')} onRanks={() => setScreen('leaderboard')} />
 }

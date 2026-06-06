@@ -110,6 +110,14 @@ export default function GroupStage({ username, onNext, onBack, onHome }) {
       <div className="px-4 pt-6 pb-4">
         <h1 className="text-white text-2xl font-bold">Pick your group standings</h1>
         <p className="text-white/40 text-sm mt-1">Use the arrows to rank each group 1st to 4th</p>
+        <div className="flex flex-col gap-1 mt-3">
+          <p className="text-xs font-semibold" style={{ color: '#3ddc84' }}>
+            ✓ Top 2 from each group advance automatically
+          </p>
+          <p className="text-xs" style={{ color: '#8b93ab' }}>
+            ★ 3rd place teams compete for 8 wildcard spots
+          </p>
+        </div>
       </div>
 
       <div className="px-4 pb-32 flex flex-col gap-4">

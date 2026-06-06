@@ -1,6 +1,21 @@
 import { useState, useEffect } from "react"
 import { supabase } from "../lib/supabase"
 import schedule from "../data/schedule"
+import squads from "../data/squads.js"
+
+// Schedule team names that differ from Wikipedia squad page names
+var SQUAD_NAME_MAP = {
+  "Czechia": "Czech Republic",
+  "Turkiye": "Turkey",
+  "USA": "United States",
+  "Bosnia & Herzegovina": "Bosnia and Herzegovina",
+  "Curacao": "Curaçao",
+}
+
+function getSquad(teamName) {
+  var wikiName = SQUAD_NAME_MAP[teamName] || teamName
+  return squads[wikiName] || null
+}
 
 var TIER1 = ["Argentina", "France", "England", "Brazil", "Portugal", "Spain", "Belgium", "Netherlands", "Germany", "Italy"]
 var TIER2 = ["Croatia", "Denmark", "Uruguay", "Switzerland", "USA", "Mexico", "Colombia", "Senegal", "Morocco", "Japan", "Poland", "Serbia", "South Korea", "Ecuador", "Australia"]
@@ -17,7 +32,6 @@ var TIERS = [
   { id: 4, teams: TIER4, limit: 1, label: "Tier 4", desc: "Other qualifiers" },
 ]
 
-var POSITION_LABELS = ["GK", "DEF", "DEF", "DEF", "DEF", "MID", "MID", "MID", "FWD", "FWD", "FWD"]
 
 function groupByDate(matches) {
   var map = {}
@@ -100,7 +114,7 @@ export default function StartingXI({ onBack }) {
   var [predictions, setPredictions] = useState({})
   var [selectedMatch, setSelectedMatch] = useState(null)
   var [selectedTeam, setSelectedTeam] = useState("")
-  var [players, setPlayers] = useState(Array(11).fill(""))
+  var [players, setPlayers] = useState([])
   var [saving, setSaving] = useState(false)
   var [locking, setLocking] = useState(false)
   var [savedMsg, setSavedMsg] = useState("")
@@ -195,16 +209,16 @@ export default function StartingXI({ onBack }) {
     var existing = predictions[String(match.id)] || []
     setSelectedMatch(match)
     setSelectedTeam(team)
-    setPlayers(Array(11).fill("").map(function (_, i) { return existing[i] || "" }))
+    setPlayers(existing.filter(function (n) { return n && n.trim() }))
     setSavedMsg("")
     setPhase(3)
   }
 
-  function setPlayer(index, value) {
+  function togglePlayer(name) {
     setPlayers(function (prev) {
-      var next = prev.slice()
-      next[index] = value
-      return next
+      if (prev.includes(name)) return prev.filter(function (n) { return n !== name })
+      if (prev.length >= 11) return prev
+      return prev.concat([name])
     })
   }
 
@@ -354,51 +368,90 @@ export default function StartingXI({ onBack }) {
   // ── RENDER: Phase 3 — Starting XI Predictor ──────────────────────────────
 
   if (phase === 3 && selectedMatch) {
+    var squad = getSquad(selectedTeam)
+    var posGroups = squad
+      ? [
+          { pos: "GK", label: "Goalkeepers", players: squad.GK },
+          { pos: "DF", label: "Defenders", players: squad.DF },
+          { pos: "MF", label: "Midfielders", players: squad.MF },
+          { pos: "FW", label: "Forwards", players: squad.FW },
+        ]
+      : []
+
     return (
-      <div style={{ minHeight: "100vh", background: "#0a0e1a", color: "#fff", paddingBottom: 100 }}>
+      <div style={{ minHeight: "100vh", background: "#0a0e1a", color: "#fff", paddingBottom: 110 }}>
         <BackHeader
           title={selectedMatch.home + " vs " + selectedMatch.away}
           onBack={function () { setPhase(2); setSelectedMatch(null); setSavedMsg("") }}
           subtitle={selectedTeam + " · " + formatDate(selectedMatch.date)}
         />
 
-        <div style={{ padding: "14px 16px 0" }}>
-          <div style={{ background: "rgba(201,168,76,0.06)", border: "1px solid rgba(201,168,76,0.2)", borderRadius: 6, padding: "10px 12px", marginBottom: 16 }}>
-            <p style={{ fontSize: 11, color: "#8b93ab", margin: 0, lineHeight: 1.6 }}>
-              Squad lists will be available after the FIFA squad submission deadline. For now, enter player names manually.
-            </p>
-          </div>
+        {/* Counter strip */}
+        <div style={{ padding: "10px 16px", borderBottom: "1px solid #1e2540", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <span style={{ fontFamily: "Oswald, sans-serif", fontSize: 11, letterSpacing: "0.14em", color: "#c9a84c" }}>SELECTED</span>
+          <span style={{ fontFamily: "Oswald, sans-serif", fontWeight: 700, fontSize: 14, color: players.length === 11 ? "#3ddc84" : "#c9a84c" }}>
+            {players.length} / 11
+          </span>
+        </div>
 
-          {players.map(function (val, i) {
-            return (
-              <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                <span style={{ fontFamily: "Oswald, sans-serif", fontWeight: 700, fontSize: 11, color: "#6b7494", width: 18, textAlign: "right", flexShrink: 0 }}>
-                  {i + 1}
-                </span>
-                <span style={{ fontFamily: "Oswald, sans-serif", fontWeight: 700, fontSize: 9, letterSpacing: "0.1em", color: "#c9a84c", width: 28, flexShrink: 0 }}>
-                  {POSITION_LABELS[i]}
-                </span>
-                <input
-                  type="text"
-                  value={val}
-                  onChange={function (e) { setPlayer(i, e.target.value) }}
-                  placeholder={"Player " + (i + 1)}
-                  style={{
-                    flex: 1,
-                    background: "#0d1224",
-                    border: "1px solid #1e2540",
-                    borderRadius: 4,
-                    padding: "8px 10px",
-                    color: "#fff",
-                    fontFamily: "Oswald, sans-serif",
-                    fontSize: 13,
-                    letterSpacing: "0.02em",
-                    outline: "none",
-                  }}
-                />
-              </div>
-            )
-          })}
+        <div style={{ padding: "14px 16px 0" }}>
+          {!squad ? (
+            <p style={{ fontSize: 13, color: "#8b93ab", textAlign: "center", paddingTop: 40 }}>
+              Squad data not yet available for {selectedTeam}.
+            </p>
+          ) : (
+            posGroups.map(function (group) {
+              return (
+                <div key={group.pos} style={{ marginBottom: 20 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                    <div style={{ height: 2, width: 14, background: "#c9a84c", borderRadius: 1, flexShrink: 0 }} />
+                    <span style={{ fontFamily: "Oswald, sans-serif", fontWeight: 700, fontSize: 10, letterSpacing: "0.2em", color: "#c9a84c" }}>
+                      {group.pos} · {group.label}
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                    {group.players.map(function (name) {
+                      var isSel = players.includes(name)
+                      var isDisabled = !isSel && players.length >= 11
+                      return (
+                        <button
+                          key={name}
+                          type="button"
+                          disabled={isDisabled}
+                          onClick={function () { togglePlayer(name) }}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 10,
+                            padding: "10px 14px",
+                            background: isSel ? "rgba(201,168,76,0.1)" : "#0d1224",
+                            border: isSel ? "1px solid #c9a84c" : "1px solid #1e2540",
+                            borderLeft: isSel ? "3px solid #c9a84c" : "3px solid #1e2540",
+                            borderRadius: "0 6px 6px 0",
+                            color: isSel ? "#c9a84c" : "#fff",
+                            opacity: isDisabled ? 0.3 : 1,
+                            cursor: isDisabled ? "not-allowed" : "pointer",
+                            textAlign: "left",
+                            width: "100%",
+                          }}
+                        >
+                          <span style={{ fontFamily: "Oswald, sans-serif", fontWeight: 600, fontSize: 13, letterSpacing: "0.02em", flex: 1 }}>
+                            {name}
+                          </span>
+                          {isSel && (
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ flexShrink: 0 }}>
+                              <circle cx="7" cy="7" r="6" fill="rgba(201,168,76,0.2)" stroke="#c9a84c" strokeWidth="1.5" />
+                              <path d="M4.5 7L6 8.5L9.5 5" stroke="#c9a84c" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          )}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              )
+            })
+          )}
         </div>
 
         <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, padding: "12px 16px", background: "#0a0e1a", borderTop: "1px solid #1e2540" }}>
@@ -409,7 +462,7 @@ export default function StartingXI({ onBack }) {
           )}
           <FooterButton
             label={saving ? "Saving..." : "Submit XI"}
-            disabled={saving}
+            disabled={saving || players.length !== 11}
             onClick={handleSubmitXI}
           />
         </div>

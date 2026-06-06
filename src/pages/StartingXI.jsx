@@ -107,23 +107,26 @@ export default function StartingXI({ onBack }) {
 
   useEffect(function () {
     async function init() {
-      var authRes = await supabase.auth.getUser()
-      var user = authRes.data.user
-      if (!user) { setPhase(1); return }
-      setUserId(user.id)
+      try {
+        var authRes = await supabase.auth.getUser()
+        var user = authRes.data.user
+        if (!user) { setPhase(1); return }
+        setUserId(user.id)
 
-      var { data: selRow } = await supabase
-        .from("team_selections")
-        .select("teams")
-        .eq("user_id", user.id)
-        .single()
+        var { data: selRow, error } = await supabase
+          .from("team_selections")
+          .select("teams")
+          .eq("user_id", user.id)
+          .maybeSingle()
 
-      if (selRow && selRow.teams && selRow.teams.length > 0) {
-        var teams = selRow.teams
-        setUserTeams(teams)
-        loadMatchesAndPredictions(user.id, teams)
-        setPhase(2)
-      } else {
+        if (!error && selRow && Array.isArray(selRow.teams) && selRow.teams.length > 0) {
+          setUserTeams(selRow.teams)
+          loadMatchesAndPredictions(user.id, selRow.teams)
+          setPhase(2)
+        } else {
+          setPhase(1)
+        }
+      } catch (err) {
         setPhase(1)
       }
     }

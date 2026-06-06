@@ -50,7 +50,7 @@ export default function StartingXI({ user, username, onBack, onLogout, currentSc
         .eq("user_id", user.id)
 
       var map = {}
-      ;(preds ?? []).forEach(function (p) { map[p.match_id] = p.players })
+      ;(preds ?? []).forEach(function (p) { map[String(p.match_id)] = p.players })
       setExistingPredictions(map)
 
       setLoadingTeams(false)
@@ -82,7 +82,7 @@ export default function StartingXI({ user, username, onBack, onLogout, currentSc
     setActiveMatch(match)
     setActiveUserTeam(match.userTeam)
     setSaveMessage("")
-    setSelectedPlayers(existingPredictions[match.id] ?? [])
+    setSelectedPlayers(existingPredictions[String(match.id)] ?? [])
     setLoadingPlayers(true)
     setPlayers([])
 
@@ -109,17 +109,34 @@ export default function StartingXI({ user, username, onBack, onLogout, currentSc
     if (selectedPlayers.length !== 11 || saving) return
     setSaving(true)
     setSaveMessage("")
+    var matchIdStr = String(activeMatch.id)
     try {
-      var { error } = await supabase
+      // Check if a row already exists for this user + match
+      var { data: existing } = await supabase
         .from("starting_xi_predictions")
-        .upsert(
-          { user_id: user.id, match_id: activeMatch.id, players: selectedPlayers },
-          { onConflict: "user_id,match_id" }
-        )
-      if (error) throw error
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("match_id", matchIdStr)
+        .single()
+
+      var saveError
+      if (existing) {
+        var { error: updateError } = await supabase
+          .from("starting_xi_predictions")
+          .update({ players: selectedPlayers })
+          .eq("id", existing.id)
+        saveError = updateError
+      } else {
+        var { error: insertError } = await supabase
+          .from("starting_xi_predictions")
+          .insert({ user_id: user.id, match_id: matchIdStr, players: selectedPlayers })
+        saveError = insertError
+      }
+      if (saveError) throw saveError
+
       setExistingPredictions(function (prev) {
         var next = Object.assign({}, prev)
-        next[activeMatch.id] = selectedPlayers
+        next[matchIdStr] = selectedPlayers
         return next
       })
       setSaveMessage("Prediction saved!")
@@ -290,7 +307,7 @@ export default function StartingXI({ user, username, onBack, onLogout, currentSc
               <p className="eyebrow">Upcoming Matches</p>
             </div>
             {upcomingMatches.map(function (match) {
-              var hasPrediction = !!existingPredictions[match.id]
+              var hasPrediction = !!existingPredictions[String(match.id)]
               var homeFlag = FLAGS[match.home] || "⚽"
               var awayFlag = FLAGS[match.away] || "⚽"
               var userTeamFlag = FLAGS[match.userTeam] || "⚽"

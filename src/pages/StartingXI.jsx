@@ -20,19 +20,14 @@ function getSquad(teamName) {
   return squads[wikiName] || null
 }
 
-var TIER1 = ["Argentina", "France", "England", "Brazil", "Portugal", "Spain", "Belgium", "Netherlands", "Germany", "Italy"]
-var TIER2 = ["Croatia", "Denmark", "Uruguay", "Switzerland", "USA", "Mexico", "Colombia", "Senegal", "Morocco", "Japan", "Poland", "Serbia", "South Korea", "Ecuador", "Australia"]
-var TIER3 = ["Canada", "Ghana", "Cameroon", "Tunisia", "Egypt", "Nigeria", "Ivory Coast", "Chile", "Peru", "Paraguay", "Costa Rica", "Saudi Arabia", "Iran", "Wales", "New Zealand"]
-
-var UPPER_SET = new Set(TIER1.concat(TIER2, TIER3))
-var ALL_TEAMS = Array.from(new Set(schedule.flatMap(function (m) { return [m.home, m.away] })))
-var TIER4 = ALL_TEAMS.filter(function (t) { return !UPPER_SET.has(t) }).sort()
+var TIER1 = ["France", "Spain", "Argentina", "England", "Portugal", "Brazil", "Netherlands", "Morocco", "Belgium", "Germany"]
+var TIER2 = ["Croatia", "Colombia", "Senegal", "Mexico", "USA", "Uruguay", "Japan", "Switzerland", "South Korea", "Ecuador", "Australia", "Turkey", "Canada", "Ivory Coast", "Tunisia", "Sweden", "Norway", "Algeria", "Austria", "Iran", "Ghana"]
+var TIER3 = ["Scotland", "Paraguay", "Qatar", "Bosnia & Herzegovina", "Cape Verde", "Haiti", "New Zealand", "Czechia", "Uzbekistan", "Jordan", "Curacao", "DR Congo", "Panama", "Saudi Arabia", "South Africa", "Egypt", "Iraq"]
 
 var TIERS = [
-  { id: 1, teams: TIER1, limit: 2, label: "Tier 1", desc: "Top 10 FIFA ranked" },
-  { id: 2, teams: TIER2, limit: 1, label: "Tier 2", desc: "Ranked 11–25" },
-  { id: 3, teams: TIER3, limit: 1, label: "Tier 3", desc: "Ranked 26–40" },
-  { id: 4, teams: TIER4, limit: 1, label: "Tier 4", desc: "Other qualifiers" },
+  { id: 1, teams: TIER1, limit: 2, label: "Tier 1", desc: "Top 10 ranked" },
+  { id: 2, teams: TIER2, limit: 3, label: "Tier 2", desc: "Ranked 11-30" },
+  { id: 3, teams: TIER3, limit: 1, label: "Tier 3", desc: "Rest of the field" },
 ]
 
 
@@ -112,7 +107,7 @@ export default function StartingXI({ onBack }) {
   var [phase, setPhase] = useState(null)
   var [userId, setUserId] = useState(null)
   var [userTeams, setUserTeams] = useState([])
-  var [picks, setPicks] = useState({ 1: [], 2: [], 3: [], 4: [] })
+  var [picks, setPicks] = useState({ 1: [], 2: [], 3: [] })
   var [filteredMatches, setFilteredMatches] = useState([])
   var [predictions, setPredictions] = useState({})
   var [selectedMatch, setSelectedMatch] = useState(null)
@@ -185,8 +180,8 @@ export default function StartingXI({ onBack }) {
     })
   }
 
-  var allPicked = picks[1].concat(picks[2], picks[3], picks[4])
-  var pickComplete = picks[1].length === 2 && picks[2].length === 1 && picks[3].length === 1 && picks[4].length === 1
+  var allPicked = picks[1].concat(picks[2], picks[3])
+  var pickComplete = picks[1].length === 2 && picks[2].length === 3 && picks[3].length === 1
 
   async function handleLockTeams() {
     if (!pickComplete || locking || !userId) return
@@ -263,10 +258,10 @@ export default function StartingXI({ onBack }) {
 
         <div style={{ padding: "16px 16px 0" }}>
           <p style={{ fontFamily: "Oswald, sans-serif", fontWeight: 700, fontSize: 18, color: "#fff", marginBottom: 4 }}>
-            Pick Your 5 Teams
+            Pick Your 6 Teams
           </p>
           <p style={{ fontSize: 12, color: "#8b93ab", marginBottom: 20, lineHeight: 1.6 }}>
-            Pick 2 from Tier 1, then 1 each from Tiers 2, 3, and 4.
+            Pick 2 from Tier 1, 3 from Tier 2, and 1 from Tier 3.
           </p>
 
           {TIERS.map(function (tier) {
@@ -350,7 +345,7 @@ export default function StartingXI({ onBack }) {
           )}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
             <span style={{ fontFamily: "Oswald, sans-serif", fontSize: 11, letterSpacing: "0.14em", color: "#6b7494" }}>
-              {allPicked.length} / 5 SELECTED
+              {allPicked.length} / 6 SELECTED
             </span>
             {pickComplete && (
               <span style={{ fontFamily: "Oswald, sans-serif", fontSize: 11, letterSpacing: "0.1em", color: "#3ddc84", fontWeight: 700 }}>

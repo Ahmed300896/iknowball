@@ -163,7 +163,7 @@ export default function App() {
   }
 
   if (screen === 'team-selection') {
-    return <TeamSelectionScreen user={user} username={username} onTeamsSelected={handleBackHome} onLogout={handleLogout} onBack={handleBackHome} />
+    return <TeamSelectionScreen user={user} username={username} onTeamsSelected={() => setScreen('starting-xi')} onLogout={handleLogout} onBack={handleBackHome} />
   }
 
   if (screen === 'starting-xi') {

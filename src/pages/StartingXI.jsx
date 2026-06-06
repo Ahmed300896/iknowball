@@ -482,10 +482,46 @@ export default function StartingXI({ onBack }) {
     <div style={{ minHeight: "100vh", background: "#0a0e1a", color: "#fff", paddingBottom: 80 }}>
       <BackHeader title="STARTING XI" onBack={onBack} />
 
-      <div style={{ padding: "10px 16px", borderBottom: "1px solid #1e2540" }}>
-        <p style={{ fontSize: 12, color: "#8b93ab", lineHeight: 1.6, margin: 0 }}>
-          Pick the starting 11 players for your team before each match kicks off. Submit before the game starts.
-        </p>
+      <div style={{ padding: "16px 16px", borderBottom: "1px solid #1e2540", display: "flex", flexDirection: "column", gap: 14 }}>
+        {[
+          {
+            n: "1",
+            title: "Pick 5 Teams",
+            desc: "Before June 11, pick 2 teams from the top 10 ranked nations, 1 from ranked 11-25, 1 from 26-40, and 1 from the rest. Your picks are locked once the tournament starts.",
+          },
+          {
+            n: "2",
+            title: "Predict the Starting XI",
+            desc: "Before each of your teams' matches kicks off, predict their starting 11 players. You must submit before the match starts — no changes after kickoff.",
+          },
+          {
+            n: "3",
+            title: "Score Points",
+            desc: "Get 1 point per correct player. Predict 7 or more correctly and earn a bonus. Points are weighted heavier in the knockout rounds.",
+          },
+        ].map(function (step) {
+          return (
+            <div key={step.n} style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+              <div style={{
+                width: 24, height: 24, borderRadius: "50%", background: "rgba(201,168,76,0.12)",
+                border: "1px solid rgba(201,168,76,0.4)", display: "flex", alignItems: "center",
+                justifyContent: "center", flexShrink: 0, marginTop: 1,
+              }}>
+                <span style={{ fontFamily: "Oswald, sans-serif", fontWeight: 700, fontSize: 11, color: "#c9a84c" }}>
+                  {step.n}
+                </span>
+              </div>
+              <div>
+                <p style={{ fontFamily: "Oswald, sans-serif", fontWeight: 700, fontSize: 12, letterSpacing: "0.06em", color: "#fff", margin: "0 0 3px" }}>
+                  {step.title}
+                </p>
+                <p style={{ fontSize: 11, color: "#8b93ab", lineHeight: 1.6, margin: 0 }}>
+                  {step.desc}
+                </p>
+              </div>
+            </div>
+          )
+        })}
       </div>
 
       <div style={{ padding: "16px 16px 0" }}>

@@ -1,20 +1,16 @@
 import { useState, useEffect } from "react"
 import { supabase } from "../lib/supabase"
-import { allTeams, FLAGS } from "../data/teams"
+import { FLAGS } from "../data/teams"
 import PageHeader from "./PageHeader"
 
-var TIER_1 = ["Argentina", "France", "Spain", "England", "Brazil", "Portugal", "Belgium", "Netherlands", "Italy", "Germany"]
+var TIER_1 = ["Argentina", "France", "Spain", "England", "Brazil", "Portugal", "Belgium", "Netherlands", "Germany"]
 var TIER_2 = ["Croatia", "Denmark", "Switzerland", "USA", "Mexico", "Senegal", "Morocco", "Japan", "Uruguay", "Colombia", "Poland", "Australia", "Ecuador", "Ghana", "Wales"]
 var TIER_3 = ["Cameroon", "Serbia", "South Korea", "Canada", "Tunisia", "Qatar", "Iran", "Saudi Arabia", "South Africa", "Czechia", "Haiti", "Ivory Coast", "Algeria", "Norway", "Austria"]
 
-var UPPER = new Set([].concat(TIER_1, TIER_2, TIER_3))
-var TIER_4 = allTeams.filter(function (t) { return !UPPER.has(t) }).sort()
-
 var TIERS = [
   { id: 1, label: "TIER 1", description: "Elite nations", teams: TIER_1, limit: 2 },
-  { id: 2, label: "TIER 2", description: "Strong nations", teams: TIER_2, limit: 1 },
+  { id: 2, label: "TIER 2", description: "Strong nations", teams: TIER_2, limit: 3 },
   { id: 3, label: "TIER 3", description: "Rising nations", teams: TIER_3, limit: 1 },
-  { id: 4, label: "TIER 4", description: "Other nations", teams: TIER_4, limit: 1 },
 ]
 
 function getFlag(team) { return FLAGS[team] || "⚽" }
@@ -27,7 +23,7 @@ function tierForTeam(team) {
 }
 
 export default function TeamSelectionScreen({ user, username, onTeamsSelected, onLogout, onBack }) {
-  var [picks, setPicks] = useState({ 1: [], 2: [], 3: [], 4: [] })
+  var [picks, setPicks] = useState({ 1: [], 2: [], 3: [] })
   var [savedTeams, setSavedTeams] = useState(null)
   var [locked, setLocked] = useState(false)
   var [loading, setLoading] = useState(true)
@@ -45,7 +41,7 @@ export default function TeamSelectionScreen({ user, username, onTeamsSelected, o
         setSavedTeams(res.data.teams)
         setLocked(res.data.locked)
         if (!res.data.locked && res.data.teams) {
-          var restored = { 1: [], 2: [], 3: [], 4: [] }
+          var restored = { 1: [], 2: [], 3: [] }
           res.data.teams.forEach(function (team) {
             var t = tierForTeam(team)
             restored[t] = [...restored[t], team]
@@ -60,7 +56,7 @@ export default function TeamSelectionScreen({ user, username, onTeamsSelected, o
 
   function toggle(team, tierId) {
     if (locked) return
-    var limit = tierId === 1 ? 2 : 1
+    var limit = tierId === 1 ? 2 : tierId === 2 ? 3 : 1
     setPicks(function (prev) {
       var current = prev[tierId]
       if (current.includes(team)) {
@@ -71,8 +67,8 @@ export default function TeamSelectionScreen({ user, username, onTeamsSelected, o
     })
   }
 
-  var allSelected = [].concat(picks[1], picks[2], picks[3], picks[4])
-  var isComplete = picks[1].length === 2 && picks[2].length === 1 && picks[3].length === 1 && picks[4].length === 1
+  var allSelected = [].concat(picks[1], picks[2], picks[3])
+  var isComplete = picks[1].length === 2 && picks[2].length === 3 && picks[3].length === 1
 
   async function handleSave() {
     if (!isComplete || saving) return
@@ -136,7 +132,7 @@ export default function TeamSelectionScreen({ user, username, onTeamsSelected, o
       <div className="px-4 pt-4 pb-2">
         <p className="eyebrow mb-1">Team Selection</p>
         <p className="text-sm" style={{ color: "#8b93ab" }}>
-          Pick 2 from Tier 1 and 1 each from Tiers 2, 3, and 4
+          Pick 2 from Tier 1, 3 from Tier 2, and 1 from Tier 3
         </p>
       </div>
 
@@ -229,13 +225,13 @@ export default function TeamSelectionScreen({ user, username, onTeamsSelected, o
         )}
 
         <div className="flex items-center justify-between">
-          <span className="eyebrow">{allSelected.length} / 5 selected</span>
+          <span className="eyebrow">{allSelected.length} / 6 selected</span>
           {isComplete && <span style={{ color: "#3ddc84", fontSize: 11, fontFamily: "Oswald, sans-serif", fontWeight: 600, letterSpacing: "0.06em" }}>READY</span>}
         </div>
 
         <div className="h-1 rounded-full overflow-hidden" style={{ background: "#1e2540" }}>
           <div className="h-full rounded-full transition-all duration-300"
-            style={{ width: (allSelected.length / 5 * 100) + "%", background: isComplete ? "#3ddc84" : "#c9a84c" }} />
+            style={{ width: (allSelected.length / 6 * 100) + "%", background: isComplete ? "#3ddc84" : "#c9a84c" }} />
         </div>
 
         {error && <p style={{ color: "#e24b4a", fontSize: 12 }}>{error}</p>}

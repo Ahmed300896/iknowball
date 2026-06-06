@@ -37,9 +37,9 @@ function ScorePredictorIcon() {
 function Starting11Icon() {
   return (
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-      <circle cx="10" cy="6" r="2.5" stroke="#6b7494" strokeWidth="1.5"/>
-      <path d="M5 17C5 14.5 7.2 12.5 10 12.5C12.8 12.5 15 14.5 15 17" stroke="#6b7494" strokeWidth="1.5" strokeLinecap="round"/>
-      <line x1="14" y1="3" x2="14" y2="9" stroke="#6b7494" strokeWidth="1.5" strokeLinecap="round"/>
+      <circle cx="10" cy="6" r="2.5" stroke="#c9a84c" strokeWidth="1.5"/>
+      <path d="M5 17C5 14.5 7.2 12.5 10 12.5C12.8 12.5 15 14.5 15 17" stroke="#c9a84c" strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="14" y1="3" x2="14" y2="9" stroke="#c9a84c" strokeWidth="1.5" strokeLinecap="round"/>
     </svg>
   )
 }
@@ -55,7 +55,7 @@ function FantasyIcon() {
 
 export default function HomeScreen({
   user, username, onPlay, onLogout, onViewPredictions,
-  onAdmin, onScorePredictor, onLeaderboard,
+  onAdmin, onScorePredictor, onLeaderboard, onStartingXI,
   currentScreen, onPredict, onRanks,
 }) {
   const [showTeamSelection, setShowTeamSelection] = useState(false)
@@ -77,6 +77,7 @@ export default function HomeScreen({
     return (
       <TeamSelectionScreen
         user={user}
+        username={username}
         onTeamsSelected={handleTeamsSelected}
         onLogout={onLogout}
         onBack={() => setShowTeamSelection(false)}
@@ -167,10 +168,11 @@ export default function HomeScreen({
               </span>
             </button>
 
-            {/* Starting XI — LOCKED */}
-            <div
-              className="w-full flex items-center gap-3"
-              style={{ background: '#0d1224', border: '1px solid #1e2540', borderLeft: '3px solid #2a3354', borderRadius: '0 6px 6px 0', padding: '14px 16px', opacity: 0.7 }}
+            {/* Starting XI — ACTIVE */}
+            <button
+              type="button"
+              onClick={onStartingXI}
+              className="card-fifa w-full text-left flex items-center gap-3"
             >
               <div className="flex items-center justify-center rounded shrink-0" style={{ width: 38, height: 38, background: '#141b30' }}>
                 <Starting11Icon />
@@ -182,12 +184,12 @@ export default function HomeScreen({
                 <p className="text-xs mt-0.5" style={{ color: '#8b93ab' }}>Pick the lineups</p>
               </div>
               <span
-                className="shrink-0 flex items-center gap-1 px-2 py-1 rounded text-xs"
-                style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 600, letterSpacing: '0.08em', border: '1px solid #2a3354', color: '#6b7494' }}
+                className="shrink-0 px-2 py-1 rounded text-xs"
+                style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 600, letterSpacing: '0.08em', background: '#c9a84c', color: '#0a0e1a' }}
               >
-                <LockIcon /> SOON
+                PLAY
               </span>
-            </div>
+            </button>
 
             {/* Fantasy XI — LOCKED */}
             <div

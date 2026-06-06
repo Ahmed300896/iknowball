@@ -11,6 +11,7 @@ import ScorePredictor from './components/ScorePredictor'
 import LeaderboardScreen from './components/LeaderboardScreen'
 import AdminResultsScreen from './components/AdminResultsScreen'
 import AdminPanel from './pages/AdminPanel'
+import StartingXI from './pages/StartingXI'
 
 export default function App() {
   const [user, setUser] = useState(null)
@@ -160,6 +161,10 @@ export default function App() {
     )
   }
 
+  if (screen === 'starting-xi') {
+    return <StartingXI user={user} username={username} onBack={handleBackHome} onLogout={handleLogout} currentScreen="starting-xi" onPredict={() => setScreen('score-predictor')} onRanks={() => setScreen('leaderboard')} />
+  }
+
   if (screen === 'admin-panel') {
     return <AdminPanel user={user} username={username} onBack={handleBackHome} onLogout={handleLogout} />
   }
@@ -201,5 +206,5 @@ export default function App() {
     return <GroupStage username={username} onNext={handleGroupsNext} onBack={handleBackHome} onHome={handleBackHome} />
   }
 
-  return <HomeScreen user={user} username={username} onPlay={handlePlay} onLogout={handleLogout} onViewPredictions={handleViewPredictions} onAdmin={() => setScreen('admin-panel')} onScorePredictor={() => setScreen('score-predictor')} onLeaderboard={() => setScreen('leaderboard')} currentScreen="home" onPredict={() => setScreen('score-predictor')} onRanks={() => setScreen('leaderboard')} />
+  return <HomeScreen user={user} username={username} onPlay={handlePlay} onLogout={handleLogout} onViewPredictions={handleViewPredictions} onAdmin={() => setScreen('admin-panel')} onScorePredictor={() => setScreen('score-predictor')} onLeaderboard={() => setScreen('leaderboard')} onStartingXI={() => setScreen('starting-xi')} currentScreen="home" onPredict={() => setScreen('score-predictor')} onRanks={() => setScreen('leaderboard')} />
 }

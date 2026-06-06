@@ -67,8 +67,6 @@ function ScoreStepper({ value, onChange }) {
 
 export default function ScorePredictor({ user, username, onBack, onLogout, currentScreen, onPredict, onRanks }) {
   const today = new Date().toLocaleDateString('en-CA')
-  const todaysMatches = matches.filter(m => m.date === today)
-  const nextMatch = matches.find(m => m.date > today)
 
   const [allPredictions, setAllPredictions] = useState({})
   const [scores, setScores] = useState({})
@@ -87,18 +85,17 @@ export default function ScorePredictor({ user, username, onBack, onLogout, curre
         const saved = data?.predictions ?? {}
         setAllPredictions(saved)
 
+        // Pre-populate steppers for every saved prediction, not just today's
         const prefilled = {}
-        todaysMatches.forEach(m => {
-          prefilled[m.id] = {
-            home: saved[m.id]?.homeScore ?? 0,
-            away: saved[m.id]?.awayScore ?? 0,
+        Object.keys(saved).forEach(id => {
+          prefilled[id] = {
+            home: saved[id]?.homeScore ?? 0,
+            away: saved[id]?.awayScore ?? 0,
           }
         })
         setScores(prefilled)
       } catch {
-        const init = {}
-        todaysMatches.forEach(m => { init[m.id] = { home: 0, away: 0 } })
-        setScores(init)
+        setScores({})
       } finally {
         setLoading(false)
       }
@@ -131,6 +128,18 @@ export default function ScorePredictor({ user, username, onBack, onLogout, curre
 
   const predictedCount = Object.keys(allPredictions).length
 
+  // Determine which match dates to display.
+  // If there are games today show only today; otherwise show the next 5 match days.
+  const hasTodayMatches = matches.some(m => m.date === today)
+  const upcomingDates = [...new Set(
+    matches.filter(m => m.date >= today).map(m => m.date)
+  )].sort()
+  const datesToShow = hasTodayMatches ? [today] : upcomingDates.slice(0, 5)
+  const groupedMatches = datesToShow
+    .map(date => ({ date, items: matches.filter(m => m.date === date) }))
+    .filter(g => g.items.length > 0)
+  const isUpcoming = !hasTodayMatches
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ background: '#0a0e1a' }}>
@@ -141,7 +150,10 @@ export default function ScorePredictor({ user, username, onBack, onLogout, curre
 
   return (
     <div className="min-h-screen pb-20" style={{ background: '#0a0e1a' }}>
-      <PageHeader title="Today's Games" showBack onBack={onBack} username={username} onLogout={onLogout} />
+      <PageHeader
+        title={isUpcoming ? "Upcoming Games" : "Today's Games"}
+        showBack onBack={onBack} username={username} onLogout={onLogout}
+      />
 
       {/* Progress bar */}
       <div className="px-4 py-3" style={{ borderBottom: '1px solid #1e2540' }}>
@@ -167,107 +179,97 @@ export default function ScorePredictor({ user, username, onBack, onLogout, curre
       </div>
 
       <div className="px-4 py-5">
-        {todaysMatches.length === 0 ? (
-          /* No games today — empty state */
+        {groupedMatches.length === 0 ? (
           <div
             className="mt-8 mx-auto max-w-xs text-center rounded-lg p-8"
             style={{ background: '#0d1224', border: '1px solid #1e2540' }}
           >
-            <p className="eyebrow mb-3">Today's Schedule</p>
+            <p className="eyebrow mb-3">Schedule</p>
             <p className="text-white text-lg mb-2" style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 600 }}>
-              NO GAMES TODAY
+              NO UPCOMING MATCHES
             </p>
-            <p className="text-sm" style={{ color: '#8b93ab' }}>Predictions open before each match day.</p>
-            {nextMatch && (
-              <p className="text-xs mt-4" style={{ color: '#6b7494' }}>
-                Next match: {formatDate(nextMatch.date)}
-              </p>
-            )}
+            <p className="text-sm" style={{ color: '#8b93ab' }}>All matches have been played.</p>
           </div>
         ) : (
-          <>
-            {/* Date heading */}
-            <p className="text-xs font-semibold tracking-widest mb-4 text-center" style={{ color: '#6b7494', fontFamily: 'Oswald, sans-serif' }}>
-              {formatDateShort(today)}
-            </p>
+          <div className="space-y-6">
+            {groupedMatches.map(group => (
+              <div key={group.date}>
+                <p className="text-xs font-semibold tracking-widest mb-4 text-center" style={{ color: '#6b7494', fontFamily: 'Oswald, sans-serif' }}>
+                  {formatDateShort(group.date)}
+                </p>
+                <div className="space-y-3">
+                  {group.items.map(match => {
+                    const score = scores[match.id] ?? { home: 0, away: 0 }
+                    const state = saveStates[match.id] ?? 'idle'
+                    const isSaved = !!allPredictions[match.id]
 
-            <div className="space-y-3">
-              {todaysMatches.map(match => {
-                const score = scores[match.id] ?? { home: 0, away: 0 }
-                const state = saveStates[match.id] ?? 'idle'
-                const isSaved = !!allPredictions[match.id]
+                    return (
+                      <div key={match.id} className="card-fifa">
+                        {/* Submitted indicator */}
+                        {isSaved && state !== 'error' && (
+                          <div className="flex items-center gap-1.5 mb-3">
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                              <circle cx="6" cy="6" r="5.5" fill="#3ddc84" fillOpacity="0.15" stroke="#3ddc84" strokeWidth="1"/>
+                              <path d="M3.5 6L5.2 7.7L8.5 4.5" stroke="#3ddc84" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                            <span className="text-xs" style={{ color: '#3ddc84', fontFamily: 'Oswald, sans-serif', letterSpacing: '0.1em', fontWeight: 600 }}>
+                              SUBMITTED
+                            </span>
+                          </div>
+                        )}
 
-                return (
-                  <div
-                    key={match.id}
-                    className="card-fifa"
-                  >
-                    {/* Submitted indicator */}
-                    {isSaved && state !== 'error' && (
-                      <div className="flex items-center gap-1.5 mb-3">
-                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                          <circle cx="6" cy="6" r="5.5" fill="#3ddc84" fillOpacity="0.15" stroke="#3ddc84" strokeWidth="1"/>
-                          <path d="M3.5 6L5.2 7.7L8.5 4.5" stroke="#3ddc84" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                        <span className="text-xs" style={{ color: '#3ddc84', fontFamily: 'Oswald, sans-serif', letterSpacing: '0.1em', fontWeight: 600 }}>
-                          SUBMITTED
-                        </span>
+                        {/* Group badge */}
+                        <p className="eyebrow mb-3">Group {match.group}</p>
+
+                        {/* Scorebug row */}
+                        <div className="flex items-center gap-2 mb-4">
+                          <div className="flex flex-col items-center gap-1.5 flex-1 min-w-0">
+                            <TeamBadge team={match.home} size={32} />
+                            <span className="text-white text-xs font-medium text-center truncate w-full" style={{ fontFamily: 'Oswald, sans-serif', letterSpacing: '0.02em' }}>
+                              {match.home}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-2 shrink-0">
+                            <ScoreStepper value={score.home} onChange={v => setScore(match.id, 'home', v)} />
+                            <span style={{ color: '#2a3354', fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 24, lineHeight: 1 }}>:</span>
+                            <ScoreStepper value={score.away} onChange={v => setScore(match.id, 'away', v)} />
+                          </div>
+
+                          <div className="flex flex-col items-center gap-1.5 flex-1 min-w-0">
+                            <TeamBadge team={match.away} size={32} />
+                            <span className="text-white text-xs font-medium text-center truncate w-full" style={{ fontFamily: 'Oswald, sans-serif', letterSpacing: '0.02em' }}>
+                              {match.away}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Submit button */}
+                        <button
+                          type="button"
+                          onClick={() => handleSubmit(match)}
+                          disabled={state === 'saving'}
+                          className={state === 'saved' ? 'btn-outline' : 'btn-gold'}
+                          style={
+                            state === 'error'
+                              ? { background: 'transparent', border: '1px solid #e24b4a', color: '#e24b4a' }
+                              : state === 'saved'
+                              ? { borderColor: '#3ddc84', color: '#3ddc84' }
+                              : {}
+                          }
+                        >
+                          {state === 'saving' ? 'SAVING…' :
+                           state === 'saved'  ? '✓ SAVED' :
+                           state === 'error'  ? 'ERROR — TRY AGAIN' :
+                           'SUBMIT PREDICTION'}
+                        </button>
                       </div>
-                    )}
-
-                    {/* Group badge */}
-                    <p className="eyebrow mb-3">Group {match.group}</p>
-
-                    {/* Scorebug row */}
-                    <div className="flex items-center gap-2 mb-4">
-                      {/* Home team */}
-                      <div className="flex flex-col items-center gap-1.5 flex-1 min-w-0">
-                        <TeamBadge team={match.home} size={32} />
-                        <span className="text-white text-xs font-medium text-center truncate w-full" style={{ fontFamily: 'Oswald, sans-serif', letterSpacing: '0.02em' }}>
-                          {match.home}
-                        </span>
-                      </div>
-
-                      {/* Score steppers */}
-                      <div className="flex items-center gap-2 shrink-0">
-                        <ScoreStepper value={score.home} onChange={v => setScore(match.id, 'home', v)} />
-                        <span style={{ color: '#2a3354', fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 24, lineHeight: 1 }}>:</span>
-                        <ScoreStepper value={score.away} onChange={v => setScore(match.id, 'away', v)} />
-                      </div>
-
-                      {/* Away team */}
-                      <div className="flex flex-col items-center gap-1.5 flex-1 min-w-0">
-                        <TeamBadge team={match.away} size={32} />
-                        <span className="text-white text-xs font-medium text-center truncate w-full" style={{ fontFamily: 'Oswald, sans-serif', letterSpacing: '0.02em' }}>
-                          {match.away}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Submit button */}
-                    <button
-                      type="button"
-                      onClick={() => handleSubmit(match)}
-                      disabled={state === 'saving'}
-                      className={state === 'saved' ? 'btn-outline' : 'btn-gold'}
-                      style={
-                        state === 'error'
-                          ? { background: 'transparent', border: '1px solid #e24b4a', color: '#e24b4a' }
-                          : state === 'saved'
-                          ? { borderColor: '#3ddc84', color: '#3ddc84' }
-                          : {}
-                      }
-                    >
-                      {state === 'saving' ? 'SAVING…' :
-                       state === 'saved'  ? '✓ SAVED' :
-                       state === 'error'  ? 'ERROR — TRY AGAIN' :
-                       'SUBMIT PREDICTION'}
-                    </button>
-                  </div>
-                )
-              })}
-            </div>
-          </>
+                    )
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </div>
 

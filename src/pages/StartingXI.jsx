@@ -58,7 +58,10 @@ export default function StartingXI({ onBack, onTeamSelect }) {
   }, []);
 
   async function handleMatchClick(match) {
-    const team = userTeams.includes(match.home) ? match.home : match.away;
+    const userTeam = userTeams.find(function (t) {
+      return t.trim().toLowerCase() === match.home.trim().toLowerCase() ||
+        t.trim().toLowerCase() === match.away.trim().toLowerCase();
+    });
     setSelectedMatch(match);
     setSelectedPlayers(existingPredictions[String(match.id)] ?? []);
     setSavedMsg("");
@@ -68,7 +71,7 @@ export default function StartingXI({ onBack, onTeamSelect }) {
     const { data } = await supabase
       .from("players")
       .select("name, position, shirt_number")
-      .eq("team_name", team)
+      .eq("team", userTeam)
       .order("shirt_number", { ascending: true });
 
     setPlayers(data ?? []);

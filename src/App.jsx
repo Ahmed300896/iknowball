@@ -12,6 +12,7 @@ import LeaderboardScreen from './components/LeaderboardScreen'
 import AdminResultsScreen from './components/AdminResultsScreen'
 import AdminPanel from './pages/AdminPanel'
 import StartingXI from './pages/StartingXI'
+import ChampionPick from './pages/ChampionPick'
 import TeamSelectionScreen from './components/TeamSelectionScreen'
 
 export default function App() {
@@ -170,6 +171,10 @@ export default function App() {
     return <StartingXI user={user} username={username} onBack={handleBackHome} onLogout={handleLogout} onTeamSelect={() => setScreen('team-selection')} currentScreen="starting-xi" onPredict={() => setScreen('score-predictor')} onRanks={() => setScreen('leaderboard')} />
   }
 
+  if (screen === 'champion-pick') {
+    return <ChampionPick onBack={handleBackHome} onLogout={handleLogout} username={username} />
+  }
+
   if (screen === 'admin-panel') {
     return <AdminPanel user={user} username={username} onBack={handleBackHome} onLogout={handleLogout} />
   }
@@ -211,5 +216,5 @@ export default function App() {
     return <GroupStage username={username} onNext={handleGroupsNext} onBack={handleBackHome} onHome={handleBackHome} />
   }
 
-  return <HomeScreen user={user} username={username} onPlay={handlePlay} onLogout={handleLogout} onViewPredictions={handleViewPredictions} onAdmin={() => setScreen('admin-panel')} onScorePredictor={() => setScreen('score-predictor')} onLeaderboard={() => setScreen('leaderboard')} onStartingXI={() => setScreen('starting-xi')} currentScreen="home" onPredict={() => setScreen('score-predictor')} onRanks={() => setScreen('leaderboard')} />
+  return <HomeScreen user={user} username={username} onPlay={handlePlay} onLogout={handleLogout} onViewPredictions={handleViewPredictions} onAdmin={() => setScreen('admin-panel')} onScorePredictor={() => setScreen('score-predictor')} onLeaderboard={() => setScreen('leaderboard')} onStartingXI={() => setScreen('starting-xi')} onChampionPick={() => setScreen('champion-pick')} currentScreen="home" onPredict={() => setScreen('score-predictor')} onRanks={() => setScreen('leaderboard')} />
 }

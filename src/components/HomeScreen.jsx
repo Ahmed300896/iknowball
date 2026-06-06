@@ -53,9 +53,21 @@ function FantasyIcon() {
   )
 }
 
+function TrophyIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+      <path d="M6 3H14V10C14 12.2 12.2 14 10 14C7.8 14 6 12.2 6 10V3Z" stroke="#c9a84c" strokeWidth="1.5" strokeLinejoin="round"/>
+      <path d="M6 5H3.5C3.5 5 3 8.5 6 9.5" stroke="#c9a84c" strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M14 5H16.5C16.5 5 17 8.5 14 9.5" stroke="#c9a84c" strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M10 14V17" stroke="#c9a84c" strokeWidth="1.5" strokeLinecap="round"/>
+      <path d="M7 17H13" stroke="#c9a84c" strokeWidth="1.5" strokeLinecap="round"/>
+    </svg>
+  )
+}
+
 export default function HomeScreen({
   user, username, onPlay, onLogout, onViewPredictions,
-  onAdmin, onScorePredictor, onLeaderboard, onStartingXI,
+  onAdmin, onScorePredictor, onLeaderboard, onStartingXI, onChampionPick,
   currentScreen, onPredict, onRanks,
 }) {
   const [showTeamSelection, setShowTeamSelection] = useState(false)
@@ -212,6 +224,29 @@ export default function HomeScreen({
                 <LockIcon /> SOON
               </span>
             </div>
+
+            {/* Champion Pick — ACTIVE */}
+            <button
+              type="button"
+              onClick={onChampionPick}
+              className="card-fifa w-full text-left flex items-center gap-3"
+            >
+              <div className="flex items-center justify-center rounded shrink-0" style={{ width: 38, height: 38, background: '#141b30' }}>
+                <TrophyIcon />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-white text-sm" style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 600, letterSpacing: '0.04em' }}>
+                  CHAMPION PICK
+                </p>
+                <p className="text-xs mt-0.5" style={{ color: '#8b93ab' }}>Pick your World Cup winner</p>
+              </div>
+              <span
+                className="shrink-0 px-2 py-1 rounded text-xs"
+                style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 600, letterSpacing: '0.08em', background: '#c9a84c', color: '#0a0e1a' }}
+              >
+                PLAY
+              </span>
+            </button>
           </div>
         </div>
 

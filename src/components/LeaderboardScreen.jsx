@@ -1,10 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
-import { calculatePoints } from '../lib/scoring'
 import PageHeader from './PageHeader'
 import BottomNav from './BottomNav'
-
-const TOTAL_MATCHES = 72
 
 function initials(username) {
   return (username || '?').split(' ').filter(Boolean).map(p => p[0].toUpperCase()).slice(0, 2).join('')
@@ -42,35 +39,28 @@ export default function LeaderboardScreen({ user, username, onBack, onLogout, cu
 
   useEffect(() => {
     async function load() {
-      const [{ data: predictions }, { data: profiles }, { data: matchResultsData }] = await Promise.all([
-        supabase.from('score_predictions').select('user_id, predictions'),
+      const [{ data: pointsData }, { data: profiles }] = await Promise.all([
+        supabase.from('user_points').select('user_id, points'),
         supabase.from('profiles').select('id, username'),
-        supabase.from('match_results').select('match_id, home_score, away_score'),
       ])
 
-      const resultsMap = Object.fromEntries(
-        (matchResultsData ?? []).map(r => [r.match_id, { homeScore: r.home_score, awayScore: r.away_score }])
-      )
       const profileMap = Object.fromEntries(
         (profiles ?? []).map(p => [p.id, p.username])
       )
 
-      const ranked = (predictions ?? [])
-        .map(row => {
-          const preds = row.predictions ?? {}
-          let points = 0
-          for (const [matchId, pred] of Object.entries(preds)) {
-            const actual = resultsMap[Number(matchId)]
-            if (actual) points += calculatePoints(pred, actual)
-          }
-          return {
-            userId: row.user_id,
-            username: profileMap[row.user_id] ?? 'Unknown',
-            count: Object.keys(preds).length,
-            points,
-          }
-        })
-        .sort((a, b) => b.points - a.points || b.count - a.count)
+      // Sum all point rows per user
+      const totals = {}
+      for (const row of (pointsData ?? [])) {
+        totals[row.user_id] = (totals[row.user_id] ?? 0) + row.points
+      }
+
+      const ranked = Object.entries(totals)
+        .map(([userId, points]) => ({
+          userId,
+          username: profileMap[userId] ?? 'Unknown',
+          points,
+        }))
+        .sort((a, b) => b.points - a.points)
 
       setRows(ranked)
       setLoading(false)
@@ -140,9 +130,6 @@ export default function LeaderboardScreen({ user, username, onBack, onLogout, cu
                       >
                         {row.points} PTS
                       </p>
-                      <p style={{ fontSize: 10, color: '#6b7494', marginTop: 1 }}>
-                        {row.count} predictions
-                      </p>
                       {/* Podium base */}
                       <div
                         className="w-full mt-2 rounded-t flex items-center justify-center"
@@ -182,17 +169,14 @@ export default function LeaderboardScreen({ user, username, onBack, onLogout, cu
                         {rank}
                       </span>
                       <Avatar username={row.username} size={32} ringColor={isCurrentUser ? '#c9a84c' : undefined} />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <span
-                            className="truncate text-sm"
-                            style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 600, color: isCurrentUser ? '#c9a84c' : '#ffffff', letterSpacing: '0.02em' }}
-                          >
-                            {row.username}
-                          </span>
-                          {isCurrentUser && <span className="text-xs shrink-0" style={{ color: '#c9a84c', opacity: 0.7 }}>YOU</span>}
-                        </div>
-                        <p style={{ fontSize: 10, color: '#6b7494', marginTop: 1 }}>{row.count} predictions</p>
+                      <div className="flex items-center gap-1.5 flex-1 min-w-0">
+                        <span
+                          className="truncate text-sm"
+                          style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 600, color: isCurrentUser ? '#c9a84c' : '#ffffff', letterSpacing: '0.02em' }}
+                        >
+                          {row.username}
+                        </span>
+                        {isCurrentUser && <span className="text-xs shrink-0" style={{ color: '#c9a84c', opacity: 0.7 }}>YOU</span>}
                       </div>
                       <p className="shrink-0" style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 14, color: isCurrentUser ? '#c9a84c' : '#ffffff' }}>
                         {row.points} <span style={{ fontSize: 10, opacity: 0.6 }}>PTS</span>
@@ -220,14 +204,11 @@ export default function LeaderboardScreen({ user, username, onBack, onLogout, cu
               {currentUserIndex + 1}
             </span>
             <Avatar username={rows[currentUserIndex]?.username} size={28} ring ringColor="#c9a84c" />
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-1.5">
-                <span className="truncate text-sm" style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 600, color: '#c9a84c', letterSpacing: '0.02em' }}>
-                  {rows[currentUserIndex]?.username}
-                </span>
-                <span className="text-xs shrink-0" style={{ color: '#c9a84c', opacity: 0.7 }}>YOU</span>
-              </div>
-              <p style={{ fontSize: 10, color: '#6b7494', marginTop: 1 }}>{rows[currentUserIndex]?.count} predictions</p>
+            <div className="flex items-center gap-1.5 flex-1 min-w-0">
+              <span className="truncate text-sm" style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 600, color: '#c9a84c', letterSpacing: '0.02em' }}>
+                {rows[currentUserIndex]?.username}
+              </span>
+              <span className="text-xs shrink-0" style={{ color: '#c9a84c', opacity: 0.7 }}>YOU</span>
             </div>
             <p className="shrink-0" style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 14, color: '#c9a84c' }}>
               {rows[currentUserIndex]?.points} <span style={{ fontSize: 10, opacity: 0.6 }}>PTS</span>

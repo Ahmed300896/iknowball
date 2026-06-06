@@ -106,7 +106,7 @@ export default function HomeScreen({
       <PageHeader title="iKnowBall" username={username} onLogout={onLogout} />
 
       {/* How to Play — top of page */}
-      <div style={{ padding: "10px 16px", borderBottom: "1px solid #1e2540", display: "flex", justifyContent: "flex-end" }}>
+      <div style={{ width: "100%", display: "flex", justifyContent: "center", padding: "10px 16px", borderBottom: "1px solid #1e2540" }}>
         <button
           type="button"
           onClick={onHowToPlay}

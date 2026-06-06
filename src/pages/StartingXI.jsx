@@ -481,8 +481,8 @@ export default function StartingXI({ onBack }) {
         {[
           {
             n: "1",
-            title: "Pick 5 Teams",
-            desc: "Before June 11, pick 2 teams from the top 10 ranked nations, 1 from ranked 11-25, 1 from 26-40, and 1 from the rest. Your picks are locked once the tournament starts.",
+            title: "Pick 6 Teams",
+            desc: "Before June 11, pick 2 teams from the top 10 ranked nations, 3 from the next tier, and 1 from the rest. Your picks are locked once the tournament starts.",
           },
           {
             n: "2",

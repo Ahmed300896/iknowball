@@ -129,12 +129,12 @@ export default function HowToPlay({ onBack, onLogout, username }) {
               {
                 n: "1",
                 title: "Pick Your 5 Teams",
-                text: "Before June 11, select 5 teams to follow: 2 from the top 10 ranked nations, 1 from ranked 11-25, 1 from 26-40, and 1 from the rest. Your picks lock when the tournament starts.",
+                text: "Before June 11, select 6 teams to follow: 2 from the top 10 ranked nations, 3 from the next tier, and 1 from the rest. Your picks lock when the tournament starts.",
               },
               {
                 n: "2",
                 title: "Predict the Starting XI",
-                text: "Before each of your teams' matches, pick exactly 11 players from their squad. You must submit before kickoff — no changes once the match starts.",
+                text: "Before each of your 6 teams' matches, pick exactly 11 players from their squad. You must submit before kickoff — no changes once the match starts.",
               },
               {
                 n: "3",

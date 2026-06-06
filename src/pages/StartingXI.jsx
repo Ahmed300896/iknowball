@@ -3,12 +3,15 @@ import { supabase } from "../lib/supabase"
 import schedule from "../data/schedule"
 import squads from "../data/squads.js"
 
-// Schedule team names that differ from Wikipedia squad page names
+// Maps schedule/selection team names to their exact keys in squads.js (FIFA PDF names)
 var SQUAD_NAME_MAP = {
-  "Czechia": "Czech Republic",
-  "Turkiye": "Turkey",
-  "USA": "United States",
-  "Bosnia & Herzegovina": "Bosnia and Herzegovina",
+  "South Korea": "Korea Republic",
+  "DR Congo": "Congo DR",
+  "Cape Verde": "Cabo Verde",
+  "Ivory Coast": "Côte D'Ivoire",
+  "Iran": "IR Iran",
+  "Bosnia & Herzegovina": "Bosnia And Herzegovina",
+  "Turkiye": "Türkiye",
   "Curacao": "Curaçao",
 }
 

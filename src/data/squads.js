@@ -619,7 +619,7 @@ const squads = {
     ],
     "DF": [
       "Ezri Konsa",
-      "Nico Oreilly",
+      "Nico O'Reilly",
       "John Stones",
       "Marc Guehi",
       "Tino Livramento",

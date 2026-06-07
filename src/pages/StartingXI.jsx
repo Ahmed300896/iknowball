@@ -119,10 +119,11 @@ export default function StartingXI({ onBack }) {
 
   useEffect(function () {
     async function init() {
+      var locked = new Date() >= new Date("2026-06-11")
       try {
         var authRes = await supabase.auth.getUser()
         var user = authRes.data.user
-        if (!user) { setPhase(1); return }
+        if (!user) { setPhase(locked ? "closed" : 1); return }
         setUserId(user.id)
 
         var { data: selRow, error } = await supabase
@@ -136,10 +137,10 @@ export default function StartingXI({ onBack }) {
           loadMatchesAndPredictions(user.id, selRow.teams)
           setPhase(2)
         } else {
-          setPhase(1)
+          setPhase(locked ? "closed" : 1)
         }
       } catch (err) {
-        setPhase(1)
+        setPhase(new Date() >= new Date("2026-06-11") ? "closed" : 1)
       }
     }
     init()
@@ -249,9 +250,82 @@ export default function StartingXI({ onBack }) {
     )
   }
 
+  // ── RENDER: Closed — tournament has started, no teams saved ─────────────
+
+  if (phase === "closed") {
+    return (
+      <div style={{ minHeight: "100vh", background: "#0a0e1a", display: "flex", flexDirection: "column" }}>
+        <BackHeader title="STARTING XI" onBack={onBack} />
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px 16px", gap: 12 }}>
+          <p style={{ fontFamily: "Oswald, sans-serif", fontWeight: 700, fontSize: 16, letterSpacing: "0.08em", color: "#e24b4a", textAlign: "center", margin: 0 }}>
+            Team selection closed.
+          </p>
+          <p style={{ fontSize: 13, color: "#8b93ab", textAlign: "center", margin: 0 }}>
+            The tournament has started.
+          </p>
+          <button
+            type="button"
+            onClick={onBack}
+            style={{
+              marginTop: 8,
+              background: "transparent",
+              border: "1px solid #c9a84c",
+              color: "#c9a84c",
+              borderRadius: 4,
+              fontFamily: "Oswald, sans-serif",
+              fontWeight: 600,
+              fontSize: 12,
+              letterSpacing: "0.1em",
+              textTransform: "uppercase",
+              padding: "8px 24px",
+              cursor: "pointer",
+            }}
+          >
+            Go Back
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   // ── RENDER: Phase 1 — Team Selection ────────────────────────────────────
 
   if (phase === 1) {
+    if (new Date() >= new Date("2026-06-11")) {
+      return (
+        <div style={{ minHeight: "100vh", background: "#0a0e1a", display: "flex", flexDirection: "column" }}>
+          <BackHeader title="STARTING XI" onBack={onBack} />
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px 16px", gap: 12 }}>
+            <p style={{ fontFamily: "Oswald, sans-serif", fontWeight: 700, fontSize: 16, letterSpacing: "0.08em", color: "#e24b4a", textAlign: "center", margin: 0 }}>
+              Team selection closed.
+            </p>
+            <p style={{ fontSize: 13, color: "#8b93ab", textAlign: "center", margin: 0 }}>
+              The tournament has started.
+            </p>
+            <button
+              type="button"
+              onClick={onBack}
+              style={{
+                marginTop: 8,
+                background: "transparent",
+                border: "1px solid #c9a84c",
+                color: "#c9a84c",
+                borderRadius: 4,
+                fontFamily: "Oswald, sans-serif",
+                fontWeight: 600,
+                fontSize: 12,
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                padding: "8px 24px",
+                cursor: "pointer",
+              }}
+            >
+              Go Back
+            </button>
+          </div>
+        </div>
+      )
+    }
     return (
       <div style={{ minHeight: "100vh", background: "#0a0e1a", color: "#fff", paddingBottom: 160 }}>
         <BackHeader title="STARTING XI" onBack={onBack} />

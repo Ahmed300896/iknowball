@@ -235,19 +235,12 @@ export default function HomeScreen({
               </span>
             </div>
 
-            {/* World Cup Predictor — COMING SOON */}
-            <div
+            {/* World Cup Predictor — ACTIVE */}
+            <button
+              type="button"
+              onClick={onWorldCupPredictor}
               className="card-fifa w-full text-left flex items-center gap-3"
-              style={{ opacity: 0.5, cursor: 'default', position: 'relative' }}
             >
-              <span style={{
-                position: 'absolute', top: 8, right: 10,
-                fontFamily: 'Oswald, sans-serif', fontWeight: 600, fontSize: 9,
-                letterSpacing: '0.1em', color: '#c9a84c',
-                background: '#1e2540', borderRadius: 4, padding: '2px 7px',
-              }}>
-                COMING SOON
-              </span>
               <div className="flex items-center justify-center rounded shrink-0" style={{ width: 38, height: 38, background: '#141b30' }}>
                 <PredictorIcon />
               </div>
@@ -257,7 +250,13 @@ export default function HomeScreen({
                 </p>
                 <p className="text-xs mt-0.5" style={{ color: '#8b93ab' }}>Pick groups, brackets and champion</p>
               </div>
-            </div>
+              <span
+                className="shrink-0 px-2 py-1 rounded text-xs"
+                style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 600, letterSpacing: '0.08em', background: '#c9a84c', color: '#0a0e1a' }}
+              >
+                PLAY
+              </span>
+            </button>
           </div>
         </div>
 

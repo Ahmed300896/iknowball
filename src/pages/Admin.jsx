@@ -5,7 +5,7 @@ import squads from "../data/squads.js"
 import { calculateAndSaveUserPoints } from "../lib/resultsHelper"
 import PageHeader from "../components/PageHeader"
 
-var ADMIN_EMAIL = "sayemahmed300896@gmail.com"
+var ADMIN_ID = "0d3be115-d531-4146-9256-120dc7d047bc"
 
 var MATCH_TYPES = ["group", "r32", "r16", "qf", "sf", "final"]
 
@@ -189,7 +189,7 @@ function TeamPicker({ teamName, selected, onToggle, search, onSearch }) {
 }
 
 export default function Admin({ user, username, onBack, onLogout }) {
-  var isAdmin = user && user.email === ADMIN_EMAIL
+  var isAdmin = user?.id === ADMIN_ID
   var grouped = groupMatchesByDate()
 
   // ── Section 1 state ──────────────────────────────────────────────────────

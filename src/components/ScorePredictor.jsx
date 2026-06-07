@@ -208,7 +208,7 @@ export default function ScorePredictor({ user, username, onBack, onLogout, curre
                 </p>
                 <div className="space-y-3">
                   {group.items.map(match => {
-                    const score = scores[match.id] ?? { home: 0, away: 0 }
+                    const score = { home: scores[match.id]?.home ?? 0, away: scores[match.id]?.away ?? 0 }
                     const state = saveStates[match.id] ?? 'idle'
                     const isSaved = !!allPredictions[match.id]
                     const locked = isMatchLocked(match.date)
@@ -303,9 +303,9 @@ export default function ScorePredictor({ user, username, onBack, onLogout, curre
                           </div>
 
                           <div className="flex items-center gap-2 shrink-0">
-                            <ScoreStepper value={score.home} onChange={v => setScore(match.id, 'home', v)} />
+                            <ScoreStepper value={score.home ?? 0} onChange={v => setScore(match.id, 'home', v)} />
                             <span style={{ color: '#2a3354', fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 24, lineHeight: 1 }}>:</span>
-                            <ScoreStepper value={score.away} onChange={v => setScore(match.id, 'away', v)} />
+                            <ScoreStepper value={score.away ?? 0} onChange={v => setScore(match.id, 'away', v)} />
                           </div>
 
                           <div className="flex flex-col items-center gap-1.5 flex-1 min-w-0">

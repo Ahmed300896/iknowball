@@ -23,7 +23,7 @@ function formatDateShort(dateStr) {
     .toUpperCase()
 }
 
-const safeScore = (v) => { const n = Number(v); return isNaN(n) ? 0 : Math.max(0, Math.round(n)); }
+const safeScore = (v) => (v === null || v === undefined || isNaN(Number(v)) ? 0 : Number(v))
 
 // Vertical stepper: + on top, score in middle, - below
 function ScoreStepper({ value, onChange }) {
@@ -31,7 +31,7 @@ function ScoreStepper({ value, onChange }) {
     <div className="flex flex-col items-center gap-0.5">
       <button
         type="button"
-        onClick={() => onChange(Math.min(20, value + 1))}
+        onClick={() => onChange(Math.min(20, (isNaN(value) ? 0 : value) + 1))}
         style={{
           width: 26, height: 26,
           background: '#141b30', border: '1px solid #2a3354',
@@ -52,7 +52,7 @@ function ScoreStepper({ value, onChange }) {
       </span>
       <button
         type="button"
-        onClick={() => onChange(Math.max(0, value - 1))}
+        onClick={() => onChange(Math.max(0, (isNaN(value) ? 0 : value) - 1))}
         style={{
           width: 26, height: 26,
           background: '#141b30', border: '1px solid #2a3354',

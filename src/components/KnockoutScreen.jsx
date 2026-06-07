@@ -96,7 +96,7 @@ function MatchCard({ teamA, teamB, picked, onPick }) {
   )
 }
 
-export default function KnockoutScreen({ username, groupPicks, thirdPlacePicks, onSubmit, onBack, onViewPredictions, onHome }) {
+export default function KnockoutScreen({ username, user, groupPicks, thirdPlacePicks, onSubmit, onBack, onViewPredictions, onHome }) {
   var r32Slots = useMemo(function () { return buildR32Slots(groupPicks, thirdPlacePicks) }, [groupPicks, thirdPlacePicks])
 
   var [roundIndex, setRoundIndex] = useState(0)
@@ -141,7 +141,8 @@ export default function KnockoutScreen({ username, groupPicks, thirdPlacePicks, 
     setSaveError("")
 
     var champion = allPicks.final[0]
-    var { error } = await supabase.from("predictions").insert({
+    var { error } = await supabase.from("predictions").upsert({
+      user_id: user.id,
       nickname: username,
       group_picks: groupPicks,
       knockout: {
@@ -152,7 +153,7 @@ export default function KnockoutScreen({ username, groupPicks, thirdPlacePicks, 
         final: champion,
       },
       champion,
-    })
+    }, { onConflict: "user_id" })
 
     setSaving(false)
 

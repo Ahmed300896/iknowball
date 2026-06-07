@@ -110,8 +110,17 @@ export default function App() {
     }
   }
 
+  async function handleWorldCupPredictor() {
+    var { data } = await supabase.from("predictions").select("id").eq("user_id", user.id).single()
+    if (data) {
+      setScreen("feed")
+    } else {
+      setScreen("groups")
+    }
+  }
+
   function handlePlay() {
-    setScreen('groups')
+    handleWorldCupPredictor()
   }
 
   function handleBackHome() {
@@ -222,6 +231,7 @@ export default function App() {
     return (
       <KnockoutScreen
         username={username}
+        user={user}
         groupPicks={groupPicks}
         thirdPlacePicks={thirdPlacePicks}
         onSubmit={handleKnockoutSubmit}
@@ -236,5 +246,5 @@ export default function App() {
     return <GroupStage username={username} onNext={handleGroupsNext} onBack={handleBackHome} onHome={handleBackHome} />
   }
 
-  return <HomeScreen user={user} username={username} onPlay={handlePlay} onLogout={handleLogout} onViewPredictions={handleViewPredictions} onAdmin={() => setScreen('admin-panel')} onScorePredictor={() => setScreen('score-predictor')} onLeaderboard={() => setScreen('leaderboard')} onStartingXI={() => setScreen('starting-xi')} onWorldCupPredictor={() => setScreen('groups')} onHowToPlay={() => setScreen('how-to-play')} currentScreen="home" onPredict={() => setScreen('score-predictor')} onRanks={() => setScreen('leaderboard')} />
+  return <HomeScreen user={user} username={username} onPlay={handlePlay} onLogout={handleLogout} onViewPredictions={handleViewPredictions} onAdmin={() => setScreen('admin-panel')} onScorePredictor={() => setScreen('score-predictor')} onLeaderboard={() => setScreen('leaderboard')} onStartingXI={() => setScreen('starting-xi')} onWorldCupPredictor={handleWorldCupPredictor} onHowToPlay={() => setScreen('how-to-play')} currentScreen="home" onPredict={() => setScreen('score-predictor')} onRanks={() => setScreen('leaderboard')} />
 }

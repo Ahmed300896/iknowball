@@ -4,7 +4,7 @@ import matches from '../data/schedule'
 import PageHeader from './PageHeader'
 import TeamBadge from './TeamBadge'
 
-const ADMIN_ID = '0d3be115-d531-4146-9256-120dc7d047bc'
+const ADMIN_ID = '18dac4ab-2689-459d-8491-6000801e0c1e'
 
 const matchesByDate = matches.reduce((acc, m) => {
   ;(acc[m.date] ??= []).push(m)

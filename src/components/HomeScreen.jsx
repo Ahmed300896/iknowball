@@ -5,7 +5,7 @@ import HowToPlay from './HowToPlay'
 import BottomNav from './BottomNav'
 import PageHeader from './PageHeader'
 
-const ADMIN_ID = '0d3be115-d531-4146-9256-120dc7d047bc'
+const ADMIN_ID = '18dac4ab-2689-459d-8491-6000801e0c1e'
 const WC_START = '2026-06-11'
 
 function daysUntil(dateStr) {

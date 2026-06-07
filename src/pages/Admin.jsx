@@ -5,7 +5,7 @@ import squads from "../data/squads.js"
 import { calculateAndSaveUserPoints } from "../lib/resultsHelper"
 import PageHeader from "../components/PageHeader"
 
-var ADMIN_ID = "0d3be115-d531-4146-9256-120dc7d047bc"
+var ADMIN_ID = "18dac4ab-2689-459d-8491-6000801e0c1e"
 
 var TYPE_LABELS = {
   "group": "Group Stage",

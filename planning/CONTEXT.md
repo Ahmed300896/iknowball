@@ -43,7 +43,7 @@ iKnowBall is a World Cup 2026 social prediction platform. Users predict match sc
 
 ### Admin Results Entry
 - Route: `admin-results`
-- Only accessible to admin user ID `0d3be115-d531-4146-9256-120dc7d047bc`
+- Only accessible to admin user ID `18dac4ab-2689-459d-8491-6000801e0c1e`
 - Shows all 72 matches grouped by date
 - Per-match score inputs with Save button; upserts to `match_results` table
 - Admin link visible only to admin user at bottom of HomeScreen
@@ -76,8 +76,8 @@ iKnowBall is a World Cup 2026 social prediction platform. Users predict match sc
 
 ## Admin Credentials
 
-- **Admin user ID**: `0d3be115-d531-4146-9256-120dc7d047bc`
-- **Admin email**: `6tydegree+admin@gmail.com`
+- **Admin user ID**: `18dac4ab-2689-459d-8491-6000801e0c1e`
+- **Admin email**: `sayemahmed300896@gmail.com`
 
 ---
 

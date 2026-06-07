@@ -102,7 +102,7 @@ export default function HomeScreen({
 
   return (
     <div className="min-h-screen pb-20" style={{ background: '#0a0e1a' }}>
-      <PageHeader title="iKnowBall" username={username} onLogout={onLogout} />
+      <PageHeader title="iKnowBall" username={username} onLogout={onLogout} onAdmin={isAdmin ? onAdmin : undefined} />
 
       {/* How to Play — top of page */}
       <div style={{ width: "100%", display: "flex", justifyContent: "center", padding: "10px 16px", borderBottom: "1px solid #1e2540" }}>
@@ -265,19 +265,7 @@ export default function HomeScreen({
           View Leaderboard
         </button>
 
-        {/* Admin link — admin only */}
-        {isAdmin && (
-          <div className="flex justify-center pb-2">
-            <button
-              type="button"
-              onClick={onAdmin}
-              className="text-xs"
-              style={{ color: '#c9a84c', fontFamily: 'Oswald, sans-serif', letterSpacing: '0.1em', opacity: 0.6 }}
-            >
-              ADMIN
-            </button>
-          </div>
-        )}
+
       </div>
 
       <BottomNav

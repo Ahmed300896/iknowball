@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 
-export default function PageHeader({ title, showBack, onBack, username, onLogout }) {
+export default function PageHeader({ title, showBack, onBack, username, onLogout, onAdmin }) {
   const [open, setOpen] = useState(false)
   const avatarRef = useRef(null)
 
@@ -94,9 +94,33 @@ export default function PageHeader({ title, showBack, onBack, username, onLogout
               <p style={{ fontSize: 11, color: '#6b7494', padding: '6px 12px' }}>
                 {username}
               </p>
+              {onAdmin && (
+                <button
+                  type="button"
+                  onClick={function() { setOpen(false); onAdmin() }}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    textAlign: 'left',
+                    background: 'transparent',
+                    border: 'none',
+                    borderTop: '1px solid #1e2540',
+                    fontFamily: 'Oswald, sans-serif',
+                    fontWeight: 600,
+                    fontSize: 12,
+                    letterSpacing: '0.1em',
+                    textTransform: 'uppercase',
+                    color: '#c9a84c',
+                    padding: '8px 12px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  Admin
+                </button>
+              )}
               <button
                 type="button"
-                onClick={() => { setOpen(false); onLogout() }}
+                onClick={function() { setOpen(false); onLogout() }}
                 style={{
                   display: 'block',
                   width: '100%',

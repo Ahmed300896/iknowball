@@ -11,6 +11,7 @@ import ScorePredictor from './components/ScorePredictor'
 import LeaderboardScreen from './components/LeaderboardScreen'
 import AdminResultsScreen from './components/AdminResultsScreen'
 import AdminPanel from './pages/AdminPanel'
+import Admin from './pages/Admin'
 import StartingXI from './pages/StartingXI'
 import HowToPlay from './components/HowToPlay'
 import ThirdPlacePicker from './components/ThirdPlacePicker'
@@ -183,7 +184,7 @@ export default function App() {
   }
 
   if (screen === 'admin-panel') {
-    return <AdminPanel user={user} username={username} onBack={handleBackHome} onLogout={handleLogout} />
+    return <Admin user={user} username={username} onBack={handleBackHome} onLogout={handleLogout} />
   }
 
   if (screen === 'leaderboard') {

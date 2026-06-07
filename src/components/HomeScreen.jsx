@@ -229,9 +229,9 @@ export default function HomeScreen({
               </div>
               <span
                 className="shrink-0 flex items-center gap-1 px-2 py-1 rounded text-xs"
-                style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 600, letterSpacing: '0.08em', border: '1px solid #2a3354', color: '#6b7494' }}
+                style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 600, letterSpacing: '0.08em', border: '1px solid rgba(201,168,76,0.3)', color: '#c9a84c' }}
               >
-                <LockIcon /> SOON
+                STARTS AT KNOCKOUTS
               </span>
             </div>
 

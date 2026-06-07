@@ -11,8 +11,8 @@ var TYPE_LABELS = {
   "group": "Group Stage",
   "r32": "Round of 32",
   "r16": "Round of 16",
-  "qf": "Quarter-Final",
-  "sf": "Semi-Final",
+  "qf": "Quarter-final",
+  "sf": "Semi-final",
   "final": "Final",
 }
 
@@ -436,12 +436,12 @@ export default function Admin({ user, username, onBack, onLogout }) {
                     </div>
                   </div>
 
-                  <div>
-                    <span style={labelStyle}>Match Type</span>
-                    <p style={{ fontFamily: "Oswald, sans-serif", fontSize: 13, color: "#c9a84c", fontWeight: 600, letterSpacing: "0.06em", margin: 0 }}>
+                  <p style={{ fontFamily: "Oswald, sans-serif", fontSize: 12, color: "#6b7494", letterSpacing: "0.06em", margin: 0 }}>
+                    {"Match Type: "}
+                    <span style={{ color: "#c9a84c", fontWeight: 600 }}>
                       {TYPE_LABELS[detectMatchType(scoreMatch)] || detectMatchType(scoreMatch)}
-                    </p>
-                  </div>
+                    </span>
+                  </p>
                 </>
               )}
 

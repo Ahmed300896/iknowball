@@ -7,7 +7,26 @@ import PageHeader from "../components/PageHeader"
 
 var ADMIN_ID = "0d3be115-d531-4146-9256-120dc7d047bc"
 
-var MATCH_TYPES = ["group", "r32", "r16", "qf", "sf", "final"]
+var TYPE_LABELS = {
+  "group": "Group Stage",
+  "r32": "Round of 32",
+  "r16": "Round of 16",
+  "qf": "Quarter-Final",
+  "sf": "Semi-Final",
+  "final": "Final",
+}
+
+function detectMatchType(match) {
+  if (match.group) return "group"
+  var parts = match.date.split("-")
+  var md = Number(parts[1]) * 100 + Number(parts[2])
+  if (md >= 628 && md <= 703) return "r32"
+  if (md >= 704 && md <= 707) return "r16"
+  if (md >= 709 && md <= 711) return "qf"
+  if (md >= 714 && md <= 715) return "sf"
+  if (md === 719) return "final"
+  return "group"
+}
 
 // Maps schedule team names to squads.js keys
 var SQUAD_NAME_MAP = {
@@ -196,7 +215,6 @@ export default function Admin({ user, username, onBack, onLogout }) {
   var [scoreMatchId, setScoreMatchId] = useState("")
   var [homeScore, setHomeScore] = useState("")
   var [awayScore, setAwayScore] = useState("")
-  var [matchType, setMatchType] = useState("group")
   var [scoreSaving, setScoreSaving] = useState(false)
   var [scoreMsg, setScoreMsg] = useState(null)
   var [existingResults, setExistingResults] = useState({})
@@ -224,16 +242,14 @@ export default function Admin({ user, username, onBack, onLogout }) {
 
   // Pre-fill score inputs when a match is selected in Section 1
   useEffect(function () {
-    if (!scoreMatchId) { setHomeScore(""); setAwayScore(""); setMatchType("group"); return }
+    if (!scoreMatchId) { setHomeScore(""); setAwayScore(""); return }
     var existing = existingResults[String(scoreMatchId)]
     if (existing) {
       setHomeScore(String(existing.home_score))
       setAwayScore(String(existing.away_score))
-      setMatchType(existing.match_type || "group")
     } else {
       setHomeScore("")
       setAwayScore("")
-      setMatchType("group")
     }
     setScoreMsg(null)
   }, [scoreMatchId, existingResults])
@@ -267,6 +283,7 @@ export default function Admin({ user, username, onBack, onLogout }) {
     try {
       var id = Number(scoreMatchId)
       var match = schedule.find(function (m) { return String(m.id) === String(scoreMatchId) })
+      var matchType = match ? detectMatchType(match) : "group"
       var { error } = await supabase.from("match_results").upsert(
         {
           match_id: id,
@@ -420,12 +437,10 @@ export default function Admin({ user, username, onBack, onLogout }) {
                   </div>
 
                   <div>
-                    <label style={labelStyle}>Match Type</label>
-                    <select value={matchType} onChange={function (e) { setMatchType(e.target.value) }} style={inputStyle}>
-                      {MATCH_TYPES.map(function (t) {
-                        return <option key={t} value={t}>{t}</option>
-                      })}
-                    </select>
+                    <span style={labelStyle}>Match Type</span>
+                    <p style={{ fontFamily: "Oswald, sans-serif", fontSize: 13, color: "#c9a84c", fontWeight: 600, letterSpacing: "0.06em", margin: 0 }}>
+                      {TYPE_LABELS[detectMatchType(scoreMatch)] || detectMatchType(scoreMatch)}
+                    </p>
                   </div>
                 </>
               )}

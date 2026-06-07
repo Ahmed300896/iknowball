@@ -1,11 +1,10 @@
-### The 5 Team Selection System
+### The 6 Team Selection System
 
-Users pick 5 teams based on FIFA ranking tiers — locked before June 11:
+Users pick 6 teams based on FIFA ranking tiers — locked before June 11:
 
-- 2 teams from top 10 ranked nations
-- 1 team from ranked 11-25
-- 1 team from ranked 26-40
-- 1 team from the rest
+- 2 teams from Tier 1 (Top 10): France, Spain, Argentina, England, Portugal, Brazil, Netherlands, Morocco, Belgium, Germany
+- 3 teams from Tier 2: Croatia, Colombia, Senegal, Mexico, USA, Uruguay, Japan, Switzerland, South Korea, Ecuador, Australia, Turkey, Canada, Ivory Coast, Tunisia, Sweden, Norway, Algeria, Austria, Iran, Ghana
+- 1 team from Tier 3: Scotland, Paraguay, Qatar, Bosnia and Herzegovina, Cape Verde, Haiti, New Zealand, Czechia, Uzbekistan, Jordan, Curacao, DR Congo, Panama, Saudi Arabia, South Africa, Egypt, Iraq
 
 ### Game 1 — World Cup Predictor (built)
 
@@ -17,7 +16,7 @@ Users pick 5 teams based on FIFA ranking tiers — locked before June 11:
 
 ### Game 2 — Starting 11 (to build)
 
-- Predict starting 11 before each match for your 5 teams
+- Predict starting 11 before each match for your 6 teams
 - Must get 7 or more correct out of 11 to earn points
 - Get 6 or less = zero points, all or nothing
 - Points per correct player increase each round

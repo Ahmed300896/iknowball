@@ -23,6 +23,8 @@ function formatDateShort(dateStr) {
     .toUpperCase()
 }
 
+const safeScore = (v) => { const n = Number(v); return isNaN(n) ? 0 : Math.max(0, Math.round(n)); }
+
 // Vertical stepper: + on top, score in middle, - below
 function ScoreStepper({ value, onChange }) {
   return (
@@ -89,8 +91,8 @@ export default function ScorePredictor({ user, username, onBack, onLogout, curre
         const prefilled = {}
         Object.keys(saved).forEach(id => {
           prefilled[id] = {
-            home: saved[id]?.homeScore ?? 0,
-            away: saved[id]?.awayScore ?? 0,
+            home: safeScore(saved[id]?.homeScore),
+            away: safeScore(saved[id]?.awayScore),
           }
         })
         setScores(prefilled)
@@ -244,11 +246,11 @@ export default function ScorePredictor({ user, username, onBack, onLogout, curre
                               {savedPred ? (
                                 <div className="flex items-center gap-1">
                                   <span style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 28, color: '#3d4560', lineHeight: 1, width: 32, textAlign: 'center' }}>
-                                    {savedPred.homeScore}
+                                    {safeScore(savedPred.homeScore)}
                                   </span>
                                   <span style={{ color: '#2a3354', fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 20, lineHeight: 1 }}>:</span>
                                   <span style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 700, fontSize: 28, color: '#3d4560', lineHeight: 1, width: 32, textAlign: 'center' }}>
-                                    {savedPred.awayScore}
+                                    {safeScore(savedPred.awayScore)}
                                   </span>
                                 </div>
                               ) : (

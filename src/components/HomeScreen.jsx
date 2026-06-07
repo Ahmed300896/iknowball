@@ -203,7 +203,7 @@ export default function HomeScreen({
                 <p className="text-white text-sm" style={{ fontFamily: 'Oswald, sans-serif', fontWeight: 600, letterSpacing: '0.04em' }}>
                   STARTING XI
                 </p>
-                <p className="text-xs mt-0.5" style={{ color: '#8b93ab' }}>Pick 5 teams, predict their XIs</p>
+                <p className="text-xs mt-0.5" style={{ color: '#8b93ab' }}>Pick 6 teams, predict their XIs</p>
               </div>
               <span
                 className="shrink-0 px-2 py-1 rounded text-xs"

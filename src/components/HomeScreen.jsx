@@ -156,6 +156,8 @@ export default function HomeScreen({
           )}
         </div>
 
+        <p style={{ textAlign: 'center', color: '#8b93ab', fontSize: '13px', margin: '8px 0 4px' }}>Compete against your friends. Who really knows ball?</p>
+
         {/* Games section */}
         <div>
           <div className="flex items-center gap-2 mb-3">

@@ -5,6 +5,7 @@ export default function SignUpScreen({ onSignUpSuccess, onSwitchToLogin }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [username, setUsername] = useState('')
+  const [inviteCode, setInviteCode] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -17,6 +18,7 @@ export default function SignUpScreen({ onSignUpSuccess, onSwitchToLogin }) {
     if (!password.trim()) { setError('Password is required.'); return }
     if (!username.trim()) { setError('Username is required.'); return }
     if (username.trim().length > 30) { setError('Username must be 30 characters or less.'); return }
+    if (inviteCode.trim().toLowerCase() !== 'iknowball26') { setError('Invalid invite code.'); return }
 
     setLoading(true)
     try {
@@ -66,6 +68,14 @@ export default function SignUpScreen({ onSignUpSuccess, onSwitchToLogin }) {
           maxLength={30}
           disabled={loading}
         />
+        <input
+          type="text"
+          value={inviteCode}
+          onChange={e => { setInviteCode(e.target.value); if (error) setError('') }}
+          placeholder="Invite Code"
+          disabled={loading}
+        />
+
         <div className="relative">
           <input
             type={showPassword ? 'text' : 'password'}

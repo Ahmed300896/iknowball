@@ -18,7 +18,7 @@ export default function SignUpScreen({ onSignUpSuccess, onSwitchToLogin }) {
     if (!password.trim()) { setError('Password is required.'); return }
     if (!username.trim()) { setError('Username is required.'); return }
     if (username.trim().length > 30) { setError('Username must be 30 characters or less.'); return }
-    if (inviteCode.trim().toLowerCase() !== 'iknowball26') { setError('Invalid invite code.'); return }
+    if (inviteCode.trim().toLowerCase() !== 'wc2026') { setError('Invalid invite code.'); return }
 
     setLoading(true)
     try {

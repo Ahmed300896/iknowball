@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { supabase } from "../lib/supabase"
 import schedule from "../data/schedule"
 import squads from "../data/squads.js"
-import { calculateAndSaveUserPoints } from "../lib/resultsHelper"
+import { calculateAndSaveUserPoints, calculateAndSaveXIPoints } from "../lib/resultsHelper"
 import PageHeader from "../components/PageHeader"
 
 var ADMIN_ID = "18dac4ab-2689-459d-8491-6000801e0c1e"
@@ -337,7 +337,8 @@ export default function Admin({ user, username, onBack, onLogout }) {
           { onConflict: "match_id,team" }
         )
       if (error) throw error
-      setXiMsg({ ok: true, text: team + " XI saved successfully!" })
+      await calculateAndSaveXIPoints(xiMatchId)
+      setXiMsg({ ok: true, text: team + " XI saved and points calculated!" })
     } catch (err) {
       setXiMsg({ ok: false, text: "Error: " + err.message })
     } finally {

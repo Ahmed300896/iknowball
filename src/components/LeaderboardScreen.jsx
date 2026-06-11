@@ -40,20 +40,28 @@ export default function LeaderboardScreen({ user, username, onBack, onLogout, cu
 
   useEffect(() => {
     async function load() {
-      // Fetch predictions, results, and profiles in parallel
-      var [predRes, resultsRes, profilesRes] = await Promise.all([
+      // Fetch predictions, results, profiles, and XI points in parallel
+      var [predRes, resultsRes, profilesRes, xiPointsRes] = await Promise.all([
         supabase.from('score_predictions').select('user_id, predictions'),
         supabase.from('match_results').select('match_id, home_score, away_score, match_type'),
         supabase.from('profiles').select('id, username'),
+        supabase.from('user_points').select('user_id, points').like('game', 'starting_xi_%'),
       ])
 
       var predData = predRes.data ?? []
       var resultsData = resultsRes.data ?? []
       var profiles = profilesRes.data ?? []
+      var xiPointsData = xiPointsRes.data ?? []
 
       var profileMap = Object.fromEntries(
         profiles.map(function (p) { return [p.id, p.username] })
       )
+
+      // Sum XI points per user
+      var xiPointsMap = {}
+      xiPointsData.forEach(function (r) {
+        xiPointsMap[r.user_id] = (xiPointsMap[r.user_id] ?? 0) + (r.points ?? 0)
+      })
 
       // Build a results lookup keyed by match_id (string)
       var resultsMap = {}
@@ -81,6 +89,7 @@ export default function LeaderboardScreen({ user, username, onBack, onLogout, cu
             result.matchType
           )
         })
+        total += xiPointsMap[row.user_id] ?? 0
         return {
           userId: row.user_id,
           username: profileMap[row.user_id] || 'Unknown',

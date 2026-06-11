@@ -53,9 +53,11 @@ export default function LeaderboardScreen({ user, username, onBack, onLogout, cu
       var profiles = profilesRes.data ?? []
       var xiPointsData = xiPointsRes.data ?? []
 
-      var profileMap = Object.fromEntries(
-        profiles.map(function (p) { return [p.id, p.username] })
-      )
+      // Build a predictions lookup keyed by user_id
+      var predMap = {}
+      predData.forEach(function (row) {
+        predMap[row.user_id] = row.predictions || {}
+      })
 
       // Sum XI points per user
       var xiPointsMap = {}
@@ -73,10 +75,9 @@ export default function LeaderboardScreen({ user, username, onBack, onLogout, cu
         }
       })
 
-      // For each user who has made predictions, compute their total score points.
-      // Users with no matched results yet will show 0 pts but still appear.
-      var ranked = predData.map(function (row) {
-        var predictions = row.predictions || {}
+      // Iterate over ALL profiles so every user appears, even with 0 points
+      var ranked = profiles.map(function (profile) {
+        var predictions = predMap[profile.id] || {}
         var total = 0
         Object.keys(predictions).forEach(function (matchId) {
           var result = resultsMap[String(matchId)]
@@ -89,10 +90,10 @@ export default function LeaderboardScreen({ user, username, onBack, onLogout, cu
             result.matchType
           )
         })
-        total += xiPointsMap[row.user_id] ?? 0
+        total += xiPointsMap[profile.id] ?? 0
         return {
-          userId: row.user_id,
-          username: profileMap[row.user_id] || 'Unknown',
+          userId: profile.id,
+          username: profile.username || 'Unknown',
           points: total,
         }
       })

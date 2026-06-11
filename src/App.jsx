@@ -15,6 +15,7 @@ import StartingXI from './pages/StartingXI'
 import HowToPlay from './components/HowToPlay'
 import ThirdPlacePicker from './components/ThirdPlacePicker'
 import TeamSelectionScreen from './components/TeamSelectionScreen'
+import { FLAGS } from './data/teams'
 
 export default function App() {
   const [user, setUser] = useState(null)
@@ -24,6 +25,7 @@ export default function App() {
   const [groupPicks, setGroupPicks] = useState(null)
   const [thirdPlacePicks, setThirdPlacePicks] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [wcChampion, setWcChampion] = useState(null)
 
   useEffect(() => {
     // Check if user is already logged in
@@ -111,8 +113,9 @@ export default function App() {
   }
 
   async function handleWorldCupPredictor() {
-    var { data } = await supabase.from("predictions").select("id").eq("user_id", user.id).single()
+    var { data } = await supabase.from("predictions").select("id, champion").eq("user_id", user.id).single()
     if (data) {
+      setWcChampion(data.champion || null)
       setScreen("wc-already-submitted")
     } else {
       setScreen("groups")
@@ -248,7 +251,14 @@ export default function App() {
         <div style={{ textAlign: "center", maxWidth: "320px" }}>
           <div style={{ fontSize: "48px", marginBottom: "16px" }}>🔒</div>
           <h2 style={{ color: "#c9a84c", fontFamily: "Oswald, sans-serif", fontSize: "24px", marginBottom: "12px" }}>Your Pick Is Locked In!</h2>
-          <p style={{ color: "#8b93ab", fontSize: "14px", marginBottom: "32px" }}>You have already submitted your World Cup Predictor. Come back after the group stage to see how you did.</p>
+          <p style={{ color: "#8b93ab", fontSize: "14px", marginBottom: wcChampion ? "20px" : "32px" }}>You have already submitted your World Cup Predictor. Come back after the group stage to see how you did.</p>
+          {wcChampion && (
+            <div style={{ background: "#141b30", border: "1px solid #2a3354", borderRadius: "8px", padding: "16px", marginBottom: "32px" }}>
+              <p style={{ color: "#6b7494", fontFamily: "Oswald, sans-serif", fontSize: "10px", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: "8px" }}>Your Champion Pick</p>
+              <div style={{ fontSize: "36px", marginBottom: "6px" }}>{FLAGS[wcChampion] || "⚽"}</div>
+              <p style={{ color: "#c9a84c", fontFamily: "Oswald, sans-serif", fontWeight: 700, fontSize: "18px", letterSpacing: "0.06em" }}>{wcChampion}</p>
+            </div>
+          )}
           <button onClick={() => setScreen("home")} style={{ background: "#c9a84c", color: "#0d1117", border: "none", borderRadius: "8px", padding: "14px 32px", fontFamily: "Oswald, sans-serif", fontSize: "16px", cursor: "pointer", width: "100%" }}>BACK TO HOME</button>
         </div>
       </div>

@@ -113,7 +113,7 @@ export default function App() {
   async function handleWorldCupPredictor() {
     var { data } = await supabase.from("predictions").select("id").eq("user_id", user.id).single()
     if (data) {
-      setScreen("feed")
+      setScreen("wc-already-submitted")
     } else {
       setScreen("groups")
     }
@@ -239,6 +239,19 @@ export default function App() {
         onViewPredictions={handleViewPredictions}
         onHome={handleBackHome}
       />
+    )
+  }
+
+  if (screen === "wc-already-submitted") {
+    return (
+      <div style={{ minHeight: "100vh", background: "#0d1117", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "24px" }}>
+        <div style={{ textAlign: "center", maxWidth: "320px" }}>
+          <div style={{ fontSize: "48px", marginBottom: "16px" }}>🔒</div>
+          <h2 style={{ color: "#c9a84c", fontFamily: "Oswald, sans-serif", fontSize: "24px", marginBottom: "12px" }}>Your Pick Is Locked In!</h2>
+          <p style={{ color: "#8b93ab", fontSize: "14px", marginBottom: "32px" }}>You have already submitted your World Cup Predictor. Come back after the group stage to see how you did.</p>
+          <button onClick={() => setScreen("home")} style={{ background: "#c9a84c", color: "#0d1117", border: "none", borderRadius: "8px", padding: "14px 32px", fontFamily: "Oswald, sans-serif", fontSize: "16px", cursor: "pointer", width: "100%" }}>BACK TO HOME</button>
+        </div>
+      </div>
     )
   }
 

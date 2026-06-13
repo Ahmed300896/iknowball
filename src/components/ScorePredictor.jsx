@@ -110,14 +110,14 @@ export default function ScorePredictor({ user, username, onBack, onLogout, curre
     setSaveStates(prev => ({ ...prev, [matchId]: 'idle' }))
   }
 
-  // A match is locked once its date is in the past (we only have dates, not kickoff times).
-  // On the match day itself, predictions remain open until midnight.
-  function isMatchLocked(matchDate) {
+  function isMatchLocked(match) {
+    if (match.kickoff) return new Date() >= new Date(match.kickoff)
+    const matchDate = match.date
     return matchDate < today
   }
 
   async function handleSubmit(match) {
-    if (isMatchLocked(match.date)) return // server-side guard: silently refuse
+    if (isMatchLocked(match)) return // server-side guard: silently refuse
     setSaveStates(prev => ({ ...prev, [match.id]: 'saving' }))
     try {
       const updated = {
@@ -137,17 +137,36 @@ export default function ScorePredictor({ user, username, onBack, onLogout, curre
 
   const predictedCount = Object.keys(allPredictions).length
 
-  // Determine which match dates to display.
-  // If there are games today show only today; otherwise show the next 5 match days.
-  const hasTodayMatches = matches.some(m => m.date === today)
-  const upcomingDates = [...new Set(
-    matches.filter(m => m.date >= today).map(m => m.date)
-  )].sort()
-  const datesToShow = hasTodayMatches ? [today] : upcomingDates.slice(0, 5)
-  const groupedMatches = datesToShow
-    .map(date => ({ date, items: matches.filter(m => m.date === date) }))
-    .filter(g => g.items.length > 0)
-  const isUpcoming = !hasTodayMatches
+  var now = new Date()
+
+  var unlocked = matches.filter(function(m) {
+    if (m.kickoff) return new Date(m.kickoff) > now
+    return m.date >= now.toLocaleDateString('en-CA')
+  })
+
+  var todayMatches = matches.filter(function(m) {
+    if (!m.kickoff) return m.date === now.toLocaleDateString('en-CA')
+    var localDate = new Date(m.kickoff).toLocaleDateString('en-CA', { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone })
+    return localDate === now.toLocaleDateString('en-CA')
+  })
+
+  var matchesToShow = todayMatches.length > 0 ? todayMatches : unlocked.slice(0, 8)
+
+  var groupedMatches = (function() {
+    var map = {}
+    matchesToShow.forEach(function(m) {
+      var dateKey = m.kickoff
+        ? new Date(m.kickoff).toLocaleDateString('en-CA', { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone })
+        : m.date
+      if (!map[dateKey]) map[dateKey] = []
+      map[dateKey].push(m)
+    })
+    return Object.keys(map).sort().map(function(date) {
+      return { date: date, items: map[date] }
+    })
+  })()
+
+  const isUpcoming = todayMatches.length === 0
 
   if (loading) {
     return (
@@ -211,7 +230,7 @@ export default function ScorePredictor({ user, username, onBack, onLogout, curre
                     const score = { home: scores[match.id]?.home ?? 0, away: scores[match.id]?.away ?? 0 }
                     const state = saveStates[match.id] ?? 'idle'
                     const isSaved = !!allPredictions[match.id]
-                    const locked = isMatchLocked(match.date)
+                    const locked = isMatchLocked(match)
                     const savedPred = allPredictions[match.id]
 
                     if (locked) {
